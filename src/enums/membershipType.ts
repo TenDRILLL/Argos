@@ -1,4 +1,4 @@
-const membershipType = Object.freeze({
+export const membershipType = Object.freeze({
     1: Symbol("Xbox"),
     2: Symbol("Playstation"),
     3: Symbol("Steam"),
@@ -8,4 +8,3 @@ const membershipType = Object.freeze({
     254: Symbol("Bungie.net"),
     "-1": Symbol("All")
 });
-export default membershipType;

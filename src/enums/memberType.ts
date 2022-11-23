@@ -1,4 +1,4 @@
-const memberType = Object.freeze({
+export const memberType = Object.freeze({
     0: Symbol("None"),
     1: Symbol("Beginner"),
     2: Symbol("Member"),
@@ -6,4 +6,3 @@ const memberType = Object.freeze({
     4: Symbol("ActingFounder"),
     5: Symbol("Founder")
 });
-export default memberType;
