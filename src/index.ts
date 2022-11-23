@@ -1,1 +1,2 @@
-export * from "./enums";
+export {memberType} from "./enums/memberType";
+export {membershipType} from "./enums/membershipType";
