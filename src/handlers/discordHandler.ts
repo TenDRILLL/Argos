@@ -59,4 +59,12 @@ export class discordHandler {
             });
         });
     }
+
+    delete(interaction){
+        return new Promise(res=>{
+            axios.delete(`https://discord.com/api/v10/webhooks/${this.discordID}/${interaction.token}/messages/@original`).then(d => {
+                res("");
+            }).catch(e => console.log("delete Responding to an interaction failed."));
+        });
+    }
 }
