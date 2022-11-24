@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "watch": true,
+    "outDir": "./build",
+    "target": "esnext",
+    "lib": ["ES5","dom","ES2015"],
+    "strictNullChecks": true,
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "module": "commonjs",
+    "esModuleInterop": true
+  },
+  "include": ["src"]
+}
