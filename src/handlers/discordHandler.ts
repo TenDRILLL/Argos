@@ -45,4 +45,18 @@ export class discordHandler {
             });
         });
     }
+
+    update(interaction,data){
+        return new Promise((res)=>{
+            axios.post(`https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/callback`,{
+                type: 7,
+                data
+            }).then(()=>{
+                res("");
+            }).catch(e => {
+                console.log("update Responding to an interaction failed.");
+                res("");
+            });
+        });
+    }
 }

@@ -40,8 +40,8 @@ app.get("/authorization", (req, res) => {
     p {text-align:center;font-family:Georgia, serif;font-size:16px;font-style:normal;font-weight:normal;color:#ffffff;background-color:#000000;}
 </style>
 <h1></h1>
-<p>Your unique registration code:</p><br>
-<p><bold>${req.url.split("=")[1]}</bold></p><br>
+<p>Your unique registration code:</p>
+<p><b>${req.url.split("=")[1]}</b></p>
 <p>Please return to Discord, and use the /register command to finalize your registration.</p>
 `);
 });
@@ -59,13 +59,12 @@ app.post("/api/interactions", async (req,res)=>{
              let dbUser = DB.get(interaction.member.user.id);
              dbUser["destinyId"] = interaction.data.custom_id;
              DB.set(interaction.member.user.id,dbUser);
-             dcclient.interactionReply(interaction,{
+             dcclient.update(interaction,{
                  content: "Registration successful!",
+                 components: [],
                  flags: 64
              });
-             //Edit buttons
         }
-        console.log(JSON.stringify(interaction));
     } else {
         res.status(400);
     }
@@ -114,6 +113,15 @@ async function handleRegistration(interaction){
                             }
                         );
                     } else {
+                        if(reply.profiles.length === 1){
+                            DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId});
+                            return dcclient.editReply(interaction,
+                                {
+                                    content: "Registration successful!",
+                                    flags: 64
+                                }
+                            );
+                        }
                         DB.set(discordID,{bungieId: id});
                         const buttons = reply.profiles.map(x => {
                             return {
