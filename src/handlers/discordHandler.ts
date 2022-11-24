@@ -32,10 +32,11 @@ export class discordHandler {
         });
     }
 
-    defer(interaction){
+    defer(interaction,data){
         return new Promise((res)=>{
             axios.post(`https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/callback`,{
                 type: 5,
+                data
             }).then(()=>{
                 res("");
             }).catch(e => {

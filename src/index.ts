@@ -16,6 +16,8 @@ const app = Express();
 const port = 11542;
 const clientID = "37090";
 const DB = new enmap({name:"users"});
+const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}];
+const style = ["",3,1,2];
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(Express.json({verify: VerifyDiscordRequest(process.env.discordKey)}));
@@ -31,8 +33,17 @@ app.get("/db",(req,res)=>{
 });
 
 app.get("/authorization", (req, res) => {
-    res.send(`Here's your registration code: ${req.url.split("=")[1]}
-Please return to Discord, and use the /register command to finalize your registration.`);
+    res.send(`
+<style>
+    body {background-color:#000000;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+    h1{font-family:Arial, sans-serif;color:#000000;background-color:#000000;}
+    p {text-align:center;font-family:Georgia, serif;font-size:16px;font-style:normal;font-weight:normal;color:#ffffff;background-color:#000000;}
+</style>
+<h1></h1>
+<p>Your unique registration code:</p><br>
+<p><bold>${req.url.split("=")[1]}</bold></p><br>
+<p>Please return to Discord, and use the /register command to finalize your registration.</p>
+`);
 });
 
 app.post("/api/interactions", async (req,res)=>{
@@ -43,6 +54,18 @@ app.post("/api/interactions", async (req,res)=>{
             handleRegistration(interaction);
         }
         res.status(200);
+    } else if(interaction.type === 3){
+        if(interaction.message.interaction.name === "register"){
+             let dbUser = DB.get(interaction.member.user.id);
+             dbUser["destinyId"] = interaction.data.custom_id;
+             DB.set(interaction.member.user.id,dbUser);
+             dcclient.interactionReply(interaction,{
+                 content: "Registration successful!",
+                 flags: 64
+             });
+             //Edit buttons
+        }
+        console.log(JSON.stringify(interaction));
     } else {
         res.status(400);
     }
@@ -64,7 +87,7 @@ function VerifyDiscordRequest(clientKey) {
 }
 
 async function handleRegistration(interaction){
-    await dcclient.defer(interaction);
+    await dcclient.defer(interaction,{flags: 64});
     const code = interaction.data.options[0].value;
     const discordID = interaction.member.user.id;
     const data = new URLSearchParams();
@@ -91,11 +114,26 @@ async function handleRegistration(interaction){
                             }
                         );
                     } else {
-                        //reply.profiles.map()
+                        DB.set(discordID,{bungieId: id});
+                        const buttons = reply.profiles.map(x => {
+                            return {
+                                type: 2,
+                                label: x.displayName,
+                                style: style[x.membershipType],
+                                emoji: emoji[x.membershipType],
+                                custom_id: x.membershipId
+                            }
+                        });
                         dcclient.editReply(interaction,
                             {
-                                content: "You need to choose which account you wish to use!",
-                                flags: 64
+                                content: "Please select your primary account/platform.",
+                                flags: 64,
+                                components: [
+                                    {
+                                        type: 1,
+                                        components: buttons
+                                    }
+                                ]
                             }
                         );
                     }
