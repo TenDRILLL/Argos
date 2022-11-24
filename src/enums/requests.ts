@@ -18,7 +18,7 @@ export function getRequest(id,data){
                     request[request.indexOf(key)] = data[key];
                 }
             });
-            request.join("/");
+            request = request.join("/");
             if(comps.length > 0){
                 request = [request,comps].join("?");
             }
