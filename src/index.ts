@@ -9,6 +9,10 @@ import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler} from "./handlers/discordHandler";
 import {BungieProfile} from "./props/bungieProfile";
 import {LinkedProfileResponse} from "./props/linkedProfileResponse";
+import {CharacterQuery} from "./props/characterQuery";
+import {RaidObject} from "./props/RaidObject";
+import {Activity, ActivityQuery} from "./props/activity";
+import {activityIdentifiers} from "./enums/activityIdentifiers";
 
 const d2client = new requestHandler(process.env.apikey);
 const dcclient = new discordHandler(process.env.discordKey,process.env.discordId);
@@ -28,21 +32,22 @@ app.get("/",(req,res)=>{
     res.sendFile(`${__dirname}/html/crota.html`);
 });
 
-app.get("/db",(req,res)=>{
-    res.send(JSON.stringify(Array.from(DB.entries())));
-});
-
 app.get("/authorization", (req, res) => {
     res.send(`
 <style>
-    body {background-color:#000000;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
-    h1{font-family:Arial, sans-serif;color:#000000;background-color:#000000;}
-    p {text-align:center;font-family:Georgia, serif;font-size:16px;font-style:normal;font-weight:normal;color:#ffffff;background-color:#000000;}
+    body {background-color:#111111;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+    h1 {font-family:Arial, sans-serif; text-align: center;}
+    h2 {font-family:Arial, sans-serif; text-align: center;}
+    div {left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);};
 </style>
-<h1></h1>
-<p>Your unique registration code:</p>
-<p><b>${req.url.split("=")[1]}</b></p>
-<p>Please return to Discord, and use the /register command to finalize your registration.</p>
+<div>
+    <h2 style="color:white">Your unique registration code:</h2>
+    <h1 style="color:white"><b>${req.url.split("=")[1]}</b></h1>
+    <h2 style="color:white">Please return to Discord, and use the /register command to finalize your registration.</h2>
+</div>
 `);
 });
 
@@ -52,12 +57,14 @@ app.post("/api/interactions", async (req,res)=>{
     if(interaction.type === 2) {
         if(interaction.data.name === "register"){
             handleRegistration(interaction);
+        } else if(interaction.data.name === "testraids"){
+            testRaids(interaction);
         }
-        res.status(200);
     } else if(interaction.type === 3){
         if(interaction.message.interaction.name === "register"){
              let dbUser = DB.get(interaction.member.user.id);
-             dbUser["destinyId"] = interaction.data.custom_id;
+             dbUser["destinyId"] = interaction.data.custom_id.split("-")[0];
+             dbUser["membershipType"] = interaction.data.custom_id.split("-")[1];
              DB.set(interaction.member.user.id,dbUser);
              dcclient.update(interaction,{
                  content: "Registration successful!",
@@ -68,6 +75,7 @@ app.post("/api/interactions", async (req,res)=>{
     } else {
         res.status(400);
     }
+    res.status(200);
 });
 
 app.listen(port, ()=>{
@@ -105,7 +113,7 @@ async function handleRegistration(interaction){
                     const reply = resp.Response as LinkedProfileResponse;
                     const primary = reply.profiles.find(x => x.isCrossSavePrimary);
                     if(primary){
-                        DB.set(discordID,{bungieId: id, destinyId: primary.membershipId});
+                        DB.set(discordID,{bungieId: id, destinyId: primary.membershipId, membershipType: primary.membershipType});
                         dcclient.editReply(interaction,
                             {
                                 content: "Registration successful!",
@@ -114,7 +122,7 @@ async function handleRegistration(interaction){
                         );
                     } else {
                         if(reply.profiles.length === 1){
-                            DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId});
+                            DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId, membershipType: reply.profiles[0].membershipType});
                             return dcclient.editReply(interaction,
                                 {
                                     content: "Registration successful!",
@@ -129,7 +137,7 @@ async function handleRegistration(interaction){
                                 label: x.displayName,
                                 style: style[x.membershipType],
                                 emoji: emoji[x.membershipType],
-                                custom_id: x.membershipId
+                                custom_id: `${x.membershipId}-${x.membershipType}`
                             }
                         });
                         dcclient.editReply(interaction,
@@ -158,6 +166,110 @@ async function handleRegistration(interaction){
     });
 }
 
+async function testRaids(interaction){
+    const discordID = interaction.data.options ? interaction.data.options[0].value : interaction.member.user.id;
+    if(!DB.has(discordID)) return dcclient.interactionReply(interaction,{content: "The requested user has not registered with me."});
+    dcclient.defer(interaction,{});
+    const raidObject = await getRaids(discordID);
+    const embed = {
+            "title": `Raid completions: <@${discordID}>`,
+            "color": 11413503,
+            "description": "Total clears (Prestige/Master clears)",
+            "footer": {
+                "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
+                "text": "Argos, Planetary Core"
+            },
+            "fields": [
+                {
+                    "name": "\u200B",
+                    "value":
+`**King's Fall**
+${raidObject["King's Fall, Legend"] + raidObject["King's Fall, Master"]} (${raidObject["King's Fall, Master"]})
+
+**Vault of Glass**
+${raidObject["Vault of Glass, Normal"] + raidObject["Vault of Glass, Master"]} (${raidObject["Vault of Glass, Master"]})
+
+**Garden of Salvation**
+${raidObject["Garden of Salvation"]}
+
+**Crown of Sorrow**
+${raidObject["Crown of Sorrow"]}
+
+**Spire of Stars**
+${raidObject["Leviathan, Spire of Stars, Normal"] + raidObject["Leviathan, Spire of Stars, Prestige"]} (${raidObject["Leviathan, Spire of Stars, Prestige"]})
+
+**Leviathan**
+${raidObject["Leviathan, Normal"] + raidObject["Leviathan, Prestige"]} (${raidObject["Leviathan, Prestige"]})`,
+                    "inline":true
+                },
+                {
+                    "name": "\u200B",
+                    "value":
+`**Vow of the Disciple**
+${raidObject["Vow of the Disciple, Normal"] + raidObject["Vow of the Disciple, Master"]} (${raidObject["Vow of the Disciple, Master"]})
+
+**Deep Stone Crypt**
+${raidObject["Deep Stone Crypt"]}
+
+**Last Wish**
+${raidObject["Last Wish"]}
+
+**Scourge of the Past**
+${raidObject["Scourge of the Past"]}
+
+**Eater of Worlds**
+${raidObject["Leviathan, Eater of Worlds, Normal"] + raidObject["Leviathan, Eater of Worlds, Prestige"]} (${raidObject["Leviathan, Eater of Worlds, Prestige"]})`,
+                    "inline":true
+                }
+            ]
+    };
+    dcclient.editReply(interaction,{
+        embeds: [embed]
+    });
+}
+
+async function getRaids(discordID): Promise<RaidObject>{
+    return new Promise(res => {
+        const dbUser = DB.get(discordID);
+        d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
+            const resp = d.Response as CharacterQuery;
+            const promises: Promise<RaidObject>[] = [];
+            resp.characters.forEach(character => {
+                promises.push(new Promise((res)=>{
+                    d2client.apiRequest("getActivityStats",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType, characterId: character.characterId}).then(d => {
+                        const resp = d.Response as ActivityQuery;
+                        let raidObject = {};
+                        resp.activities.forEach(a => {
+                            for(let [k,v] of activityIdentifiers.entries()){
+                                if(v.includes(a.activityHash)){
+                                    if(raidObject[k.toString()]){
+                                        raidObject[k.toString()] += a.values.activityCompletions.basic.value;
+                                    } else {
+                                        raidObject[k.toString()] = a.values.activityCompletions.basic.value;
+                                    }
+                                }
+                            }
+                        });
+                        res(raidObject);
+                    });
+                }));
+            });
+            Promise.all(promises).then(data => {
+                const obj = {};
+                data.forEach(char => {
+                    Object.keys(char).forEach(key => {
+                        if(obj[key]){
+                            obj[key] += char[key];
+                        } else {
+                            obj[key] = char[key];
+                        }
+                    });
+                });
+                res(obj);
+            }).catch(e => console.log(e));
+        });
+    });
+}
 
 /*
 https://www.bungie.net/en/OAuth/Authorize?client_id=37090&response_type=code
