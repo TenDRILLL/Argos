@@ -1,5 +1,6 @@
 import {APIResponse} from "../props/apiResponse";
 import axios from "axios";
+import {getRequest} from "../enums/requests";
 
 export class requestHandler {
     private apiKey: string;
@@ -8,9 +9,11 @@ export class requestHandler {
         this.apiKey = apiKey;
     }
 
-    async apiRequest(endpoint): Promise<APIResponse>{
+    async apiRequest(endpoint, data): Promise<APIResponse>{
         return new Promise((res,rej)=>{
-            axios.get(endpoint,
+            const request = getRequest(endpoint,data);
+            if(!request) return rej("Invalid request.");
+            axios.get(request,
                 {
                     headers: {
                         "X-API-Key": this.apiKey,

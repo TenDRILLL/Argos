@@ -3,7 +3,7 @@ const apiRoot = "https://www.bungie.net/platform";
 const requests = new Map();
 requests.set("getBungieProfile","/User/GetBungieNetUserById/id");
 requests.set("getBungieLinkedProfiles","/Destiny2/membershipType/Profile/membershipId/LinkedProfiles");
-requests.set("getDestinyCharacters","/Destiny2/membershipType/Profile/destinyMembershipId?components=200");
+requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMembershipId/Stats/");
 requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=1100");
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
 
