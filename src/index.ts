@@ -35,18 +35,17 @@ app.get("/",(req,res)=>{
 app.get("/authorization", (req, res) => {
     res.send(`
 <style>
-    body {background-color:#111111;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+    body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
     h1 {font-family:Arial, sans-serif; text-align: center;}
     h2 {font-family:Arial, sans-serif; text-align: center;}
-    div {left: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);};
+    div{left: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%);}
 </style>
 <div>
     <h2 style="color:white">Your unique registration code:</h2>
     <h1 style="color:white"><b>${req.url.split("=")[1]}</b></h1>
-    <h2 style="color:white">Please return to Discord, and use the /register command to finalize your registration.</h2>
+    <h2 style="color:white">Please return to Discord, and use the
+    <span style="background: #414776; font-family: Uni Sans,serif;">/register</span>
+    command to finalize your registration.</h2>
 </div>
 `);
 });
@@ -170,11 +169,13 @@ async function testRaids(interaction){
     const discordID = interaction.data.options ? interaction.data.options[0].value : interaction.member.user.id;
     if(!DB.has(discordID)) return dcclient.interactionReply(interaction,{content: "The requested user has not registered with me."});
     dcclient.defer(interaction,{});
-    const raidObject = await getRaids(discordID);
+    const dbUser = DB.get(discordID);
+    const raidObject = await getRaids(dbUser);
+    const bungoName = await getBungieName(dbUser.bungieId);
     const embed = {
-            "title": `Raid completions: <@${discordID}>`,
+            "title": `Raid completions: ${bungoName}`,
             "color": 11413503,
-            "description": "Total clears (Prestige/Master clears)",
+            "description": `**${raidObject["Total"]}** total clears.`,
             "footer": {
                 "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
                 "text": "Argos, Planetary Core"
@@ -184,10 +185,10 @@ async function testRaids(interaction){
                     "name": "\u200B",
                     "value":
 `**King's Fall**
-${raidObject["King's Fall, Legend"] + raidObject["King's Fall, Master"]} (${raidObject["King's Fall, Master"]})
+${raidObject["King's Fall, Legend"] + raidObject["King's Fall, Master"]} M:(${raidObject["King's Fall, Master"]})
 
 **Vault of Glass**
-${raidObject["Vault of Glass, Normal"] + raidObject["Vault of Glass, Master"]} (${raidObject["Vault of Glass, Master"]})
+${raidObject["Vault of Glass, Normal"] + raidObject["Vault of Glass, Master"]} M:(${raidObject["Vault of Glass, Master"]})
 
 **Garden of Salvation**
 ${raidObject["Garden of Salvation"]}
@@ -196,17 +197,17 @@ ${raidObject["Garden of Salvation"]}
 ${raidObject["Crown of Sorrow"]}
 
 **Spire of Stars**
-${raidObject["Leviathan, Spire of Stars, Normal"] + raidObject["Leviathan, Spire of Stars, Prestige"]} (${raidObject["Leviathan, Spire of Stars, Prestige"]})
+${raidObject["Leviathan, Spire of Stars, Normal"] + raidObject["Leviathan, Spire of Stars, Prestige"]} P:(${raidObject["Leviathan, Spire of Stars, Prestige"]})
 
 **Leviathan**
-${raidObject["Leviathan, Normal"] + raidObject["Leviathan, Prestige"]} (${raidObject["Leviathan, Prestige"]})`,
+${raidObject["Leviathan, Normal"] + raidObject["Leviathan, Prestige"]} P:(${raidObject["Leviathan, Prestige"]})`,
                     "inline":true
                 },
                 {
                     "name": "\u200B",
                     "value":
 `**Vow of the Disciple**
-${raidObject["Vow of the Disciple, Normal"] + raidObject["Vow of the Disciple, Master"]} (${raidObject["Vow of the Disciple, Master"]})
+${raidObject["Vow of the Disciple, Normal"] + raidObject["Vow of the Disciple, Master"]} M:(${raidObject["Vow of the Disciple, Master"]})
 
 **Deep Stone Crypt**
 ${raidObject["Deep Stone Crypt"]}
@@ -218,7 +219,7 @@ ${raidObject["Last Wish"]}
 ${raidObject["Scourge of the Past"]}
 
 **Eater of Worlds**
-${raidObject["Leviathan, Eater of Worlds, Normal"] + raidObject["Leviathan, Eater of Worlds, Prestige"]} (${raidObject["Leviathan, Eater of Worlds, Prestige"]})`,
+${raidObject["Leviathan, Eater of Worlds, Normal"] + raidObject["Leviathan, Eater of Worlds, Prestige"]} P:(${raidObject["Leviathan, Eater of Worlds, Prestige"]})`,
                     "inline":true
                 }
             ]
@@ -228,9 +229,8 @@ ${raidObject["Leviathan, Eater of Worlds, Normal"] + raidObject["Leviathan, Eate
     });
 }
 
-async function getRaids(discordID): Promise<RaidObject>{
+async function getRaids(dbUser): Promise<RaidObject>{
     return new Promise(res => {
-        const dbUser = DB.get(discordID);
         d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
             const resp = d.Response as CharacterQuery;
             const promises: Promise<RaidObject>[] = [];
@@ -255,13 +255,31 @@ async function getRaids(discordID): Promise<RaidObject>{
                 }));
             });
             Promise.all(promises).then(data => {
-                const obj = {};
+                const obj = {
+                    "Crown of Sorrow": 0,
+                    "Deep Stone Crypt": 0,
+                    "Garden of Salvation": 0,
+                    "King's Fall, Legend": 0,
+                    "King's Fall, Master": 0,
+                    "Last Wish": 0,
+                    "Leviathan, Eater of Worlds, Normal": 0,
+                    "Leviathan, Eater of Worlds, Prestige": 0,
+                    "Leviathan, Spire of Stars, Normal": 0,
+                    "Leviathan, Spire of Stars, Prestige": 0,
+                    "Leviathan, Normal": 0,
+                    "Leviathan, Prestige": 0,
+                    "Scourge of the Past": 0,
+                    "Vault of Glass, Master": 0,
+                    "Vault of Glass, Normal": 0,
+                    "Vow of the Disciple, Master": 0,
+                    "Vow of the Disciple, Normal": 0,
+                    "Total": 0
+                };
                 data.forEach(char => {
                     Object.keys(char).forEach(key => {
                         if(obj[key]){
                             obj[key] += char[key];
-                        } else {
-                            obj[key] = char[key];
+                            obj["Total"] += char[key];
                         }
                     });
                 });
@@ -270,6 +288,17 @@ async function getRaids(discordID): Promise<RaidObject>{
         });
     });
 }
+
+async function getBungieName(id){
+    return new Promise((res)=>{
+        d2client.apiRequest("getBungieProfile",{id}).then(data => {
+            const resp = data.Response as BungieProfile;
+            res(resp.displayName);
+        });
+    });
+}
+
+
 
 /*
 https://www.bungie.net/en/OAuth/Authorize?client_id=37090&response_type=code
