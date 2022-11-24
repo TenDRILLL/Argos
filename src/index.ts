@@ -7,9 +7,11 @@ import enmap from "enmap";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler} from "./handlers/discordHandler";
+import {BungieProfile} from "./props/bungieProfile";
+import {LinkedProfileResponse} from "./props/linkedProfileResponse";
 
 const d2client = new requestHandler(process.env.apikey);
-const dcclient = new discordHandler(process.env.discordKey);
+const dcclient = new discordHandler(process.env.discordKey,process.env.discordId);
 const app = Express();
 const port = 11542;
 const clientID = "37090";
@@ -21,7 +23,11 @@ app.use(bodyParser.json());
 
 
 app.get("/",(req,res)=>{
-    res.sendFile(`${__dirname}/crota.html`);
+    res.sendFile(`${__dirname}/html/crota.html`);
+});
+
+app.get("/db",(req,res)=>{
+    res.send(JSON.stringify(Array.from(DB.entries())));
 });
 
 app.get("/authorization", (req, res) => {
@@ -35,7 +41,6 @@ app.post("/api/interactions", async (req,res)=>{
     if(interaction.type === 2) {
         if(interaction.data.name === "register"){
             handleRegistration(interaction);
-
         }
         res.status(200);
     } else {
@@ -58,7 +63,8 @@ function VerifyDiscordRequest(clientKey) {
     };
 }
 
-function handleRegistration(interaction){
+async function handleRegistration(interaction){
+    await dcclient.defer(interaction);
     const code = interaction.data.options[0].value;
     const discordID = interaction.member.user.id;
     const data = new URLSearchParams();
@@ -67,16 +73,36 @@ function handleRegistration(interaction){
     data.append("client_id",clientID);
     d2client.token(data).then(x => {
         //@ts-ignore
-        if(x.membership_id){//@ts-ignore
-            dcclient.interactionReply(interaction,
-                {
-                    content: "Registration successful!",
-                    flags: 64
-                }
-            );//@ts-ignore
-            DB.set(discordID,{destinyID: x.membership_id});
+        let id = x.membership_id;
+        if(id){
+            d2client.apiRequest("getBungieProfile",{id}).then(profile => {
+                const reply = profile.Response as BungieProfile;
+                let membershipType;
+                if(reply.steamDisplayName){membershipType = 3} else if(reply.xboxDisplayName){membershipType = 1} else if(reply.psnDisplayName){membershipType = 2} else {return;}
+                d2client.apiRequest("getBungieLinkedProfiles",{membershipType, membershipId: id}).then(resp => {
+                    const reply = resp.Response as LinkedProfileResponse;
+                    const primary = reply.profiles.find(x => x.isCrossSavePrimary);
+                    if(primary){
+                        DB.set(discordID,{bungieId: id, destinyId: primary.membershipId});
+                        dcclient.editReply(interaction,
+                            {
+                                content: "Registration successful!",
+                                flags: 64
+                            }
+                        );
+                    } else {
+                        //reply.profiles.map()
+                        dcclient.editReply(interaction,
+                            {
+                                content: "You need to choose which account you wish to use!",
+                                flags: 64
+                            }
+                        );
+                    }
+                });
+            });
         } else {
-            dcclient.interactionReply(interaction,
+            dcclient.editReply(interaction,
                 {
                     content: "Registration failed, please generate a new code.",
                     flags: 64
