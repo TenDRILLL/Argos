@@ -28,15 +28,16 @@ export class discordHandler {
         });
     }
 
-    followup(interaction,data){
+    newMessage(interaction,data){
         return new Promise(res => {
-            axios.post(`https://discord.com/api/v10/webhooks/${this.discordID}/${interaction.token}`,{
-                type: 4,
-                data
+            axios.post(`https://discord.com/api/v10/channels/${interaction.channel_id}/messages`, data,{
+                headers: {
+                    "Authorization": `Bot ${this.token}`
+                }
             }).then(()=>{
                 res("");
             }).catch(()=>{
-                console.log("followup Responding to an interaction failed.");
+                console.log("newMessage creation failed.");
                 res("");
             });
         });
