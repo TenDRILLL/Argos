@@ -10,7 +10,7 @@ import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
 
 const DB = new enmap({name:"users"});
-const d2client = new requestHandler(process.env.apikey,DB);
+const d2client = new requestHandler(process.env.apikey, DB);
 const dcclient = new discordHandler(process.env.discordKey,process.env.discordId);
 const app = Express();
 const port = 11542;
