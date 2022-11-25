@@ -60,6 +60,15 @@ export class requestHandler {
         });
     }
 
+    async getBungieTag(id){
+        return new Promise((res)=>{
+            this.apiRequest("getBungieProfile",{id}).then(data => {
+                const resp = data.Response as BungieProfile;
+                res(resp.uniqueName);
+            });
+        });
+    }
+
 
     async handleRegistration(interaction,dcclient,clientID,DB){
         const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}];
