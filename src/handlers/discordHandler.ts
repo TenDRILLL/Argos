@@ -28,6 +28,20 @@ export class discordHandler {
         });
     }
 
+    followup(interaction,data){
+        return new Promise(res => {
+            axios.post(`https://discord.com/api/v10/webhooks/${this.discordID}/${interaction.token}`,{
+                type: 4,
+                data
+            }).then(()=>{
+                res("");
+            }).catch(()=>{
+                console.log("followup Responding to an interaction failed.");
+                res("");
+            });
+        });
+    }
+
     editReply(interaction,data){
         axios.patch(`https://discord.com/api/v10/webhooks/${this.discordID}/${interaction.token}/messages/@original`,data).catch(() => {
             console.log("editreply Responding to an interaction failed.");

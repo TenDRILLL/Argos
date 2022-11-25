@@ -49,13 +49,20 @@ export async function updateStatRoles(DB,dcclient,d2client){
                         tempArr[j] = statRoles.lightLevel[key];
                     }
                 });
-                dcclient.getMember(statRoles.guildID,id).then(member => {
+                dcclient.getMember(statRoles.guildID,id).then(async member => {
+                    let data = {};
+                    const d2name = await d2client.getBungieTag(dbUser.bungieId);
+                    if(member.nick){
+                        if(!member.nick.endsWith(d2name)){
+                            data["nick"] = d2name;
+                        }
+                    } else {
+                        data["nick"] = d2name;
+                    }
                     let roles = member.roles;
                     roles = roles.filter(x => !statRoles.allIDs.includes(x));
-                    roles = [...roles, ...tempArr];
-                    dcclient.setMember(statRoles.guildID,id,{
-                        roles
-                    });
+                    data["roles"] = [...roles, ...tempArr];
+                    dcclient.setMember(statRoles.guildID,id,data);
                 });
             });
         });

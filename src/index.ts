@@ -9,6 +9,7 @@ import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
 import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
 import {statRoles as statC} from "./enums/statRoles";
+import {registrationLink} from "./commands/registrationLink";
 
 const statRoles = new statC();
 const DB = new enmap({name:"users"});
@@ -58,6 +59,8 @@ app.post("/api/interactions", async (req,res)=>{
             testRaids(interaction,dcclient,d2client,DB);
         } else if(interaction.data.name === "teststats"){
             testStats(interaction,dcclient,d2client,DB);
+        } else if(interaction.data.name === "registrationlink"){
+            registrationLink(interaction,dcclient);
         }
     } else if(interaction.type === 3){ // Button
         if(interaction.data.custom_id.split("-")[0] === "delete"){
