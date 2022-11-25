@@ -4,12 +4,15 @@ import {getRequest} from "../enums/requests";
 import {URLSearchParams} from "url";
 import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
+import {DBUserUpdater} from "./dbUserUpdater";
 
 export class requestHandler {
     private apiKey: string;
+    public dbUserUpdater: DBUserUpdater;
 
-    constructor(apiKey){
+    constructor(apiKey,DB){
         this.apiKey = apiKey;
+        this.dbUserUpdater = new DBUserUpdater(DB,this);
     }
 
     async apiRequest(endpoint, data): Promise<APIResponse>{
@@ -45,6 +48,16 @@ export class requestHandler {
             });
         });
     }
+
+    async getBungieName(id){
+        return new Promise((res)=>{
+            this.apiRequest("getBungieProfile",{id}).then(data => {
+                const resp = data.Response as BungieProfile;
+                res(resp.displayName);
+            });
+        });
+    }
+
 
     async handleRegistration(interaction,dcclient,clientID,DB){
         const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}];
