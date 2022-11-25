@@ -5,6 +5,8 @@ import {URLSearchParams} from "url";
 import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
+import {statRoles as statC} from "../enums/statRoles";
+const statRoles = new statC();
 
 export class requestHandler {
     private apiKey: string;
@@ -88,15 +90,23 @@ export class requestHandler {
                                     flags: 64
                                 }
                             );
+                            if(interaction.member.roles.includes(statRoles.registeredID)) return;
+                            let roles = [...interaction.member.roles, statRoles.registeredID];
+                            dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
+                            return;
                         } else {
                             if(reply.profiles.length === 1){
                                 DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId, membershipType: reply.profiles[0].membershipType});
-                                return dcclient.editReply(interaction,
+                                dcclient.editReply(interaction,
                                     {
                                         content: "Registration successful!",
                                         flags: 64
                                     }
                                 );
+                                if(interaction.member.roles.includes(statRoles.registeredID)) return;
+                                let roles = [...interaction.member.roles, statRoles.registeredID];
+                                dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
+                                return;
                             }
                             DB.set(discordID,{bungieId: id});
                             const buttons = reply.profiles.map(x => {

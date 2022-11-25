@@ -97,24 +97,4 @@ export class discordHandler {
             }).catch(e => console.log(e));
         });
     }
-
-    /*
-    GET-MEMBER
-    ENDPOINT: /guilds/{guild.id}/members/{user.id}
-    METHOD: GET
-    Returns: GuildMember
-
-    SET-MEMBER
-    ENDPOINT: /guilds/{guild.id}/members/{user.id}
-    METHOD: PATCH
-    X-Audit-Log-Reason header supported, should use.
-
-    JSON data: Roles: Snowflake[]
-
-    1) Get Member
-    GuildMember#roles: Snowflake[]
-    2) Check requirements for roles
-    3) Set roles to have previous roles, remove.
-    4) Set member
-    */
 }

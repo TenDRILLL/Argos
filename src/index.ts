@@ -5,13 +5,15 @@ import enmap from "enmap";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler} from "./handlers/discordHandler";
-import {VerifyDiscordRequest} from "./handlers/utils";
+import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
 import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
+import {statRoles as statC} from "./enums/statRoles";
 
+const statRoles = new statC();
 const DB = new enmap({name:"users"});
 const d2client = new requestHandler(process.env.apikey, DB);
-const dcclient = new discordHandler(process.env.discordKey,process.env.discordId);
+const dcclient = new discordHandler(process.env.discordKey,process.env.discordId,process.env.discordToken);
 const app = Express();
 const port = 11542;
 const clientID = "37090";
@@ -78,6 +80,10 @@ app.post("/api/interactions", async (req,res)=>{
                  components: [],
                  flags: 64
              });
+            if(interaction.member.roles.includes(statRoles.registeredID)) return;
+            let roles = [...interaction.member.roles, statRoles.registeredID];
+            dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
+            return;
         }
     } else {
         res.status(400);
@@ -87,4 +93,7 @@ app.post("/api/interactions", async (req,res)=>{
 
 app.listen(port, ()=>{
     console.log(`BungoAPIShits http://localhost:${port}/`);
+    setInterval(()=>{
+        updateStatRoles(DB,dcclient,d2client);
+    },5*60*1000)
 });
