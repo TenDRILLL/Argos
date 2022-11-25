@@ -6,6 +6,7 @@ requests.set("getBungieLinkedProfiles","/Destiny2/membershipType/Profile/members
 requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMembershipId/Stats/");
 requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=1100");
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
+requests.set("getAccountStats", "/Destiny2/membershipType/Account/destinyMembershipId/Stats/")
 
 export function getRequest(id,data){
     if(requests.has(id)){
