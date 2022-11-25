@@ -74,7 +74,20 @@ ${raidObject["Leviathan, Eater of Worlds, Normal"] + raidObject["Leviathan, Eate
         ]
     };
     dcclient.editReply(interaction,{
-        embeds: [embed]
+        embeds: [embed],
+        components: [
+            {
+                type: 1,
+                components: [
+                    {
+                        type: 2,
+                        label: "Delete",
+                        style: 4,
+                        custom_id: `delete-${interaction.member.user.id}`
+                    }
+                ]
+            }
+        ]
     });
 }
 

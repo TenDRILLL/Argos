@@ -50,6 +50,9 @@ app.post("/api/interactions", async (req,res)=>{
             testRaids(interaction,dcclient,d2client,DB);
         }
     } else if(interaction.type === 3){ // Button
+        if(interaction.data.custom_id.split("-")[0] === "delete"){
+            return dcclient.delete(interaction);
+        }
         if(interaction.message.interaction.name === "register"){
              let dbUser = DB.get(interaction.member.user.id);
              dbUser["destinyId"] = interaction.data.custom_id.split("-")[0];

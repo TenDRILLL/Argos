@@ -67,4 +67,7 @@ export class discordHandler {
             }).catch(e => console.log("delete Responding to an interaction failed."));
         });
     }
+
+    //TODO: Check if user qualifies for any cool roles (and other shit we might come up with)
+    //TODO: getRaids(), getPvP(), getStats()
 }
