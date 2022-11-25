@@ -51,7 +51,14 @@ app.post("/api/interactions", async (req,res)=>{
         }
     } else if(interaction.type === 3){ // Button
         if(interaction.data.custom_id.split("-")[0] === "delete"){
-            return dcclient.delete(interaction);
+            if(interaction.data.custom_id.split("-")[1] === interaction.member.user.id){
+                return dcclient.delete(interaction);
+            } else {
+                return dcclient.interactionReply(interaction,{
+                    content: "This isn't your command.",
+                    flags: 64
+                });
+            }
         }
         if(interaction.message.interaction.name === "register"){
              let dbUser = DB.get(interaction.member.user.id);

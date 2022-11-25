@@ -1,5 +1,5 @@
 import {BungieProfile} from "../props/bungieProfile";
-import {RaidObject} from "../props/RaidObject";
+import {RaidObject} from "../props/dbUser";
 import {CharacterQuery} from "../props/characterQuery";
 import {ActivityQuery} from "../props/activity";
 import {activityIdentifiers} from "../enums/activityIdentifiers";
@@ -95,7 +95,7 @@ async function getRaids(dbUser,d2client): Promise<RaidObject>{
     return new Promise(res => {
         d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
             const resp = d.Response as CharacterQuery;
-            const promises: Promise<RaidObject>[] = [];
+            const promises: Promise<Object>[] = [];
             resp.characters.forEach(character => {
                 promises.push(new Promise((res)=>{
                     d2client.apiRequest("getActivityStats",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType, characterId: character.characterId}).then(d => {

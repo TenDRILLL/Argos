@@ -62,8 +62,12 @@ export class discordHandler {
 
     delete(interaction){
         return new Promise(res=>{
-            axios.delete(`https://discord.com/api/v10/webhooks/${this.discordID}/${interaction.token}/messages/@original`).then(d => {
-                res("");
+            axios.post(`https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/callback`, {
+                type: 6
+            }).then(()=>{
+                axios.delete(`https://discord.com/api/v10/webhooks/${this.discordID}/${interaction.token}/messages/@original`).then(d => {
+                    res("");
+                }).catch(e => console.log("delete Deleting an interaction failed."));
             }).catch(e => console.log("delete Responding to an interaction failed."));
         });
     }
