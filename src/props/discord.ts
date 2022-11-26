@@ -45,24 +45,28 @@ export class RawInteraction {
 }
 
 export class RawCommandInteraction extends RawInteraction {
-    data: {
-        id: string;
-        name: string;
-        type: number;
-        resolved?: RawResolvedData;
-        options?: RawCommandInteractionOption[];
-        guild_id?: string;
-        target_id?: string;
-    }
+    data: RawCommandInteractionData;
 }
 
 export class RawButtonInteraction extends RawInteraction {
     message: RawMessage;
-    data: {
-        custom_id: string;
-        component_type: number;
-        values?: RawSelectOptionValue[];
-    }
+    data: RawButtonInteractionData;
+}
+
+export class RawButtonInteractionData {
+    custom_id: string;
+    component_type: number;
+    values?: RawSelectOptionValue[];
+}
+
+export class RawCommandInteractionData {
+    id: string;
+    name: string;
+    type: number;
+    resolved?: RawResolvedData;
+    options?: RawCommandInteractionOption[];
+    guild_id?: string;
+    target_id?: string;
 }
 
 export class RawResolvedData {
@@ -75,7 +79,11 @@ export class RawResolvedData {
 }
 
 export class RawCommandInteractionOption {
-    //Command Interaction Option here.
+    name: string;
+    type: number;
+    value?: string | number;
+    options?: RawCommandInteractionOption[];
+    focused?: boolean;
 }
 
 export class RawSelectOptionValue {

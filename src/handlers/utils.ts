@@ -1,11 +1,13 @@
 import {verifyKey} from "discord-interactions";
 import {statRoles as statRoleConstructor} from "../enums/statRoles";
+import "dotenv/config";
 const statRoles = new statRoleConstructor();
-export function VerifyDiscordRequest(clientKey) {
+
+export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
         const signature = req.get("X-Signature-Ed25519");
         const timestamp = req.get("X-Signature-Timestamp");
-        const isValidRequest = verifyKey(buf, signature, timestamp, clientKey);
+        const isValidRequest = verifyKey(buf, signature, timestamp, process.env.discordKey as string);
         if (!isValidRequest) {
             res.status(401).send("Bad request signature");
         }
@@ -76,23 +78,3 @@ function sleep(seconds){
         },seconds*1000);
     });
 }
-
-/*
-    GET-MEMBER
-    ENDPOINT: /guilds/{guild.id}/members/{user.id}
-    METHOD: GET
-    Returns: GuildMember
-
-    SET-MEMBER
-    ENDPOINT: /guilds/{guild.id}/members/{user.id}
-    METHOD: PATCH
-    X-Audit-Log-Reason header supported, should use.
-
-    JSON data: Roles: Snowflake[]
-
-    1) Get Member
-    GuildMember#roles: Snowflake[]
-    2) Check requirements for roles
-    3) Set roles to have previous roles, remove.
-    4) Set member
-*/

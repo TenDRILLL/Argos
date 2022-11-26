@@ -4,24 +4,24 @@ import "dotenv/config";
 import enmap from "enmap";
 
 import {requestHandler} from "./handlers/requestHandler";
-import {discordHandler} from "./handlers/discordHandler";
+import {discordHandler, Interaction} from "./handlers/discordHandler";
 import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
 import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
 import {statRoles as statC} from "./enums/statRoles";
 import {registrationLink} from "./commands/registrationLink";
-import {RawButtonInteraction, RawCommandInteraction, RawInteraction} from "./props/discord";
+import {RawButtonInteraction, RawButtonInteractionData, RawCommandInteraction, RawCommandInteractionData, RawInteraction} from "./props/discord";
 
 const statRoles = new statC();
 const DB = new enmap({name:"users"});
 const d2client = new requestHandler(process.env.apikey, DB);
-const dcclient = new discordHandler(process.env.discordKey,process.env.discordId,process.env.discordToken);
+const dcclient = new discordHandler();
 const app = Express();
 const port = 11542;
 const clientID = "37090";
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(Express.json({verify: VerifyDiscordRequest(process.env.discordKey)}));
+app.use(Express.json({verify: VerifyDiscordRequest()}));
 app.use(bodyParser.json());
 
 app.get("/",(req,res)=>{
@@ -29,7 +29,7 @@ app.get("/",(req,res)=>{
 });
 
 app.get("/db",(req,res)=>{
-    res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0px 0px 0px;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
+    res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0 0 0;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
 });
 
 app.get("/authorization", (req, res) => {
@@ -54,34 +54,36 @@ app.post("/api/interactions", async (req,res)=>{
     const data = req.body as RawInteraction;
     if(data.type === 1) return dcclient.ping(res);
     if(data.type === 2) { // /command
-        const interaction = data as RawCommandInteraction;
+        const interaction = new Interaction(data as RawCommandInteraction);
+        if(!(interaction.data instanceof RawCommandInteractionData)) return;
         if(interaction.data.name === "register"){
             d2client.handleRegistration(interaction,dcclient,clientID,DB);
         } else if(interaction.data.name === "testraids"){
-            testRaids(interaction,dcclient,d2client,DB);
+            testRaids(interaction,d2client,DB);
         } else if(interaction.data.name === "teststats"){
-            testStats(interaction,dcclient,d2client,DB);
+            testStats(interaction,d2client,DB);
         } else if(interaction.data.name === "registrationlink"){
-            registrationLink(interaction,dcclient);
+            registrationLink(interaction);
         }
     } else if(data.type === 3){ // Button
-        const interaction = data as RawButtonInteraction;
+        const interaction = new Interaction(data as RawButtonInteraction);
+        if(!(interaction.data instanceof RawButtonInteractionData)) return;
         if(interaction.data.custom_id.split("-")[0] === "delete"){
             if(interaction.data.custom_id.split("-")[1] === interaction.member?.user?.id){
-                return dcclient.delete(interaction);
+                return interaction.delete();
             } else {
-                return dcclient.interactionReply(interaction,{
+                return interaction.reply({
                     content: "This isn't your command.",
                     flags: 64
                 });
             }
         }
-        if(interaction.message.interaction?.name === "register"){
+        if(interaction.message?.interaction?.name === "register"){
              let dbUser = DB.get(interaction.member?.user?.id as string);
              dbUser["destinyId"] = interaction.data.custom_id.split("-")[0];
              dbUser["membershipType"] = interaction.data.custom_id.split("-")[1];
              DB.set(interaction.member?.user?.id as string,dbUser);
-             dcclient.update(interaction,{
+             interaction.update({
                  content: "Registration successful!",
                  components: [],
                  flags: 64

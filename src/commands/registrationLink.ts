@@ -1,9 +1,11 @@
-export async function registrationLink(interaction,dcclient){
-    dcclient.interactionReply(interaction,{
+import { Interaction } from "../handlers/discordHandler";
+
+export async function registrationLink(interaction: Interaction){
+    interaction.reply({
         content: "Sent.",
         flags: 64
     }).then(()=>{
-        dcclient.newMessage(interaction,{
+        interaction.newMessage({
             content: "**To unlock Destiny channels and roles, register here.**",
             components: [
                 {
