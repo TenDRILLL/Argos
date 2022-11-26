@@ -1,0 +1,57 @@
+export class weaponNameQuery{
+    displayProperties: displayProperties;
+    tooltipNotifications: Object[];
+    collectibleHash: number;
+    iconWatermark: String;
+    iconWatermarkShelved: String;
+    backgroundColor: Object[];
+    screenshot: String;
+    itemTypeDisplayName: String;
+    flavorText: String;
+    uiItemDisplayStyle: String;
+    itemTypeAndTierDisplayName: String;
+    displaySource: String;
+    action: Object[];
+    inventory: Object[];
+    stats: Object[];
+    equippingBlock: Object[];
+    translationBlock: Object[];
+    preview: Object[];
+    quality: Object[];
+    acquireRewardSiteHash: number;
+    acquireUnlockHash: number;
+    sockets: Object[];
+    talentGrid: Object[];
+    investmentStats: Object[];
+    perks: [];
+    loreHash: number;
+    summaryItemHash: number;
+    allowActions: true;
+    doesPostmasterPullHaveSideEffects: boolean;
+    nonTransferrable: boolean;
+    itemCategoryHashes: Object[];
+    specialItemType: number;
+    itemType: number;
+    itemSubType: number;
+    classType: number;
+    breakerType: number;
+    equippable: boolean;
+    damageTypeHashes: Object[];
+    damageTypes: Object[];
+    defaultDamageType: number;
+    defaultDamageTypeHash: number;
+    isWrapper: boolean;
+    traitIds: Object[];
+    traitHashes: Object[];
+    hash: number;
+    index: number;
+    redacted: boolean;
+    blacklisted: boolean;
+}
+
+export class displayProperties {
+    description: String;
+    name: String;
+    icon: String;
+    hasIcon: boolean;
+};

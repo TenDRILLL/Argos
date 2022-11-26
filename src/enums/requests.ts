@@ -7,6 +7,7 @@ requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMem
 requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=1100");
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
 requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/UniqueWeapons");
+requests.set("getWeaponName","/Destiny2/Manifest/DestinyInventoryItemDefinition/hashIdentifier/");
 
 export function getRequest(id,data){
     if(requests.has(id)){
