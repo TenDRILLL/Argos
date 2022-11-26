@@ -5,8 +5,8 @@ import {RawCommandInteractionData} from "../props/discord";
 export async function testStats(interaction: Interaction,d2client,DB){
     let discordID;
     const authorID = interaction.member ? interaction.member?.user?.id : interaction.user?.id;
-    if (interaction.data instanceof RawCommandInteractionData && interaction.data.options) {
-        discordID = interaction.data.options[0].value;
+    if (interaction.data["options"]) {
+        discordID = interaction.data["options"][0].value;
     } else if(interaction.member){
         discordID = interaction.member?.user?.id;
     } else {
