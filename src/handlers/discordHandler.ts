@@ -62,7 +62,7 @@ export class Interaction {
         this.applicationId = raw.application_id;
         this.type = raw.type;
         this.guildId = raw.guild_id ?? null;
-        this.channelId = raw.guild_id ?? null;
+        this.channelId = raw.channel_id ?? null;
         this.member = raw.member ?? null;
         this.user = raw.user ?? null;
         this.token = raw.token;
