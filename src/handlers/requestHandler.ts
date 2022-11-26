@@ -73,7 +73,7 @@ export class requestHandler {
     async handleRegistration(interaction,dcclient,clientID,DB){
         const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}];
         const style = ["",3,1,2];
-        await dcclient.defer(interaction,{flags: 64});
+        await interaction.defer({flags: 64});
         const code = interaction.data.options[0].value;
         const discordID = interaction.member.user.id;
         const data = new URLSearchParams();
@@ -93,8 +93,7 @@ export class requestHandler {
                         const primary = reply.profiles.find(x => x.isCrossSavePrimary);
                         if(primary){
                             DB.set(discordID,{bungieId: id, destinyId: primary.membershipId, membershipType: primary.membershipType});
-                            dcclient.editReply(interaction,
-                                {
+                            interaction.editReply({
                                     content: "Registration successful!",
                                     flags: 64
                                 }
@@ -127,8 +126,7 @@ export class requestHandler {
                                     custom_id: `${x.membershipId}-${x.membershipType}`
                                 }
                             });
-                            dcclient.editReply(interaction,
-                                {
+                            interaction.editReply({
                                     content: "Please select your primary account/platform.",
                                     flags: 64,
                                     components: [
@@ -143,8 +141,7 @@ export class requestHandler {
                     });
                 });
             } else {
-                dcclient.editReply(interaction,
-                    {
+                interaction.editReply({
                         content: "Registration failed, please generate a new code.",
                         flags: 64
                     }
