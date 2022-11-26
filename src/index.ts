@@ -10,6 +10,7 @@ import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
 import {statRoles as statC} from "./enums/statRoles";
 import {registrationLink} from "./commands/registrationLink";
+import {RawButtonInteraction, RawCommandInteraction, RawInteraction} from "./props/Discord";
 
 const statRoles = new statC();
 const DB = new enmap({name:"users"});
@@ -50,9 +51,10 @@ app.get("/authorization", (req, res) => {
 });
 
 app.post("/api/interactions", async (req,res)=>{
-    const interaction = req.body;
-    if(interaction.type === 1) return dcclient.ping(res);
-    if(interaction.type === 2) { // /command
+    const data = req.body as RawInteraction;
+    if(data.type === 1) return dcclient.ping(res);
+    if(data.type === 2) { // /command
+        const interaction = data as RawCommandInteraction;
         if(interaction.data.name === "register"){
             d2client.handleRegistration(interaction,dcclient,clientID,DB);
         } else if(interaction.data.name === "testraids"){
@@ -62,9 +64,10 @@ app.post("/api/interactions", async (req,res)=>{
         } else if(interaction.data.name === "registrationlink"){
             registrationLink(interaction,dcclient);
         }
-    } else if(interaction.type === 3){ // Button
+    } else if(data.type === 3){ // Button
+        const interaction = data as RawButtonInteraction;
         if(interaction.data.custom_id.split("-")[0] === "delete"){
-            if(interaction.data.custom_id.split("-")[1] === interaction.member.user.id){
+            if(interaction.data.custom_id.split("-")[1] === interaction.member?.user?.id){
                 return dcclient.delete(interaction);
             } else {
                 return dcclient.interactionReply(interaction,{
@@ -73,19 +76,19 @@ app.post("/api/interactions", async (req,res)=>{
                 });
             }
         }
-        if(interaction.message.interaction.name === "register"){
-             let dbUser = DB.get(interaction.member.user.id);
+        if(interaction.message.interaction?.name === "register"){
+             let dbUser = DB.get(interaction.member?.user?.id as string);
              dbUser["destinyId"] = interaction.data.custom_id.split("-")[0];
              dbUser["membershipType"] = interaction.data.custom_id.split("-")[1];
-             DB.set(interaction.member.user.id,dbUser);
+             DB.set(interaction.member?.user?.id as string,dbUser);
              dcclient.update(interaction,{
                  content: "Registration successful!",
                  components: [],
                  flags: 64
              });
-            if(interaction.member.roles.includes(statRoles.registeredID)) return;
-            let roles = [...interaction.member.roles, statRoles.registeredID];
-            dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
+            if(interaction.member?.roles.includes(statRoles.registeredID)) return;
+            let roles = [...interaction.member?.roles as string[], statRoles.registeredID];
+            dcclient.setMember(statRoles.guildID,interaction.member?.user?.id,{roles});
             return;
         }
     } else {
