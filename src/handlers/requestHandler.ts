@@ -105,8 +105,7 @@ export class requestHandler {
                         } else {
                             if(reply.profiles.length === 1){
                                 DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId, membershipType: reply.profiles[0].membershipType});
-                                dcclient.editReply(interaction,
-                                    {
+                                interaction.editReply({
                                         content: "Registration successful!",
                                         flags: 64
                                     }
