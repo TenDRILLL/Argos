@@ -55,21 +55,19 @@ app.post("/api/interactions", async (req,res)=>{
     if(data.type === 1) return dcclient.ping(res);
     if(data.type === 2) { // /command
         const interaction = new Interaction(data as RawCommandInteraction);
-        if(!(interaction.data instanceof RawCommandInteractionData)) return;
-        if(interaction.data.name === "register"){
+        if(interaction.data["name"] === "register"){
             d2client.handleRegistration(interaction,dcclient,clientID,DB);
-        } else if(interaction.data.name === "testraids"){
+        } else if(interaction.data["name"] === "testraids"){
             testRaids(interaction,d2client,DB);
-        } else if(interaction.data.name === "teststats"){
+        } else if(interaction.data["name"] === "teststats"){
             testStats(interaction,d2client,DB);
-        } else if(interaction.data.name === "registrationlink"){
+        } else if(interaction.data["name"] === "registrationlink"){
             registrationLink(interaction);
         }
     } else if(data.type === 3){ // Button
         const interaction = new Interaction(data as RawButtonInteraction);
-        if(!(interaction.data instanceof RawButtonInteractionData)) return;
-        if(interaction.data.custom_id.split("-")[0] === "delete"){
-            if(interaction.data.custom_id.split("-")[1] === interaction.member?.user?.id){
+        if(interaction.data["custom_id"].split("-")[0] === "delete"){
+            if(interaction.data["custom_id"].split("-")[1] === interaction.member?.user?.id){
                 return interaction.delete();
             } else {
                 return interaction.reply({
@@ -80,8 +78,8 @@ app.post("/api/interactions", async (req,res)=>{
         }
         if(interaction.message?.interaction?.name === "register"){
              let dbUser = DB.get(interaction.member?.user?.id as string);
-             dbUser["destinyId"] = interaction.data.custom_id.split("-")[0];
-             dbUser["membershipType"] = interaction.data.custom_id.split("-")[1];
+             dbUser["destinyId"] = interaction.data["custom_id"].split("-")[0];
+             dbUser["membershipType"] = interaction.data["custom_id"].split("-")[1];
              DB.set(interaction.member?.user?.id as string,dbUser);
              interaction.update({
                  content: "Registration successful!",
