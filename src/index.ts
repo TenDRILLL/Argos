@@ -10,7 +10,7 @@ import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
 import {statRoles as statC} from "./enums/statRoles";
 import {registrationLink} from "./commands/registrationLink";
-import {RawButtonInteraction, RawCommandInteraction, RawInteraction} from "./props/Discord";
+import {RawButtonInteraction, RawCommandInteraction, RawInteraction} from "./props/discord";
 
 const statRoles = new statC();
 const DB = new enmap({name:"users"});
