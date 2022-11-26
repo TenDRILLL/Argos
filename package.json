@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc --build && copyfiles -u 1 src/html/* build",
     "buildrun": "npm run build && npm run run",
-    "run": "cd build && node index.js"
+    "run": "cd build && node index.js",
+    "test": "npm run build && cd build && node test.js"
   },
   "author": "Ten#0010",
   "license": "ISC",

@@ -98,5 +98,5 @@ app.listen(port, ()=>{
     console.log(`BungoAPIShits http://localhost:${port}/`);
     setInterval(()=>{
         updateStatRoles(DB,dcclient,d2client);
-    },5*60*1000)
+    },5*60*1000);
 });
