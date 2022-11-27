@@ -80,7 +80,7 @@ function sleep(seconds){
     });
 }
 
-export function getWeaponInfo(weaponDB,d2client,weaponID) {
+export function getWeaponInfo(weaponDB,d2client,weaponID): weaponDataBaseObject {
     if (!weaponDB.has(weaponID)) {
         d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then(u => {
             const item = u.Response as weaponNameQuery;
