@@ -1,6 +1,8 @@
 import {verifyKey} from "discord-interactions";
 import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
+import { weaponNameQuery } from "../props/weaponNameQuery";
+import { weaponDataBaseObject } from "../props/weaponQuery";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -76,4 +78,15 @@ function sleep(seconds){
             res("");
         },seconds*1000);
     });
+}
+
+export function getWeaponInfo(weaponDB,d2client,weaponID) {
+    if (!weaponDB.has(weaponID)) {
+        d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then(u => {
+            const item = u.Response as weaponNameQuery;
+            const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDataBaseObject;
+            weaponDB.set(item.hash.toString(), weapon);
+        })
+    }
+    return weaponDB.get(weaponID);
 }

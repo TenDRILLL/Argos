@@ -22,3 +22,8 @@ export class WeaponStatValueObject {
         displayValue: string;
     }
 }
+
+export class weaponDataBaseObject {
+    Name: String;
+    Type: String;
+}
