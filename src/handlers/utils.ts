@@ -2,7 +2,7 @@ import {verifyKey} from "discord-interactions";
 import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
 import { weaponNameQuery } from "../props/weaponNameQuery";
-import { weaponDataBaseObject } from "../props/weaponQuery";
+import { weaponDatabaseObject } from "../props/weaponQuery";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -80,13 +80,17 @@ function sleep(seconds){
     });
 }
 
-export function getWeaponInfo(weaponDB,d2client,weaponID): weaponDataBaseObject {
-    if (!weaponDB.has(weaponID)) {
-        d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then(u => {
+export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabaseObject> {
+    return new Promise<weaponDatabaseObject>(res => {
+    if ((!weaponDB.has(weaponID))) {
+        res(weaponDB.get(weaponID));
+    }
+    else {
+        d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then((u: { Response: weaponNameQuery; }) => {
             const item = u.Response as weaponNameQuery;
-            const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDataBaseObject;
-            weaponDB.set(item.hash.toString(), weapon);
+            weaponDB.set(item.hash.toString(), {Name: item.displayProperties.name, Type: item.itemTypeDisplayName});
+            res({Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject);
         })
     }
-    return weaponDB.get(weaponID);
+})
 }

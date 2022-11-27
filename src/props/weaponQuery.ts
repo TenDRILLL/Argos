@@ -23,7 +23,7 @@ export class WeaponStatValueObject {
     }
 }
 
-export class weaponDataBaseObject {
+export class weaponDatabaseObject {
     Name: String;
     Type: String;
 }

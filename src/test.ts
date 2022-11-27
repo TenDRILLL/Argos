@@ -3,7 +3,7 @@ import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler} from "./handlers/discordHandler";
 import {CharacterQuery} from "./props/characterQuery";
 import enmap from "enmap";
-import {weaponDataBaseObject, WeaponQuery, WeaponStat} from "./props/weaponQuery";
+import {weaponDatabaseObject, WeaponQuery, WeaponStat} from "./props/weaponQuery";
 import { weaponNameQuery } from "./props/weaponNameQuery";
 import {statRoles} from "./enums/statRoles";
 import { getWeaponInfo } from "./handlers/utils";
@@ -30,9 +30,9 @@ function instantiateWeaponDatabase() {
                         await sleep(2*i);
                         d2client.apiRequest("getWeaponName", {hashIdentifier: weapon.referenceId}).then(u => {
                             const item = u.Response as weaponNameQuery;
-                            const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDataBaseObject;
+                            const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject;
                             weaponDB.set(item.hash.toString(), weapon);
-                            console.log("Added "+item.displayProperties.name+" to database");
+                            console.log(`Added ${item.displayProperties.name} to database`);
                         })
                     }
                 })
