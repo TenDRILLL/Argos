@@ -5,8 +5,7 @@ import {URLSearchParams} from "url";
 import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
-import {statRoles as statC} from "../enums/statRoles";
-const statRoles = new statC();
+import {statRoles} from "../enums/statRoles";
 
 export class requestHandler {
     private apiKey: string;

@@ -1,7 +1,6 @@
 import {verifyKey} from "discord-interactions";
-import {statRoles as statRoleConstructor} from "../enums/statRoles";
+import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
-const statRoles = new statRoleConstructor();
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {

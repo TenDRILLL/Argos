@@ -8,11 +8,10 @@ import {discordHandler, Interaction} from "./handlers/discordHandler";
 import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
 import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
-import {statRoles as statC} from "./enums/statRoles";
+import {statRoles} from "./enums/statRoles";
 import {registrationLink} from "./commands/registrationLink";
 import {RawButtonInteraction, RawButtonInteractionData, RawCommandInteraction, RawCommandInteractionData, RawInteraction} from "./props/discord";
 
-const statRoles = new statC();
 const DB = new enmap({name:"users"});
 const d2client = new requestHandler(process.env.apikey, DB);
 const dcclient = new discordHandler();
