@@ -24,6 +24,6 @@ export class WeaponStatValueObject {
 }
 
 export class weaponDatabaseObject {
-    Name: String;
-    Type: String;
+    Name: string;
+    Type: string;
 }

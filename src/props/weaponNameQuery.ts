@@ -2,15 +2,15 @@ export class weaponNameQuery{
     displayProperties: displayProperties;
     tooltipNotifications: Object[];
     collectibleHash: number;
-    iconWatermark: String;
-    iconWatermarkShelved: String;
+    iconWatermark: string;
+    iconWatermarkShelved: string;
     backgroundColor: Object[];
-    screenshot: String;
-    itemTypeDisplayName: String;
-    flavorText: String;
-    uiItemDisplayStyle: String;
-    itemTypeAndTierDisplayName: String;
-    displaySource: String;
+    screenshot: string;
+    itemTypeDisplayName: string;
+    flavorText: string;
+    uiItemDisplayStyle: string;
+    itemTypeAndTierDisplayName: string;
+    displaySource: string;
     action: Object[];
     inventory: Object[];
     stats: Object[];
@@ -50,8 +50,8 @@ export class weaponNameQuery{
 }
 
 export class displayProperties {
-    description: String;
-    name: String;
-    icon: String;
+    description: string;
+    name: string;
+    icon: string;
     hasIcon: boolean;
 };
