@@ -6,6 +6,7 @@ export class DBUser {
     raids: RaidObject;
     dungeons: DungeonsObject;
     grandmasters: GrandmastersObject;
+    roles: string[];
 }
 
 export class RaidObject {

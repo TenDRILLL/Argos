@@ -65,7 +65,10 @@ export async function updateStatRoles(DB,dcclient,d2client){
                     let roles = member.roles;
                     roles = roles.filter(x => !statRoles.allIDs.includes(x));
                     data["roles"] = [...roles, ...tempArr];
+                    if(dbUser.roles !== undefined && dbUser.roles === roles) return;
+                    dbUser.roles = roles;
                     dcclient.setMember(statRoles.guildID,id,data);
+                    DB.set(id,dbUser);
                 });
             });
         });
