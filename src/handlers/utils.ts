@@ -82,15 +82,14 @@ function sleep(seconds){
 
 export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabaseObject> {
     return new Promise<weaponDatabaseObject>(res => {
-    if ((!weaponDB.has(weaponID))) {
-        res(weaponDB.get(weaponID));
-    }
-    else {
-        d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then((u: { Response: weaponNameQuery; }) => {
-            const item = u.Response as weaponNameQuery;
-            weaponDB.set(item.hash.toString(), {Name: item.displayProperties.name, Type: item.itemTypeDisplayName});
-            res({Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject);
-        })
-    }
-})
+        if ((!weaponDB.has(weaponID))) {
+            res(weaponDB.get(weaponID));
+        } else {
+            d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then(u => {
+                const item = u.Response as weaponNameQuery;
+                weaponDB.set(item.hash.toString(), {Name: item.displayProperties.name, Type: item.itemTypeDisplayName});
+                res({Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject);
+            });
+        }
+    });
 }
