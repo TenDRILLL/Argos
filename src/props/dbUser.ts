@@ -4,6 +4,8 @@ export class DBUser {
     membershipType: number;
     stats: Stats;
     raids: RaidObject;
+    dungeons: DungeonsObject;
+    grandmasters: GrandmastersObject;
 }
 
 export class RaidObject {
@@ -24,6 +26,46 @@ export class RaidObject {
     "Vault of Glass, Normal": number;
     "Vow of the Disciple, Master": number;
     "Vow of the Disciple, Normal": number;
+    "Total": number;
+}
+
+export class DungeonsObject {
+    "Duality": number;
+    "Grasp of Avarice": number;
+    "Prophecy": number;
+    "Pit of Heresy": number;
+    "Shattered Throne": number;
+    "Presage": number;
+    "Harbinger": number;
+    "Zero Hour": number;
+    "The Whisper": number;
+    "Total": number;
+}
+
+export class GrandmastersObject {
+    "The Glassway": number;
+    "The Lightblade": number;
+    "Fallen S.A.B.E.R": number;
+    "The Disgraced": number;
+    "Exodus Crash": number;
+    "The Devils Lair": number;
+    "Proving Grounds": number;
+    "Warden of Nothing": number;
+    "The Insight Terminus": number;
+    "The Corrupted": number;
+    "The Arms Dealer": number;
+    "The Inverted Spire": number;
+    "Birthplace of the Vile": number;
+    "Lake of Shadows": number;
+    "The Scarlet Keep": number;
+
+    "Broodhold": number;
+    "The Festering Core": number;
+    "The Hollowed Lair": number;
+    "Savathun's Song": number;
+    "Tree of Probabilities": number;
+    "Strange Terrain": number;
+    "A Garden World": number;
     "Total": number;
 }
 
