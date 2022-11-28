@@ -7,11 +7,53 @@ import {weaponDatabaseObject, WeaponQuery, WeaponStat} from "./props/weaponQuery
 import { weaponNameQuery } from "./props/weaponNameQuery";
 import {statRoles} from "./enums/statRoles";
 import { getWeaponInfo } from "./handlers/utils";
+import {ManifestQuery} from "./props/activity";
 
 const DB = new enmap({name:"users"});
 const weaponDB = new enmap({name: "weapons"})
 const d2client = new requestHandler(process.env.apikey, DB);
 const dcclient = new discordHandler();
+
+d2client.apiRequest("getDestinyEntityDefinition",{
+    entityType: "DestinyActivityDefinition",
+    hashIdentifier: "4197461112"
+}).then(d => {
+    console.log(d);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function instantiateWeaponDatabase() {
     const destinyMembershipId = "4611686018468779813";

@@ -16,6 +16,12 @@ export class requestHandler {
         this.dbUserUpdater = new DBUserUpdater(DB,this);
     }
 
+    async rawRequest(url): Promise<JSON>{
+        return new Promise(res => {
+            axios.get(url).then(d => res(d.data)).catch(e => console.log(e));
+        });
+    }
+
     async apiRequest(endpoint, data): Promise<APIResponse>{
         return new Promise((res,rej)=>{
             const request = getRequest(endpoint,data);

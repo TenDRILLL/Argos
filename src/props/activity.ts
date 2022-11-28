@@ -119,3 +119,63 @@ export class activityStatWithId {
     };
     activityId: string;
 }
+
+export class ManifestQuery {
+    version: string;
+    mobileAssetContentPath: string;
+    mobileGearAssetDataBases: [ [Object], [Object], [Object] ];
+    mobileWorldContentPaths: {
+        en: string;
+        fr: string;
+        es: string;
+        'es-mx': string;
+        de: string;
+        it: string;
+        ja: string;
+        'pt-br': string;
+        ru: string;
+        pl: string;
+        ko: string;
+        'zh-cht': string;
+        'zh-chs': string;
+    };
+    jsonWorldContentPaths: {
+        en: string;
+        fr: string;
+        es: string;
+        'es-mx': string;
+        de: string;
+        it: string;
+        ja: string;
+        'pt-br': string;
+        ru: string;
+        pl: string;
+        ko: string;
+        'zh-cht': string;
+        'zh-chs': string;
+    };
+    jsonWorldComponentContentPaths: {
+        en: [Object],
+        fr: [Object],
+        es: [Object],
+        'es-mx': [Object],
+        de: [Object],
+        it: [Object],
+        ja: [Object],
+        'pt-br': [Object],
+        ru: [Object],
+        pl: [Object],
+        ko: [Object],
+        'zh-cht': [Object],
+        'zh-chs': [Object]
+    };
+    mobileClanBannerDatabasePath: string;
+    mobileGearCDN: {
+        Geometry: string;
+        Texture: string;
+        PlateRegion: string;
+        Gear: string;
+        Shader: string;
+    };
+    iconImagePyramidInfo: [];
+}
