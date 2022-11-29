@@ -40,3 +40,25 @@ export class activityStatWithId {
     };
     activityId: string;
 }
+
+export class ActivityInsertionPoint {
+    phaseHash: number;
+    unlockHash: number;
+}
+
+export class ActivityChallenge {
+    rewardSiteHash: number;
+    inhibiRewardsUnlockHash: number;
+    objectiveHash: number;
+    dummyRewards: RewardItem[];
+}
+
+export class ActivityModifier {
+    activityModifierHash: number;
+}
+
+export class RewardItem {
+    itemHash: number;
+    quantity: number;
+    hasConditionalVisibility: boolean;
+}
