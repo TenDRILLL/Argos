@@ -110,9 +110,7 @@ export function updateActivityIdentifierDB(d2client, activityIdentifierDB) {
         const resp = d.Response as ManifestQuery;
         const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
-            const activities = e as unknown as RawManifestQuery;
-            const values = Object.values(activities);
-            values.forEach(x => {
+            Object.values(e as unknown as RawManifestQuery).forEach(x => {
                 const activity = x as ManifestActivity;
                 if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(activity.activityTypeHash)) {
                     const saved = activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
