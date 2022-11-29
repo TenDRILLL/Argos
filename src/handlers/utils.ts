@@ -3,6 +3,8 @@ import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
 import { weaponNameQuery } from "../props/weaponNameQuery";
 import { weaponDatabaseObject } from "../props/weaponQuery";
+import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
+import { activityIdentifierObject } from "../props/activityIdentifierObject";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -97,8 +99,35 @@ export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabas
     });
 }
 
-export function normalizeRaidName(raidName) {
+export function normalizeActivityName(raidName) {
     const parts: string[] = raidName.split(":");
     const preOrMas = parts[parts.length-1] === " Master" || parts[parts.length-1] === " Prestige";
     return parts.length === 1 || !(preOrMas) ? parts[0] : parts.join(",");
+}
+
+export function updateActivityIdentifierDB(d2client, activityIdentifierDB) {
+    d2client.apiRequest("getManifests",{}).then(d => {
+        const resp = d.Response as ManifestQuery;
+        const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
+        d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
+            const activities = e as unknown as RawManifestQuery;
+            const values = Object.values(activities);
+            values.forEach(x => {
+                const activity = x as ManifestActivity;
+                if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(activity.activityTypeHash)) {
+                    const saved = activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
+                    if (!saved.IDs.includes(activity.hash)) {
+                        saved.IDs.push(activity.hash);
+                        activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
+                }
+            }   else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
+                    const saved = activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: []};
+                    if (!saved.IDs.includes(activity.hash)) {
+                        saved.IDs.push(activity.hash);
+                        activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
+                    }
+                }
+            })
+        });    
+    });
 }

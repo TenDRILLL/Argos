@@ -89,6 +89,9 @@ export class ManifestActivity {
     releaseTime: number;
     completionUnlockHash: number;
     activityLightLevel: number;
+    destinationHash: number;
+    placeHash: number;
+    activityTypeHash: number;
     tier: number;
     pgcrImage: string;
     rewards: {rewardItems: RewardItem[]};
