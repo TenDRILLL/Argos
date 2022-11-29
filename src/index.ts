@@ -1,7 +1,6 @@
 import Express from "express";
 import bodyParser from "body-parser";
 import "dotenv/config";
-import enmap from "enmap";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler, Interaction} from "./handlers/discordHandler";
@@ -10,10 +9,9 @@ import {testRaids} from "./commands/testraids";
 import {testStats} from "./commands/teststats";
 import {statRoles} from "./enums/statRoles";
 import {registrationLink} from "./commands/registrationLink";
-import {RawButtonInteraction, RawButtonInteractionData, RawCommandInteraction, RawCommandInteractionData, RawInteraction} from "./props/discord";
+import {RawButtonInteraction, RawCommandInteraction, RawInteraction} from "./props/discord";
 
-const DB = new enmap({name:"users"});
-const d2client = new requestHandler(process.env.apikey, DB);
+const d2client = new requestHandler(process.env.apikey);
 const dcclient = new discordHandler();
 const app = Express();
 const port = 11542;
@@ -55,11 +53,11 @@ app.post("/api/interactions", async (req,res)=>{
     if(data.type === 2) { // /command
         const interaction = new Interaction(data as RawCommandInteraction);
         if(interaction.data["name"] === "register"){
-            d2client.handleRegistration(interaction,dcclient,clientID,DB);
+            d2client.handleRegistration(interaction,dcclient,clientID);
         } else if(interaction.data["name"] === "testraids"){
-            testRaids(interaction,d2client,DB);
+            testRaids(interaction,d2client);
         } else if(interaction.data["name"] === "teststats"){
-            testStats(interaction,d2client,DB);
+            testStats(interaction,d2client);
         } else if(interaction.data["name"] === "registrationlink"){
             registrationLink(interaction);
         }
@@ -76,10 +74,10 @@ app.post("/api/interactions", async (req,res)=>{
             }
         }
         if(interaction.message?.interaction?.name === "register"){
-             let dbUser = DB.get(interaction.member?.user?.id as string);
+             let dbUser = d2client.DB.get(interaction.member?.user?.id as string);
              dbUser["destinyId"] = interaction.data["custom_id"].split("-")[0];
              dbUser["membershipType"] = interaction.data["custom_id"].split("-")[1];
-             DB.set(interaction.member?.user?.id as string,dbUser);
+             d2client.DB.set(interaction.member?.user?.id as string,dbUser);
              interaction.update({
                  content: "Registration successful!",
                  components: [],
@@ -99,6 +97,6 @@ app.post("/api/interactions", async (req,res)=>{
 app.listen(port, ()=>{
     console.log(`BungoAPIShits http://localhost:${port}/`);
     setInterval(()=>{
-        updateStatRoles(DB,dcclient,d2client);
+        updateStatRoles(dcclient,d2client);
     },5*60*1000);
 });

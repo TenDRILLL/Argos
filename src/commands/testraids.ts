@@ -1,7 +1,7 @@
 import {DBUser} from "../props/dbUser";
 import { Interaction } from "../handlers/discordHandler";
 
-export async function testRaids(interaction: Interaction,d2client,DB){
+export async function testRaids(interaction: Interaction,d2client){
     let discordID;
     const authorID = interaction.member ? interaction.member?.user?.id : interaction.user?.id;
     if (interaction.data["options"] !== undefined) {
@@ -12,9 +12,9 @@ export async function testRaids(interaction: Interaction,d2client,DB){
         discordID = interaction.user?.id;
     }
 
-    if(!DB.has(discordID)) return interaction.reply({content: "The requested user has not registered with me.", flags: 64});
+    if(!d2client.DB.has(discordID)) return interaction.reply({content: "The requested user has not registered with me.", flags: 64});
     await interaction.defer();
-    let dbUser = DB.get(discordID) as DBUser;
+    let dbUser = d2client.DB.get(discordID) as DBUser;
     if(dbUser.raids === undefined){
         dbUser = await d2client.dbUserUpdater.updateStats(discordID);
     }

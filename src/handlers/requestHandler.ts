@@ -6,14 +6,17 @@ import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
 import {statRoles} from "../enums/statRoles";
+import enmap from "enmap";
 
 export class requestHandler {
     private apiKey: string;
     public dbUserUpdater: DBUserUpdater;
+    public DB;
 
-    constructor(apiKey,DB){
+    constructor(apiKey){
         this.apiKey = apiKey;
-        this.dbUserUpdater = new DBUserUpdater(DB,this);
+        this.DB = new enmap({name:"users"});
+        this.dbUserUpdater = new DBUserUpdater(this.DB,this);
     }
 
     async rawRequest(url): Promise<JSON>{
@@ -82,7 +85,7 @@ export class requestHandler {
     }
 
 
-    async handleRegistration(interaction,dcclient,clientID,DB){
+    async handleRegistration(interaction,dcclient,clientID){
         const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}];
         const style = ["",3,1,2];
         await interaction.defer({flags: 64});
@@ -104,7 +107,7 @@ export class requestHandler {
                         const reply = resp.Response as LinkedProfileResponse;
                         const primary = reply.profiles.find(x => x.isCrossSavePrimary);
                         if(primary){
-                            DB.set(discordID,{bungieId: id, destinyId: primary.membershipId, membershipType: primary.membershipType});
+                            this.DB.set(discordID,{bungieId: id, destinyId: primary.membershipId, membershipType: primary.membershipType});
                             interaction.editReply({
                                     content: "Registration successful!",
                                     flags: 64
@@ -116,7 +119,7 @@ export class requestHandler {
                             return;
                         } else {
                             if(reply.profiles.length === 1){
-                                DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId, membershipType: reply.profiles[0].membershipType});
+                                this.DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId, membershipType: reply.profiles[0].membershipType});
                                 interaction.editReply({
                                         content: "Registration successful!",
                                         flags: 64
@@ -127,7 +130,7 @@ export class requestHandler {
                                 dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
                                 return;
                             }
-                            DB.set(discordID,{bungieId: id});
+                            this.DB.set(discordID,{bungieId: id});
                             const buttons = reply.profiles.map(x => {
                                 return {
                                     type: 2,

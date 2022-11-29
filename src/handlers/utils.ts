@@ -15,8 +15,8 @@ export function VerifyDiscordRequest() {
     };
 }
 
-export async function updateStatRoles(DB,dcclient,d2client){
-    const memberIds: String[] = Array.from(DB.keys());
+export async function updateStatRoles(dcclient,d2client){
+    const memberIds: String[] = Array.from(d2client.DB.keys());
     for (let i = 0; i < memberIds.length; i += 10) {
         await sleep(i);
         const ids: String[] = memberIds.slice(i, i + 10);
@@ -68,7 +68,7 @@ export async function updateStatRoles(DB,dcclient,d2client){
                     if(dbUser.roles !== undefined && dbUser.roles === roles) return;
                     dbUser.roles = roles;
                     dcclient.setMember(statRoles.guildID,id,data);
-                    DB.set(id,dbUser);
+                    d2client.DB.set(id,dbUser);
                 });
             });
         });
