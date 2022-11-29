@@ -5,6 +5,7 @@ import { weaponNameQuery } from "../props/weaponNameQuery";
 import { weaponDatabaseObject } from "../props/weaponQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
+import { bungieGroupQuery } from "../props/bungieGroupQuery";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -54,6 +55,13 @@ export async function updateStatRoles(dcclient,d2client){
                         tempArr[j] = statRoles.lightLevel[key];
                     }
                 });
+                j = tempArr.length;
+                d2client.apiRequest("getGroupMembers", {groupID: "3506545" /*Venerity groupID*/}).then(d => {
+                    const resp = d.Response as bungieGroupQuery;
+                    if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
+                        tempArr[j] = statRoles.guildMember;
+                    }
+                })
                 dcclient.getMember(statRoles.guildID,id).then(async member => {
                     let data = {};
                     const d2name = await d2client.getBungieTag(dbUser.bungieId);
