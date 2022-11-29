@@ -2,28 +2,21 @@ import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler} from "./handlers/discordHandler";
 import {CharacterQuery} from "./props/characterQuery";
-import enmap from "enmap";
-import {weaponDatabaseObject, WeaponQuery, WeaponStat} from "./props/weaponQuery";
-import { weaponNameQuery } from "./props/weaponNameQuery";
-import {statRoles} from "./enums/statRoles";
-import { getWeaponInfo, normalizeActivityName } from "./handlers/utils";
-import { ManifestActivityQuery, ManifestQuery, RawManifestQuery, ManifestActivity } from "./props/activity";
-import { activityIdentifierObject } from "./props/activityIdentifierObject";
+import {weaponDatabaseObject, WeaponQuery} from "./props/weaponQuery";
+import {weaponNameQuery} from "./props/weaponNameQuery";
+import {ManifestActivity, ManifestActivityQuery, ManifestQuery} from "./props/manifest";
 
-const DB = new enmap({name:"users"});
-const weaponDB = new enmap({name: "weapons"})
-const activityIdentifierDB = new enmap({name: "activityIdentifiers"})
-const d2client = new requestHandler(process.env.apikey, DB);
+const d2client = new requestHandler(process.env.apikey);
 const dcclient = new discordHandler();
 
 d2client.apiRequest("getManifests",{}).then(d => {
     const resp = d.Response as ManifestQuery;
     const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
     d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
-        const activities = e as unknown as RawManifestQuery;//@ts-ignore
-        const values = Object.values(activities); //@ts-ignore
+        const activities = e as unknown as ManifestActivityQuery;
+        const values: ManifestActivity[] = Object.values(activities);
         console.log(values[0]);
-        values.forEach(x => { //@ts-ignore
+        values.forEach(x => {
             if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(x.activityTypeHash)) {}
         })
    //     values.filter(x => [608898761/*dungeon*/, 2043403989/*raid*/].includes(x.activityTypeHash)).forEach(q => {
@@ -32,8 +25,8 @@ d2client.apiRequest("getManifests",{}).then(d => {
          //       saved.IDs.push(q.hash);
            //     activityIdentifierDB.set(normalizeActivityName(q.displayProperties.name), saved)
            // }
-    //    }); 
-    });    
+    //    });
+    });
 });
 //console.log(activityIdentifierDB.get("Vow of the Disciple, Master"));
 
@@ -48,14 +41,14 @@ function instantiateWeaponDatabase() {
                 const resp2 = v.Response as WeaponQuery;
                 let i = 0;
                 resp2.weapons.forEach(async weapon => {
-                    if (!weaponDB.has(weapon.referenceId) && !beingChecked.includes(weapon.referenceId)) {
+                    if (!d2client.weaponDB.has(weapon.referenceId) && !beingChecked.includes(weapon.referenceId)) {
                         beingChecked.push(weapon.referenceId);
                         i += 1;
                         await sleep(2*i);
                         d2client.apiRequest("getWeaponName", {hashIdentifier: weapon.referenceId}).then(u => {
                             const item = u.Response as weaponNameQuery;
                             const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject;
-                            weaponDB.set(item.hash.toString(), weapon);
+                            d2client.weaponDB.set(item.hash.toString(), weapon);
                             console.log(`Added ${item.displayProperties.name} to database`);
                         })
                     }
