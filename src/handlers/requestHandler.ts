@@ -12,11 +12,15 @@ export class requestHandler {
     private apiKey: string;
     public dbUserUpdater: DBUserUpdater;
     public DB;
+    public weaponDB;
+    public activityIdentifierDB;
 
     constructor(apiKey){
         this.apiKey = apiKey;
         this.DB = new enmap({name:"users"});
         this.dbUserUpdater = new DBUserUpdater(this.DB,this);
+        this.weaponDB = new enmap({name: "weapons"});
+        this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
     }
 
     async rawRequest(url): Promise<JSON>{
