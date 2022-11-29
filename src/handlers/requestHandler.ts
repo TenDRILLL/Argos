@@ -34,7 +34,14 @@ export class requestHandler {
                     }
                 })
                 .then(d => {
-                    res(d.data as APIResponse);
+                    const response = d.data as APIResponse;
+                    if(response.ThrottleSeconds > 0){
+                        setTimeout(()=>{
+                            res(this.apiRequest(endpoint,data));
+                        },response.ThrottleSeconds * 1000);
+                    } else {
+                        res(response);
+                    }
             }).catch(e => {
                 rej(e.code);
             });
