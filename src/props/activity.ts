@@ -179,3 +179,7 @@ export class ManifestQuery {
     };
     iconImagePyramidInfo: [];
 }
+
+export class RawManifestQuery {
+    [key: string]: Object;
+  }
