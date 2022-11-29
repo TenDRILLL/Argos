@@ -99,15 +99,6 @@ export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabas
 
 export function normalizeRaidName(raidName) {
     const parts: string[] = raidName.split(":");
-    if (parts.length == 1) {
-        return parts[0];
-    }
-    else {
-        if (parts[parts.length-1] == " Master" || parts[parts.length-1] == " Prestige") {
-            return parts.join(",")
-        }
-        else {
-            return parts[0];
-        }
-    }    
+    const preOrMas = parts[parts.length-1] == " Master" || parts[parts.length-1] == " Prestige";
+    return parts.length === 1  || !(preOrMas) ? parts[0] : parts.join(",");
 }
