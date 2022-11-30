@@ -50,9 +50,6 @@ app.post("/api/interactions", async (req,res)=>{
     const case1 = interaction.data["custom_id"]?.split("-")[0];
     const case2 = interaction.data["name"];
     const case3 = interaction.message?.interaction?.name;
-    console.log(case1);
-    console.log(case2);
-    console.log(case3);
     if(case1 !== undefined && dcclient.commands.has(case1)){
         dcclient.commands.get(case1)!.run(interaction, d2client);
     } else if(case2 !== undefined && dcclient.commands.has(case2)){
