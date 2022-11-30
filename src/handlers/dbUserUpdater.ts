@@ -2,19 +2,18 @@ import {DBUser, Stats, RaidObject, DungeonsObject, GrandmastersObject} from "../
 import {CharacterQuery} from "../props/characterQuery";
 import {ActivityQuery} from "../props/activity";
 import {activityIdentifiers} from "../enums/activityIdentifiers";
+import {normalizeActivityName} from "./utils";
 
 export class DBUserUpdater {
-    private DB;
     private d2client;
 
-    constructor(DB,d2client){
-        this.DB = DB;
+    constructor(d2client){
         this.d2client = d2client;
     }
 
     async updateStats(userid: string): Promise<DBUser>{
         return new Promise(res => {
-            let dbUser = this.DB.get(userid);
+            let dbUser = this.d2client.DB.get(userid);
             this.d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
                 const resp = d.Response as CharacterQuery;
                 const stats: Stats = {
@@ -47,20 +46,20 @@ export class DBUserUpdater {
                         "Crown of Sorrow": 0,
                         "Deep Stone Crypt": 0,
                         "Garden of Salvation": 0,
-                        "King's Fall, Legend": 0,
+                        "King's Fall": 0,
                         "King's Fall, Master": 0,
                         "Last Wish": 0,
-                        "Leviathan, Eater of Worlds, Normal": 0,
+                        "Leviathan, Eater of Worlds": 0,
                         "Leviathan, Eater of Worlds, Prestige": 0,
-                        "Leviathan, Spire of Stars, Normal": 0,
+                        "Leviathan, Spire of Stars": 0,
                         "Leviathan, Spire of Stars, Prestige": 0,
-                        "Leviathan, Normal": 0,
+                        "Leviathan": 0,
                         "Leviathan, Prestige": 0,
                         "Scourge of the Past": 0,
                         "Vault of Glass, Master": 0,
-                        "Vault of Glass, Normal": 0,
+                        "Vault of Glass": 0,
                         "Vow of the Disciple, Master": 0,
-                        "Vow of the Disciple, Normal": 0,
+                        "Vow of the Disciple": 0,
                         "Total": 0
                     };
                     const dungeons: DungeonsObject = {
@@ -102,7 +101,8 @@ export class DBUserUpdater {
                         "Total": 0
                     }
                     data.forEach(char => {
-                        Object.keys(char).forEach(key => { //Last Wish
+                        Object.keys(char).forEach(key => {
+                            key = normalizeActivityName(key); //Last Wish
                             if(raids[key] != undefined){
                                 raids[key] += char[key];
                                 raids["Total"] += char[key];
@@ -119,7 +119,7 @@ export class DBUserUpdater {
                     dbUser.raids = raids;
                     dbUser.dungeons = dungeons;
                     dbUser.grandmasters = gms;
-                    this.DB.set(userid, dbUser);
+                    this.d2client.DB.set(userid, dbUser);
                     res(dbUser);
                 }).catch(e => console.log(e));
             });

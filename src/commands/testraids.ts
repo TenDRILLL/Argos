@@ -33,10 +33,10 @@ export async function testRaids(interaction: Interaction,d2client){
                 "name": "\u200B",
                 "value":
                     `**King's Fall**
-${raidObject["King's Fall, Legend"] + raidObject["King's Fall, Master"]} - M: ${raidObject["King's Fall, Master"]}
+${raidObject["King's Fall"] + raidObject["King's Fall, Master"]} - M: ${raidObject["King's Fall, Master"]}
 
 **Vault of Glass**
-${raidObject["Vault of Glass, Normal"] + raidObject["Vault of Glass, Master"]} - M: ${raidObject["Vault of Glass, Master"]}
+${raidObject["Vault of Glass"] + raidObject["Vault of Glass, Master"]} - M: ${raidObject["Vault of Glass, Master"]}
 
 **Garden of Salvation**
 ${raidObject["Garden of Salvation"]}
@@ -45,17 +45,17 @@ ${raidObject["Garden of Salvation"]}
 ${raidObject["Crown of Sorrow"]}
 
 **Spire of Stars**
-${raidObject["Leviathan, Spire of Stars, Normal"] + raidObject["Leviathan, Spire of Stars, Prestige"]} - P: ${raidObject["Leviathan, Spire of Stars, Prestige"]}
+${raidObject["Leviathan, Spire of Stars"] + raidObject["Leviathan, Spire of Stars, Prestige"]} - P: ${raidObject["Leviathan, Spire of Stars, Prestige"]}
 
 **Leviathan**
-${raidObject["Leviathan, Normal"] + raidObject["Leviathan, Prestige"]} - P: ${raidObject["Leviathan, Prestige"]}`,
+${raidObject["Leviathan"] + raidObject["Leviathan, Prestige"]} - P: ${raidObject["Leviathan, Prestige"]}`,
                 "inline":true
             },
             {
                 "name": "\u200B",
                 "value":
                     `**Vow of the Disciple**
-${raidObject["Vow of the Disciple, Normal"] + raidObject["Vow of the Disciple, Master"]} - M: ${raidObject["Vow of the Disciple, Master"]}
+${raidObject["Vow of the Disciple"] + raidObject["Vow of the Disciple, Master"]} - M: ${raidObject["Vow of the Disciple, Master"]}
 
 **Deep Stone Crypt**
 ${raidObject["Deep Stone Crypt"]}
@@ -67,7 +67,7 @@ ${raidObject["Last Wish"]}
 ${raidObject["Scourge of the Past"]}
 
 **Eater of Worlds**
-${raidObject["Leviathan, Eater of Worlds, Normal"] + raidObject["Leviathan, Eater of Worlds, Prestige"]} - P: ${raidObject["Leviathan, Eater of Worlds, Prestige"]}`,
+${raidObject["Leviathan, Eater of Worlds"] + raidObject["Leviathan, Eater of Worlds, Prestige"]} - P: ${raidObject["Leviathan, Eater of Worlds, Prestige"]}`,
                 "inline":true
             }
         ]

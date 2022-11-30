@@ -10,8 +10,8 @@ requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershi
 requests.set("getWeaponName","/Destiny2/Manifest/DestinyInventoryItemDefinition/hashIdentifier/");
 requests.set("getManifests","/Destiny2/Manifest/");
 requests.set("getDestinyEntityDefinition","/Destiny2/Manifest/entityType/hashIdentifier");
-requests.set("getGroupMembers", "/GroupV2/groupID/Members/");
-requests.set("getPendingClanInvites", "/GroupV2/groupID/Members/Pending/");
+requests.set("getGroupMembers", "/GroupV2/groupId/Members/");
+requests.set("getPendingClanInvites", "/GroupV2/groupId/Members/Pending/");
 
 export function getRequest(id,data){
     if(requests.has(id)){

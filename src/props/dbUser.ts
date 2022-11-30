@@ -13,20 +13,20 @@ export class RaidObject {
     "Crown of Sorrow": number;
     "Deep Stone Crypt": number;
     "Garden of Salvation": number;
-    "King's Fall, Legend": number;
+    "King's Fall": number;
     "King's Fall, Master": number;
     "Last Wish": number;
-    "Leviathan, Eater of Worlds, Normal": number;
+    "Leviathan, Eater of Worlds": number;
     "Leviathan, Eater of Worlds, Prestige": number;
-    "Leviathan, Spire of Stars, Normal": number;
+    "Leviathan, Spire of Stars": number;
     "Leviathan, Spire of Stars, Prestige": number;
-    "Leviathan, Normal": number;
+    "Leviathan": number;
     "Leviathan, Prestige": number;
     "Scourge of the Past": number;
     "Vault of Glass, Master": number;
-    "Vault of Glass, Normal": number;
+    "Vault of Glass": number;
     "Vow of the Disciple, Master": number;
-    "Vow of the Disciple, Normal": number;
+    "Vow of the Disciple": number;
     "Total": number;
 }
 

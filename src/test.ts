@@ -9,26 +9,9 @@ import {ManifestActivity, ManifestActivityQuery, ManifestQuery} from "./props/ma
 const d2client = new requestHandler(process.env.apikey);
 const dcclient = new discordHandler();
 
-d2client.apiRequest("getManifests",{}).then(d => {
-    const resp = d.Response as ManifestQuery;
-    const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
-    d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
-        const activities = e as unknown as ManifestActivityQuery;
-        const values: ManifestActivity[] = Object.values(activities);
-        console.log(values[0]);
-        values.forEach(x => {
-            if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(x.activityTypeHash)) {}
-        })
-   //     values.filter(x => [608898761/*dungeon*/, 2043403989/*raid*/].includes(x.activityTypeHash)).forEach(q => {
-     //       const saved = activityIdentifierDB.get(normalizeActivityName(q.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
-       //     if (!saved.IDs.includes(q.hash)) {
-         //       saved.IDs.push(q.hash);
-           //     activityIdentifierDB.set(normalizeActivityName(q.displayProperties.name), saved)
-           // }
-    //    });
-    });
-});
-//console.log(activityIdentifierDB.get("Vow of the Disciple, Master"));
+d2client.apiRequest("getGroupMembers",{groupId: "3506545"}).then(d => {
+    console.log(d);
+}).catch(e => console.log(e));
 
 function instantiateWeaponDatabase() {
     const destinyMembershipId = "4611686018468779813";

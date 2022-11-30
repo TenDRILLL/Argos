@@ -18,7 +18,7 @@ export class requestHandler {
     constructor(apiKey){
         this.apiKey = apiKey;
         this.DB = new enmap({name:"users"});
-        this.dbUserUpdater = new DBUserUpdater(this.DB,this);
+        this.dbUserUpdater = new DBUserUpdater(this);
         this.weaponDB = new enmap({name: "weapons"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
     }
@@ -29,17 +29,20 @@ export class requestHandler {
         });
     }
 
-    async apiRequest(endpoint, data): Promise<APIResponse>{
+    async apiRequest(endpoint, data, headers?): Promise<APIResponse>{
         return new Promise((res,rej)=>{
             const request = getRequest(endpoint,data);
             if(!request) return rej("Invalid request.");
-            axios.get(request,
-                {
-                    headers: {
-                        "X-API-Key": this.apiKey,
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    }
-                })
+            const config = {headers: {
+                    "X-API-Key": this.apiKey,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }};
+            if(headers){
+                headers.forEach(header => {
+                    config.headers[header[0]] = header[1];
+                });
+            }
+            axios.get(request, config)
                 .then(d => {
                     const response = d.data as APIResponse;
                     if(response.ThrottleSeconds > 0){

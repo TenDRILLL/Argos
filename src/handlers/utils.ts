@@ -24,11 +24,11 @@ export async function updateStatRoles(dcclient,d2client){
         await sleep(i);
         const ids: String[] = memberIds.slice(i, i + 10);
         ids.forEach(id => {
-            d2client.dbUserUpdater.updateStats(id).then(dbUser => {
+            d2client.dbUserUpdater.updateStats(id).then(async dbUser => {
                 let tempRaidObj = {
-                    kingsFall: dbUser.raids["King's Fall, Legend"] + dbUser.raids["King's Fall, Master"],
-                    vow: dbUser.raids["Vow of the Disciple, Normal"] + dbUser.raids["Vow of the Disciple, Master"],
-                    vault: dbUser.raids["Vault of Glass, Normal"] + dbUser.raids["Vault of Glass, Master"],
+                    kingsFall: dbUser.raids["King's Fall"] + dbUser.raids["King's Fall, Master"],
+                    vow: dbUser.raids["Vow of the Disciple"] + dbUser.raids["Vow of the Disciple, Master"],
+                    vault: dbUser.raids["Vault of Glass"] + dbUser.raids["Vault of Glass, Master"],
                     crypt: dbUser.raids["Deep Stone Crypt"],
                     garden: dbUser.raids["Garden of Salvation"],
                     lastWish: dbUser.raids["Last Wish"]
@@ -56,12 +56,12 @@ export async function updateStatRoles(dcclient,d2client){
                     }
                 });
                 j = tempArr.length;
-                d2client.apiRequest("getGroupMembers", {groupID: "3506545" /*Venerity groupID*/}).then(d => {
+                await d2client.apiRequest("getGroupMembers", {groupID: "3506545" /*Venerity groupID*/}).then(d => {
                     const resp = d.Response as BungieGroupQuery;
                     if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
                         tempArr[j] = statRoles.guildMember;
                     }
-                })
+                });
                 dcclient.getMember(statRoles.guildID,id).then(async member => {
                     let data = {};
                     const d2name = await d2client.getBungieTag(dbUser.bungieId);

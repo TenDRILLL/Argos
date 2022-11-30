@@ -96,6 +96,7 @@ app.post("/api/interactions", async (req,res)=>{
 
 app.listen(port, ()=>{
     console.log(`BungoAPIShits http://localhost:${port}/`);
+    updateStatRoles(dcclient,d2client);
     setInterval(()=>{
         updateStatRoles(dcclient,d2client);
     },5*60*1000);
