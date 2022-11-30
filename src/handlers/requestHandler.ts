@@ -80,7 +80,7 @@ export class requestHandler {
             this.apiRequest("getBungieProfile",{id}).then(data => {
                 const resp = data.Response as BungieProfile;
                 res(resp.displayName);
-            });
+            }).catch(e => console.log(e));
         });
     }
 
@@ -89,7 +89,7 @@ export class requestHandler {
             this.apiRequest("getBungieProfile",{id}).then(data => {
                 const resp = data.Response as BungieProfile;
                 res(resp.uniqueName);
-            });
+            }).catch(e => console.log(e));
         });
     }
 
@@ -161,8 +161,8 @@ export class requestHandler {
                                 }
                             );
                         }
-                    });
-                });
+                    }).catch(e => console.log(e));
+                }).catch(e => console.log(e));
             } else {
                 interaction.editReply({
                         content: "Registration failed, please generate a new code.",

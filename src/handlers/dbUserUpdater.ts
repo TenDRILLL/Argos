@@ -38,7 +38,7 @@ export class DBUserUpdater {
                                 }
                             });
                             res(raidObject);
-                        });
+                        }).catch(e => console.log(e));
                     }));
                 });
                 Promise.all(promises).then(data => {
@@ -122,7 +122,7 @@ export class DBUserUpdater {
                     this.d2client.DB.set(userid, dbUser);
                     res(dbUser);
                 }).catch(e => console.log(e));
-            });
+            }).catch(e => console.log(e));
         });
     }
 }

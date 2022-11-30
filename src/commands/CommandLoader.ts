@@ -11,6 +11,7 @@ export async function load(): Promise<Map<string, Command>> {
         const commandTable: Object = {};
         const promises: Array<Promise<boolean>> = [];
         commandFiles.forEach(name => {
+            if(name === "Command.js") return;
             promises.push(new Promise(res => {
                 import(`./${name}`).then(file => {
                     const js = new(<any>Object.entries(file)[0][1]);

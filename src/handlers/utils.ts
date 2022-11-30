@@ -61,7 +61,7 @@ export async function updateStatRoles(dcclient,d2client){
                     if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
                         tempArr[j] = statRoles.guildMember;
                     }
-                });
+                }).catch(e => console.log(e));
                 dcclient.getMember(statRoles.guildID,id).then(async member => {
                     let data = {};
                     const d2name = await d2client.getBungieTag(dbUser.bungieId);
@@ -102,7 +102,7 @@ export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabas
                 const item = u.Response as weaponNameQuery;
                 weaponDB.set(item.hash.toString(), {Name: item.displayProperties.name, Type: item.itemTypeDisplayName});
                 res({Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject);
-            });
+            }).catch(e => console.log(e));
         }
     });
 }
@@ -113,7 +113,7 @@ export function normalizeActivityName(raidName) {
     return parts.length === 1 || !(preOrMas) ? parts[0] : parts.join(",");
 }
 
-export function updateActivityIdentifierDB(d2client, activityIdentifierDB) {
+export function updateActivityIdentifierDB(d2client) {
     d2client.apiRequest("getManifests",{}).then(d => {
         const resp = d.Response as ManifestQuery;
         const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
@@ -121,19 +121,19 @@ export function updateActivityIdentifierDB(d2client, activityIdentifierDB) {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
                 const activity = x as ManifestActivity;
                 if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(activity.activityTypeHash)) {
-                    const saved = activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
+                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
                 }
             }   else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
-                    const saved = activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: []};
+                    const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: []};
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
                     }
                 }
             })
         });    
-    });
+    }).catch(e => console.log(e));
 }

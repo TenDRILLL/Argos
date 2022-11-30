@@ -14,11 +14,11 @@ const dcclient = new discordHandler();
 function instantiateWeaponDatabase() {
     const destinyMembershipId = "4611686018468779813";
     const beingChecked: number[] = []
-    d2client.apiRequest("getDestinyCharacters", {destinyMembershipId: destinyMembershipId, membershipType: 3}).then(d => {
+    d2client.apiRequest("getDestinyCharacters", {destinyMembershipId, membershipType: 3}).then(d => {
         const resp = d.Response as CharacterQuery;
         resp.characters.forEach(e => {
             const characterId = e.characterId;
-            d2client.apiRequest("getWeaponStats",{membershipType: 3, destinyMembershipId: destinyMembershipId, characterId: characterId}).then(v => {
+            d2client.apiRequest("getWeaponStats",{membershipType: 3, destinyMembershipId, characterId}).then(v => {
                 const resp2 = v.Response as WeaponQuery;
                 let i = 0;
                 resp2.weapons.forEach(async weapon => {
@@ -31,12 +31,12 @@ function instantiateWeaponDatabase() {
                             const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject;
                             d2client.weaponDB.set(item.hash.toString(), weapon);
                             console.log(`Added ${item.displayProperties.name} to database`);
-                        })
+                        }).catch(e => console.log(`3 ${e}`));
                     }
                 })
-            })
+            }).catch(e => console.log(`2 ${e}`));
         })
-    })
+    }).catch(e => console.log(`1 ${e}`));
 }
 
 function instantiateActivityDatabase() {
@@ -50,10 +50,11 @@ function instantiateActivityDatabase() {
             if (!saved.IDs.includes(e)) {
                 saved.IDs.push(e);
             }
-        })
-        d2client.activityIdentifierDB.set(key, saved.IDs);
+        });
+        d2client.activityIdentifierDB.set(key, saved);
         result = iterator.next();
     }
+    console.log("Activity DB done.");
 }
 
 function sleep(seconds){
@@ -63,3 +64,6 @@ function sleep(seconds){
         },seconds*1000);
     });
 }
+
+instantiateActivityDatabase();
+instantiateWeaponDatabase();
