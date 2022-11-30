@@ -5,13 +5,11 @@ import {CharacterQuery} from "./props/characterQuery";
 import {weaponDatabaseObject, WeaponQuery} from "./props/weaponQuery";
 import {weaponNameQuery} from "./props/weaponNameQuery";
 import {ManifestActivity, ManifestActivityQuery, ManifestQuery} from "./props/manifest";
+import { activityIdentifiers } from "./enums/activityIdentifiers";
+import { activityIdentifierObject } from "./props/activityIdentifierObject";
 
 const d2client = new requestHandler(process.env.apikey);
 const dcclient = new discordHandler();
-
-d2client.apiRequest("getGroupMembers",{groupId: "3506545"}).then(d => {
-    console.log(d);
-}).catch(e => console.log(e));
 
 function instantiateWeaponDatabase() {
     const destinyMembershipId = "4611686018468779813";
@@ -41,8 +39,22 @@ function instantiateWeaponDatabase() {
     })
 }
 
-// 	608898761 dungeon activityTypeHash
-// 	2043403989 raid
+function instantiateActivityDatabase() {
+    const iterator = activityIdentifiers.keys()
+    let result = iterator.next();
+    while (!result.done) {
+        const key = result.value;
+        const values = activityIdentifiers.get(result.value.toString());
+        const saved = d2client.activityIdentifierDB.get(key) as activityIdentifierObject ?? {IDs: []};
+        values?.forEach(e => {
+            if (!saved.IDs.includes(e)) {
+                saved.IDs.push(e);
+            }
+        })
+        d2client.activityIdentifierDB.set(key, saved.IDs);
+        result = iterator.next();
+    }
+}
 
 function sleep(seconds){
     return new Promise(res => {
