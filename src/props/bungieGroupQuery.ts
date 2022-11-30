@@ -1,11 +1,9 @@
-import internal from "stream"
-
-export class bungieGroupQuery {
+export class BungieGroupQuery {
     results: QueryProfile[];
     totalResults: number;
     hasMore: boolean;
     query: { itemsPerPage: number, currentPage: number; };
-    useTotalResults: boolean
+    useTotalResults: boolean;
 }
 
 export class QueryProfile {
@@ -13,12 +11,12 @@ export class QueryProfile {
     isOnline: boolean;
     lastOnlineStatusChange: string;
     groupId: string;
-    destinyUserInfo: destinyUserInfo;
-    bungieNetUserInfo: bungieNetUserInfo;
+    destinyUserInfo: DestinyUserInfo;
+    bungieNetUserInfo: BungieNetUserInfo;
     joinDate: string;
 }
 
-export class destinyUserInfo {
+export class DestinyUserInfo {
     LastSeenDisplayName: string;
     LastSeenDisplayNameType: number;
     iconPath: string;
@@ -32,7 +30,7 @@ export class destinyUserInfo {
     bungieGlobalDisplayNameCode: number;
 }
 
-export class bungieNetUserInfo {
+export class BungieNetUserInfo {
     supplementalDisplayName: string;
     iconPath: string;
     crossSaveOverride: number;
