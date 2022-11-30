@@ -45,11 +45,14 @@ app.get("/authorization", (req, res) => {
 app.post("/api/interactions", async (req,res)=>{
     if(dcclient.commands === undefined) return; //This shouldn't really happen, but there's a slight possibility when the bot is starting.
     const data = req.body as RawInteraction;
-    if(data.type === 1) return dcclient.ping(res);
+    if(data.type === 1) return res.send({type: 1});
     const interaction = new Interaction(data, dcclient);
-    const case1 = interaction.data["name"];
-    const case2 = interaction.data["custom_id"].split("-")[0];
+    const case1 = interaction.data["custom_id"]?.split("-")[0];
+    const case2 = interaction.data["name"];
     const case3 = interaction.message?.interaction?.name;
+    console.log(case1);
+    console.log(case2);
+    console.log(case3);
     if(case1 !== undefined && dcclient.commands.has(case1)){
         dcclient.commands.get(case1)!.run(interaction, d2client);
     } else if(case2 !== undefined && dcclient.commands.has(case2)){

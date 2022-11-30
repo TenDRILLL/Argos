@@ -18,10 +18,6 @@ export class discordHandler {
         this.commands = await load();
     }
 
-    ping(res){
-        return res.send({type: 1});
-    }
-
     getMember(guildID,userID){
         return new Promise(res => {
             axios.get(`https://discord.com/api/v10/guilds/${guildID}/members/${userID}`,{
