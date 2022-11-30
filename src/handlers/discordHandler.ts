@@ -1,13 +1,21 @@
 import axios from "axios";
 import "dotenv/config";
-import {RawButtonInteraction, RawButtonInteractionData, RawCommandInteraction, RawCommandInteractionData, RawMember, RawMessage, RawUser} from "../props/discord";
+import {RawInteraction, RawButtonInteractionData, RawCommandInteractionData, RawMember, RawMessage, RawUser} from "../props/discord";
+import Command from "../commands/Command";
+import {load} from "../commands/CommandLoader";
 export class discordHandler {
     private discordID: string;
     private token: string;
+    public commands: Map<string, Command>;
 
     constructor(){
         this.discordID = process.env.discordId as string;
         this.token = process.env.discordToken as string;
+        this.loadCommands();
+    }
+
+    async loadCommands(){
+        this.commands = await load();
     }
 
     ping(res){
@@ -56,8 +64,10 @@ export class Interaction {
     public message: RawMessage | null;
     private discordID = process.env.discordId as string;
     private discordToken = process.env.discordToken as string;
+    public client: discordHandler;
 
-    constructor(raw: RawButtonInteraction | RawCommandInteraction) {
+
+    constructor(raw: RawInteraction, dcclient: discordHandler) {
         this.id = raw.id;
         this.applicationId = raw.application_id;
         this.type = raw.type;
@@ -70,8 +80,9 @@ export class Interaction {
         this.appPermissions = raw.app_permissions ?? null;
         this.locale = raw.locale ?? null;
         this.guildLocale = raw.guild_locale ?? null;
-        this.data = raw.data;
+        this.data = raw.data!;
         this.message = raw["message"] ?? null;
+        this.client = dcclient;
     }
 
     reply(data){

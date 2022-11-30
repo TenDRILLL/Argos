@@ -10,6 +10,7 @@ import enmap from "enmap";
 
 export class requestHandler {
     private apiKey: string;
+    private clientID: string;
     public dbUserUpdater: DBUserUpdater;
     public DB;
     public weaponDB;
@@ -17,6 +18,7 @@ export class requestHandler {
 
     constructor(apiKey){
         this.apiKey = apiKey;
+        this.clientID = "37090";
         this.DB = new enmap({name:"users"});
         this.dbUserUpdater = new DBUserUpdater(this);
         this.weaponDB = new enmap({name: "weapons"});
@@ -92,7 +94,7 @@ export class requestHandler {
     }
 
 
-    async handleRegistration(interaction,dcclient,clientID){
+    async handleRegistration(interaction){
         const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}];
         const style = ["",3,1,2];
         await interaction.defer({flags: 64});
@@ -101,7 +103,7 @@ export class requestHandler {
         const data = new URLSearchParams();
         data.append("grant_type","authorization_code");
         data.append("code", code);
-        data.append("client_id",clientID);
+        data.append("client_id",this.clientID);
         this.token(data).then(x => {
             //@ts-ignore
             let id = x.membership_id;
@@ -122,7 +124,7 @@ export class requestHandler {
                             );
                             if(interaction.member.roles.includes(statRoles.registeredID)) return;
                             let roles = [...interaction.member.roles, statRoles.registeredID];
-                            dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
+                            interaction.client.setMember(statRoles.guildID,interaction.member.user.id,{roles});
                             return;
                         } else {
                             if(reply.profiles.length === 1){
@@ -134,7 +136,7 @@ export class requestHandler {
                                 );
                                 if(interaction.member.roles.includes(statRoles.registeredID)) return;
                                 let roles = [...interaction.member.roles, statRoles.registeredID];
-                                dcclient.setMember(statRoles.guildID,interaction.member.user.id,{roles});
+                                interaction.client.setMember(statRoles.guildID,interaction.member.user.id,{roles});
                                 return;
                             }
                             this.DB.set(discordID,{bungieId: id});

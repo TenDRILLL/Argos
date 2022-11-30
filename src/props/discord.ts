@@ -42,15 +42,17 @@ export class RawInteraction {
     app_permissions?: string;
     locale?: string;
     guild_locale?: string;
+    data?: RawCommandInteractionData | RawButtonInteractionData;
+    message?: RawMessage;
 }
 
 export class RawCommandInteraction extends RawInteraction {
-    data: RawCommandInteractionData;
+    declare data: RawCommandInteractionData;
 }
 
 export class RawButtonInteraction extends RawInteraction {
-    message: RawMessage;
-    data: RawButtonInteractionData;
+    declare message: RawMessage;
+    declare data: RawButtonInteractionData;
 }
 
 export class RawButtonInteractionData {

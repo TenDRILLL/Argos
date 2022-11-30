@@ -5,17 +5,12 @@ import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler, Interaction} from "./handlers/discordHandler";
 import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
-import {testRaids} from "./commands/testraids";
-import {testStats} from "./commands/teststats";
-import {statRoles} from "./enums/statRoles";
-import {registrationLink} from "./commands/registrationLink";
-import {RawButtonInteraction, RawCommandInteraction, RawInteraction} from "./props/discord";
+import {RawInteraction} from "./props/discord";
 
 const d2client = new requestHandler(process.env.apikey);
 const dcclient = new discordHandler();
 const app = Express();
 const port = 11542;
-const clientID = "37090";
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(Express.json({verify: VerifyDiscordRequest()}));
@@ -48,46 +43,19 @@ app.get("/authorization", (req, res) => {
 });
 
 app.post("/api/interactions", async (req,res)=>{
+    if(dcclient.commands === undefined) return; //This shouldn't really happen, but there's a slight possibility when the bot is starting.
     const data = req.body as RawInteraction;
     if(data.type === 1) return dcclient.ping(res);
-    if(data.type === 2) { // /command
-        const interaction = new Interaction(data as RawCommandInteraction);
-        if(interaction.data["name"] === "register"){
-            d2client.handleRegistration(interaction,dcclient,clientID);
-        } else if(interaction.data["name"] === "testraids"){
-            testRaids(interaction,d2client);
-        } else if(interaction.data["name"] === "teststats"){
-            testStats(interaction,d2client);
-        } else if(interaction.data["name"] === "registrationlink"){
-            registrationLink(interaction);
-        }
-    } else if(data.type === 3){ // Button
-        const interaction = new Interaction(data as RawButtonInteraction);
-        if(interaction.data["custom_id"].split("-")[0] === "delete"){
-            if(interaction.data["custom_id"].split("-")[1] === interaction.member?.user?.id){
-                return interaction.delete();
-            } else {
-                return interaction.reply({
-                    content: "This isn't your command.",
-                    flags: 64
-                });
-            }
-        }
-        if(interaction.message?.interaction?.name === "register"){
-             let dbUser = d2client.DB.get(interaction.member?.user?.id as string);
-             dbUser["destinyId"] = interaction.data["custom_id"].split("-")[0];
-             dbUser["membershipType"] = interaction.data["custom_id"].split("-")[1];
-             d2client.DB.set(interaction.member?.user?.id as string,dbUser);
-             interaction.update({
-                 content: "Registration successful!",
-                 components: [],
-                 flags: 64
-             });
-            if(interaction.member?.roles.includes(statRoles.registeredID)) return;
-            let roles = [...interaction.member?.roles as string[], statRoles.registeredID];
-            dcclient.setMember(statRoles.guildID,interaction.member?.user?.id,{roles});
-            return;
-        }
+    const interaction = new Interaction(data, dcclient);
+    const case1 = interaction.data["name"];
+    const case2 = interaction.data["custom_id"].split("-")[0];
+    const case3 = interaction.message?.interaction?.name;
+    if(case1 !== undefined && dcclient.commands.has(case1)){
+        dcclient.commands.get(case1)!.run(interaction, d2client);
+    } else if(case2 !== undefined && dcclient.commands.has(case2)){
+        dcclient.commands.get(case2)!.run(interaction, d2client);
+    } else if(case3 !== undefined && dcclient.commands.has(case3)){
+        dcclient.commands.get(case3)!.run(interaction, d2client);
     } else {
         res.status(400);
     }
