@@ -44,8 +44,8 @@ export class requestHandler {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }};
             if(headers){
-                headers.forEach(header => {
-                    config.headers[header[0]] = header[1];
+                Object.keys(headers).forEach(headerName => {
+                    config.headers[headerName] = headers[headerName];
                 });
             }
             axios.get(request, config)
