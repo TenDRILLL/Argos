@@ -235,4 +235,69 @@ export class requestHandler {
             }
         });
     }
+
+    async localRegister(code,discordID){
+        const data = new URLSearchParams();
+        data.append("grant_type","authorization_code");
+        data.append("code", code);
+        data.append("client_id",this.clientID);
+        data.append("client_secret",this.secret);
+        this.token(data).then(x => {
+            let id = x.membership_id;
+            if(id){
+                this.apiRequest("getBungieProfile",{id}).then(profile => {
+                    const reply = profile.Response as BungieProfile;
+                    let membershipType;
+                    if(reply.steamDisplayName){membershipType = 3} else if(reply.xboxDisplayName){membershipType = 1} else if(reply.psnDisplayName){membershipType = 2} else {return;}
+                    this.apiRequest("getBungieLinkedProfiles",{membershipType, membershipId: id}).then(resp => {
+                        const reply = resp.Response as LinkedProfileResponse;
+                        const primary = reply.profiles.find(x => x.isCrossSavePrimary);
+                        if(primary){
+                            this.DB.set(discordID,{
+                                bungieId: id,
+                                destinyId: primary.membershipId,
+                                membershipType: primary.membershipType,
+                                tokens: {
+                                    accessToken: x.access_token,
+                                    accessExpiry: Date.now() + (x.expires_in*1000),
+                                    refreshToken: x.refresh_token,
+                                    refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
+                                }
+                            });
+                            console.log("Registration successful!");
+                            return;
+                        } else {
+                            if(reply.profiles.length === 1){
+                                this.DB.set(discordID,{
+                                    bungieId: id,
+                                    destinyId: reply.profiles[0].membershipId,
+                                    membershipType: reply.profiles[0].membershipType,
+                                    tokens: {
+                                        accessToken: x.access_token,
+                                        accessExpiry: Date.now() + (x.expires_in*1000),
+                                        refreshToken: x.refresh_token,
+                                        refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
+                                    }
+                                });
+                                console.log("Registration successful!");
+                                return;
+                            }
+                            this.DB.set(discordID,{
+                                bungieId: id,
+                                tokens: {
+                                    accessToken: x.access_token,
+                                    accessExpiry: Date.now() + (x.expires_in*1000),
+                                    refreshToken: x.refresh_token,
+                                    refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
+                                }
+                            });
+                            console.log("Registered but no default platform set!");
+                        }
+                    }).catch(e => console.log(e));
+                }).catch(e => console.log(e));
+            } else {
+                console.log("Registration failed, please generate a new code.");
+            }
+        });
+    }
 }
