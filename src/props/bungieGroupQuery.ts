@@ -21,7 +21,7 @@ export class DestinyUserInfo {
     LastSeenDisplayNameType: number;
     iconPath: string;
     crossSaveOverride: number;
-    applicableMembershipTypes: number[]
+    applicableMembershipTypes: number[];
     isPublic: boolean;
     membershipType: number;
     membershipId: string;
@@ -40,4 +40,30 @@ export class BungieNetUserInfo {
     displayName: string;
     bungieGlobalDisplayName: string;
     bungieGlobalDisplayNameCode: number;
+}
+
+export class PendingClanmembersQuery {
+    results: ClanApplication[];
+    totalResults: number;
+    hasMore: boolean;
+    query: { itemsPerPage: number, currentPage: number };
+    replacementContinuationToken: string;
+    useTotalResults: boolean;
+}
+
+export class ClanApplication {
+    groupId: number;
+    creationDate: string;
+    resolveState: number;
+    resolveDate: string;
+    resolvedByMembershipId: string;
+    requestMessage: string;
+    resolveMessage: string;
+    destinyUserInfo: DestinyUserInfo;
+    bungieNetUserInfo: BungieNetUserInfo;
+}
+
+export class ClanApplicationList {
+    memberships: BungieNetUserInfo[];
+    message: string;
 }
