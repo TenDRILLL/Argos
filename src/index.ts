@@ -57,7 +57,7 @@ app.post("/api/interactions", async (req,res)=>{
     } else if(case3 !== undefined && dcclient.commands.has(case3)){
         dcclient.commands.get(case3)!.run(interaction, d2client);
     } else {
-        res.status(400);
+        interaction.reply({content: "Not implemented yet."}).catch(e => console.log(e)); //This catches in case a command is missing, to avoid the request not being handled.
     }
     res.status(200);
 });
