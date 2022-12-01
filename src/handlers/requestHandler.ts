@@ -2,7 +2,7 @@ import "dotenv/config";
 import enmap from "enmap";
 import axios from "axios";
 
-import {APIResponse} from "../props/apiResponse";
+import {APIResponse, AuthenticationResponse} from "../props/apiResponse";
 import {getRequest} from "../enums/requests";
 import {URLSearchParams} from "url";
 import {BungieProfile} from "../props/bungieProfile";
@@ -64,7 +64,7 @@ export class requestHandler {
         });
     }
 
-    async token(data){
+    async token(data): Promise<AuthenticationResponse>{
         return new Promise((res)=>{
             axios.post(`https://www.bungie.net/platform/app/oauth/token`, data, {
                 headers: {
@@ -110,7 +110,6 @@ export class requestHandler {
         data.append("client_id",this.clientID);
         data.append("client_secret",this.secret);
         this.token(data).then(x => {
-            //@ts-ignore
             let id = x.membership_id;
             if(id){
                 this.apiRequest("getBungieProfile",{id}).then(profile => {
@@ -121,7 +120,17 @@ export class requestHandler {
                         const reply = resp.Response as LinkedProfileResponse;
                         const primary = reply.profiles.find(x => x.isCrossSavePrimary);
                         if(primary){
-                            this.DB.set(discordID,{bungieId: id, destinyId: primary.membershipId, membershipType: primary.membershipType});
+                            this.DB.set(discordID,{
+                                bungieId: id,
+                                destinyId: primary.membershipId,
+                                membershipType: primary.membershipType,
+                                tokens: {
+                                    accessToken: x.access_token,
+                                    accessExpiry: x.expires_in,
+                                    refreshToken: x.refresh_token,
+                                    refreshExpiry: x.refresh_expires_in
+                                }
+                            });
                             interaction.editReply({
                                     content: "Registration successful!",
                                     flags: 64
@@ -133,7 +142,17 @@ export class requestHandler {
                             return;
                         } else {
                             if(reply.profiles.length === 1){
-                                this.DB.set(discordID,{bungieId: id, destinyId: reply.profiles[0].membershipId, membershipType: reply.profiles[0].membershipType});
+                                this.DB.set(discordID,{
+                                    bungieId: id,
+                                    destinyId: reply.profiles[0].membershipId,
+                                    membershipType: reply.profiles[0].membershipType,
+                                    tokens: {
+                                        accessToken: x.access_token,
+                                        accessExpiry: x.expires_in,
+                                        refreshToken: x.refresh_token,
+                                        refreshExpiry: x.refresh_expires_in
+                                    }
+                                });
                                 interaction.editReply({
                                         content: "Registration successful!",
                                         flags: 64
@@ -144,7 +163,15 @@ export class requestHandler {
                                 interaction.client.setMember(statRoles.guildID,interaction.member.user.id,{roles});
                                 return;
                             }
-                            this.DB.set(discordID,{bungieId: id});
+                            this.DB.set(discordID,{
+                                bungieId: id,
+                                tokens: {
+                                    accessToken: x.access_token,
+                                    accessExpiry: x.expires_in,
+                                    refreshToken: x.refresh_token,
+                                    refreshExpiry: x.refresh_expires_in
+                                }
+                            });
                             const buttons = reply.profiles.map(x => {
                                 return {
                                     type: 2,

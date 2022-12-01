@@ -7,6 +7,12 @@ export class DBUser {
     dungeons: DungeonsObject;
     grandmasters: GrandmastersObject;
     roles: string[];
+    tokens: {
+        accessToken: string;
+        accessExpiry: number;
+        refreshToken: string;
+        refreshExpiry: number;
+    }
 }
 
 export class RaidObject {
