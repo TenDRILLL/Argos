@@ -1,23 +1,27 @@
-import {APIResponse} from "../props/apiResponse";
+import "dotenv/config";
+import enmap from "enmap";
 import axios from "axios";
+
+import {APIResponse} from "../props/apiResponse";
 import {getRequest} from "../enums/requests";
 import {URLSearchParams} from "url";
 import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
 import {statRoles} from "../enums/statRoles";
-import enmap from "enmap";
 
 export class requestHandler {
     private apiKey: string;
     private clientID: string;
+    private secret: string;
     public dbUserUpdater: DBUserUpdater;
     public DB;
     public weaponDB;
     public activityIdentifierDB;
 
-    constructor(apiKey){
-        this.apiKey = apiKey;
+    constructor(){
+        this.apiKey = process.env.apikey as string;
+        this.secret = process.env.apisecret as string;
         this.clientID = "37090";
         this.DB = new enmap({name:"users"});
         this.dbUserUpdater = new DBUserUpdater(this);
@@ -104,6 +108,7 @@ export class requestHandler {
         data.append("grant_type","authorization_code");
         data.append("code", code);
         data.append("client_id",this.clientID);
+        data.append("client_secret",this.secret);
         this.token(data).then(x => {
             //@ts-ignore
             let id = x.membership_id;
