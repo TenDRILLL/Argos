@@ -1,13 +1,12 @@
 import Express from "express";
 import bodyParser from "body-parser";
-import "dotenv/config";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler, Interaction} from "./handlers/discordHandler";
 import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
 import {RawInteraction} from "./props/discord";
 
-const d2client = new requestHandler(process.env.apikey);
+const d2client = new requestHandler();
 const dcclient = new discordHandler();
 const app = Express();
 const port = 11542;
