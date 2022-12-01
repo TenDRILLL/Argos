@@ -9,6 +9,7 @@ import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
 import {statRoles} from "../enums/statRoles";
+import {DBUser} from "../props/dbUser";
 
 export class requestHandler {
     private apiKey: string;
@@ -79,18 +80,30 @@ export class requestHandler {
         });
     }
     
-    async refreshToken(refreshToken){
+    async refreshToken(dbUserID):Promise<DBUser>{
+        let dbUser: DBUser = this.DB.get(dbUserID);
         const data = new URLSearchParams();
         data.append("grant_type","refresh_token");
-        data.append("refresh_token",refreshToken);
+        data.append("refresh_token",dbUser.tokens?.refreshToken);
+        data.append("client_id",this.clientID);
+        data.append("client_secret",this.secret);
         return new Promise((res,rej)=>{
+            if(!dbUser.tokens?.refreshToken) rej(`No refresh token for ${dbUserID}!`);
+            if(Date.now() - dbUser.tokens.refreshExpiry >= 0) rej(`Refresh token has expired for ${dbUserID}!`);
             axios.post(`https://www.bungie.net/platform/app/oauth/token`, data, {
                 headers: {
                     "X-API-Key": this.apiKey,
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             }).then(d => {
-                res(d.data);
+                dbUser.tokens = {
+                    accessToken: d.data.access_token,
+                    accessExpiry: Date.now() + (d.data.expires_in*1000),
+                    refreshToken: d.data.refresh_token,
+                    refreshExpiry: Date.now() + (d.data.refresh_expires_in*1000)
+                }
+                this.DB.set(dbUserID,dbUser);
+                res(dbUser);
             }).catch(e => {
                 rej(e.code);
             });
@@ -144,9 +157,9 @@ export class requestHandler {
                                 membershipType: primary.membershipType,
                                 tokens: {
                                     accessToken: x.access_token,
-                                    accessExpiry: x.expires_in,
+                                    accessExpiry: Date.now() + (x.expires_in*1000),
                                     refreshToken: x.refresh_token,
-                                    refreshExpiry: x.refresh_expires_in
+                                    refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                 }
                             });
                             interaction.editReply({
@@ -166,9 +179,9 @@ export class requestHandler {
                                     membershipType: reply.profiles[0].membershipType,
                                     tokens: {
                                         accessToken: x.access_token,
-                                        accessExpiry: x.expires_in,
+                                        accessExpiry: Date.now() + (x.expires_in*1000),
                                         refreshToken: x.refresh_token,
-                                        refreshExpiry: x.refresh_expires_in
+                                        refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                     }
                                 });
                                 interaction.editReply({
@@ -185,9 +198,9 @@ export class requestHandler {
                                 bungieId: id,
                                 tokens: {
                                     accessToken: x.access_token,
-                                    accessExpiry: x.expires_in,
+                                    accessExpiry: Date.now() + (x.expires_in*1000),
                                     refreshToken: x.refresh_token,
-                                    refreshExpiry: x.refresh_expires_in
+                                    refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                 }
                             });
                             const buttons = reply.profiles.map(x => {
