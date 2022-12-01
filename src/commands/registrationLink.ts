@@ -25,7 +25,7 @@ export default class RegistrationLink extends Command {
                         ]
                     }
                 ]
-            });
+            }).catch(e => console.log(e));
         });
     }
 }

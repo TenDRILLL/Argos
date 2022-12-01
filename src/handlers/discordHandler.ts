@@ -96,7 +96,7 @@ export class Interaction {
     newMessage(data){
         return new Promise(async (res,rej)=>{
             try {
-                await this.client.rest.post(Routes.channelMessages(this.channelId!),{body: {data}});
+                await this.client.rest.post(Routes.channelMessages(this.channelId!),{body: data});
                 res("");
             } catch(e){
                 rej(e);
@@ -107,7 +107,8 @@ export class Interaction {
     editReply(data){
         return new Promise(async (res,rej)=>{
             try {
-                await this.client.rest.patch(Routes.webhookMessage(this.discordID,this.token,"@original"),{body: {data}});
+                await this.client.rest.patch(Routes.webhookMessage(this.discordID,this.token,"@original"),{body: data});
+                res("");
             } catch(e){
                 rej(e);
             }
@@ -118,6 +119,7 @@ export class Interaction {
         return new Promise(async (res,rej)=>{
             try {
                 await this.client.rest.post(Routes.interactionCallback(this.id,this.token),{body: {type: 5, data}});
+                res("");
             } catch(e){
                 rej(e);
             }
@@ -128,6 +130,7 @@ export class Interaction {
         return new Promise(async (res,rej)=>{
             try {
                 await this.client.rest.post(Routes.interactionCallback(this.id,this.token), {body: {type: 7, data}});
+                res("");
             } catch(e){
                 rej(e);
             }
@@ -139,6 +142,7 @@ export class Interaction {
             try {
                 await this.client.rest.post(Routes.interactionCallback(this.id,this.token), {body: {type: 6}});
                 await this.client.rest.delete(Routes.webhookMessage(this.discordID,this.token,"@original"));
+                res("");
             } catch(e){
                 rej(e);
             }

@@ -19,10 +19,10 @@ export default class Register extends Command {
             content: "Registration successful!",
             components: [],
             flags: 64
-        });
+        }).catch(e => console.log(e));
         if(interaction.member?.roles.includes(statRoles.registeredID)) return;
         let roles = [...interaction.member?.roles as string[], statRoles.registeredID];
-        interaction.client.setMember(statRoles.guildID,interaction.member?.user?.id,{roles});
+        interaction.client.setMember(statRoles.guildID,interaction.member?.user?.id,{roles}).catch(e => console.log(e));
         return;
     }
 }

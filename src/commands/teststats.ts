@@ -29,6 +29,6 @@ export default class TestStats extends Command {
 Light: ${dbUser.stats.light}
 KD: ${dbUser.stats.kd}`,
             components: [{type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${authorID}`}]}]
-        });
+        }).catch(e => console.log(e));
     }
 }

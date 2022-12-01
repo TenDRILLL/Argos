@@ -80,6 +80,6 @@ ${raidObject["Leviathan, Eater of Worlds"] + raidObject["Leviathan, Eater of Wor
         interaction.editReply({
             embeds: [embed],
             components: [{type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${authorID}`}]}]
-        });
+        }).catch(e => console.log(e));
     }
 }

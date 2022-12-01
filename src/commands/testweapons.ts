@@ -6,6 +6,6 @@ export default class TestWeapons extends Command {
     }
 
     async cmdRun(interaction, d2client){
-        interaction.reply({content: "Not implemented yet."});
+        interaction.reply({content: "Not implemented yet."}).catch(e => console.log(e));
     }
 }
