@@ -56,12 +56,12 @@ export async function updateStatRoles(dcclient,d2client){
                     }
                 });
                 j = tempArr.length;
-                await d2client.apiRequest("getGroupMembers", {groupID: "3506545" /*Venerity groupID*/}).then(d => {
+                await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
                     const resp = d.Response as BungieGroupQuery;
                     if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
                         tempArr[j] = statRoles.guildMember;
                     }
-                }).catch(e => console.log(e));
+                }).catch(e => console.log(4));
                 dcclient.getMember(statRoles.guildID,id).then(async member => {
                     let data = {};
                     const d2name = await d2client.getBungieTag(dbUser.bungieId);

@@ -38,7 +38,7 @@ export class DBUserUpdater {
                                 }
                             });
                             res(raidObject);
-                        }).catch(e => console.log(e));
+                        }).catch(e => console.log(1));
                     }));
                 });
                 Promise.all(promises).then(data => {
@@ -121,8 +121,8 @@ export class DBUserUpdater {
                     dbUser.grandmasters = gms;
                     this.d2client.DB.set(userid, dbUser);
                     res(dbUser);
-                }).catch(e => console.log(e));
-            }).catch(e => console.log(e));
+                }).catch(e => console.log(2));
+            }).catch(e => console.log(3));
         });
     }
 }
