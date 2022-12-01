@@ -22,13 +22,19 @@ function instantiateWeaponDatabase() {
                 const resp2 = v.Response as WeaponQuery;
                 let i = 0;
                 resp2.weapons.forEach(async weapon => {
-                    if (!d2client.weaponDB.has(weapon.referenceId) && !beingChecked.includes(weapon.referenceId)) {
+                    if (/*!d2client.weaponDB.has(weapon.referenceId) &&*/ !beingChecked.includes(weapon.referenceId)) {
                         beingChecked.push(weapon.referenceId);
                         i += 1;
                         await sleep(2*i);
                         d2client.apiRequest("getWeaponName", {hashIdentifier: weapon.referenceId}).then(u => {
                             const item = u.Response as weaponNameQuery;
-                            const weapon = {Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject;
+                            const weapon = {
+                                Name: item.displayProperties.name,
+                                Type: item.itemTypeDisplayName,
+                                Slot: item.equippingBlock.equipmentSlotTypeHash,
+                                UniqueLabel: item.equippingBlock.uniqueLabel
+                            } as weaponDatabaseObject;
+                            console.log(JSON.stringify(weapon));
                             d2client.weaponDB.set(item.hash.toString(), weapon);
                             console.log(`Added ${item.displayProperties.name} to database`);
                         }).catch(e => console.log(`3 ${e}`));
@@ -65,5 +71,5 @@ function sleep(seconds){
     });
 }
 
-instantiateActivityDatabase();
+//instantiateActivityDatabase();
 instantiateWeaponDatabase();

@@ -14,7 +14,16 @@ export class weaponNameQuery{
     action: Object[];
     inventory: Object[];
     stats: Object[];
-    equippingBlock: Object[];
+    equippingBlock: {
+        uniqueLabel: string;
+        uniqueLabelHash: number;
+        equipmentSlotTypeHash: number;
+        attributes: number;
+        equippingSoundHash: number;
+        hornSoundHash: number;
+        ammoType: number;
+        displayStrings: string[];
+    };
     translationBlock: Object[];
     preview: Object[];
     quality: Object[];
