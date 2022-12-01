@@ -78,6 +78,24 @@ export class requestHandler {
             });
         });
     }
+    
+    async refreshToken(refreshToken){
+        const data = new URLSearchParams();
+        data.append("grant_type","refresh_token");
+        data.append("refresh_token",refreshToken);
+        return new Promise((res,rej)=>{
+            axios.post(`https://www.bungie.net/platform/app/oauth/token`, data, {
+                headers: {
+                    "X-API-Key": this.apiKey,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            }).then(d => {
+                res(d.data);
+            }).catch(e => {
+                rej(e.code);
+            });
+        });
+    }
 
     async getBungieName(id){
         return new Promise((res)=>{
