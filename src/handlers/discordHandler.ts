@@ -1,16 +1,20 @@
-import axios from "axios";
 import "dotenv/config";
 import {RawInteraction, RawButtonInteractionData, RawCommandInteractionData, RawMember, RawMessage, RawUser} from "../props/discord";
 import Command from "../commands/Command";
 import {load} from "../commands/CommandLoader";
+import {REST} from "@discordjs/rest";
+import {Routes} from "discord-api-types/v10";
+
 export class discordHandler {
     private discordID: string;
     private token: string;
     public commands: Map<string, Command>;
+    public rest: REST;
 
     constructor(){
         this.discordID = process.env.discordId as string;
         this.token = process.env.discordToken as string;
+        this.rest = new REST({version: "10"}).setToken(this.token);
         this.loadCommands();
     }
 
@@ -19,26 +23,24 @@ export class discordHandler {
     }
 
     getMember(guildID,userID){
-        return new Promise(res => {
-            axios.get(`https://discord.com/api/v10/guilds/${guildID}/members/${userID}`,{
-                headers: {
-                    "Authorization": `Bot ${this.token}`
-                }
-            }).then(d => {
-                res(d.data);
-            }).catch(e => console.log(e));
+        return new Promise(async (res,rej)=>{
+            try {
+                const member = await this.rest.get(Routes.guildMember(guildID,userID));
+                res(member);
+            } catch(e){
+                rej(e);
+            }
         });
     }
 
     setMember(guildID,userID,data){
-        return new Promise(res => {
-            axios.patch(`https://discord.com/api/v10/guilds/${guildID}/members/${userID}`, data, {
-                headers: {
-                    "Authorization": `Bot ${this.token}`
-                }
-            }).then(() => {
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.rest.patch(Routes.guildMember(guildID,userID),{body: data});
                 res("");
-            }).catch(e => console.log(e));
+            } catch(e){
+                rej(e);
+            }
         });
     }
 }
@@ -59,7 +61,6 @@ export class Interaction {
     public data: RawCommandInteractionData | RawButtonInteractionData;
     public message: RawMessage | null;
     private discordID = process.env.discordId as string;
-    private discordToken = process.env.discordToken as string;
     public client: discordHandler;
 
 
@@ -82,77 +83,65 @@ export class Interaction {
     }
 
     reply(data){
-        return new Promise((res)=>{
-            axios.post(`https://discord.com/api/v10/interactions/${this.id}/${this.token}/callback`,{
-                type: 4,
-                data
-            }).then(()=>{
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.interactionCallback(this.id,this.token),{body: {type: 4, data}});
                 res("");
-            }).catch(() => {
-                console.log("reply Responding to an interaction failed.");
-                res("");
-            });
+            } catch(e){
+                rej(e);
+            }
         });
     }
 
     newMessage(data){
-        return new Promise(res => {
-            axios.post(`https://discord.com/api/v10/channels/${this.channelId}/messages`, data,{
-                headers: {
-                    "Authorization": `Bot ${this.discordToken}`
-                }
-            }).then(()=>{
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.channelMessages(this.channelId!),{body: {data}});
                 res("");
-            }).catch(()=>{
-                console.log("newMessage creation failed.");
-                res("");
-            });
+            } catch(e){
+                rej(e);
+            }
         });
     }
 
     editReply(data){
-        axios.patch(`https://discord.com/api/v10/webhooks/${this.discordID}/${this.token}/messages/@original`,data).catch(() => {
-            console.log("editreply Responding to an interaction failed.");
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.patch(Routes.webhookMessage(this.discordID,this.token,"@original"),{body: {data}});
+            } catch(e){
+                rej(e);
+            }
         });
     }
 
     defer(data = {}){
-        return new Promise((res)=>{
-            axios.post(`https://discord.com/api/v10/interactions/${this.id}/${this.token}/callback`,{
-                type: 5,
-                data
-            }).then(()=>{
-                res("");
-            }).catch(() => {
-                console.log("defer Responding to an interaction failed.");
-                res("");
-            });
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.interactionCallback(this.id,this.token),{body: {type: 5, data}});
+            } catch(e){
+                rej(e);
+            }
         });
     }
 
     update(data){
-        return new Promise((res)=>{
-            axios.post(`https://discord.com/api/v10/interactions/${this.id}/${this.token}/callback`,{
-                type: 7,
-                data
-            }).then(()=>{
-                res("");
-            }).catch(() => {
-                console.log("update Responding to an interaction failed.");
-                res("");
-            });
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.interactionCallback(this.id,this.token), {body: {type: 7, data}});
+            } catch(e){
+                rej(e);
+            }
         });
     }
 
     delete(){
-        return new Promise(res=>{
-            axios.post(`https://discord.com/api/v10/interactions/${this.id}/${this.token}/callback`, {
-                type: 6
-            }).then(()=>{
-                axios.delete(`https://discord.com/api/v10/webhooks/${this.discordID}/${this.token}/messages/@original`).then(() => {
-                    res("");
-                }).catch(() => console.log("delete Deleting an interaction failed."));
-            }).catch(() => console.log("delete Responding to an interaction failed."));
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.interactionCallback(this.id,this.token), {body: {type: 6}});
+                await this.client.rest.delete(Routes.webhookMessage(this.discordID,this.token,"@original"));
+            } catch(e){
+                rej(e);
+            }
         });
     }
 }
