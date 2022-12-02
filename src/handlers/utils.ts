@@ -92,15 +92,34 @@ export function fetchPendingClanRequests(dcclient, d2client) {
     d2client.refreshToken("190157848246878208").then(d => {
         d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
             const resp = d.Response as PendingClanmembersQuery;
+            const emojis = {1: "<:Xbox:1045358581316321280>", 2: "<:PlayStation:1045354080794595339>", 3: "<:Steam:1045354053087006800>"};
             d2client.handledRequests.set("IDs", []);
             const handled = d2client.handledRequests ?? {IDs: []};
             let IDs = handled.get("IDs");
             resp.results.forEach(req => {
                 if (!IDs.includes(req.destinyUserInfo.membershipId)) {
-                    console.log("new");
                     IDs.push(req.destinyUserInfo.membershipId);
                     d2client.handledRequests.set("IDs", IDs);
-                    dcclient.sendMessage("1045010061799460864", {content: "Message containing the clan request"});
+                    const embed = { "type": "rich",
+                          "title": `A new clan request`,
+                          "description": "",
+                          "color": 0xae27ff,
+                          "fields": [{
+                              "name": `User`,
+                              "value": `${req.bungieNetUserInfo.supplementalDisplayName}`,
+                              "inline": true
+                            }, {
+                              "name": `Platforms`,
+                              "value": `${req.destinyUserInfo.applicableMembershipTypes.map(y => emojis[y]).join(" ")}`,
+                              "inline": true
+                            }/* {
+                              "name": `Started`,
+                              "value": `Time for starting destiny`,
+                              "inline": true
+                            }*/
+                          ]};
+                    dcclient.sendMessage("1045010061799460864", {
+                        embeds: [embed] });
                 }
             })
         }).catch(e => console.log(e));
