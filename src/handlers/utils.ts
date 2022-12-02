@@ -6,7 +6,6 @@ import { weaponDatabaseObject } from "../props/weaponQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
-import enmap from "enmap";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -111,15 +110,15 @@ export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
                         "fields": [
                             {"name": "User", "value": `${req.bungieNetUserInfo.supplementalDisplayName}`, "inline": true},
                             {"name": "Platforms", "value": `${req.destinyUserInfo.applicableMembershipTypes.map(y => emojis[y]).join(" ")}`, "inline": true},
-                            {"name": "K/D", "value": `${data.stats.kd}`},
-                            {"name": "Raid clears", "value": `${data.raids.Total}`, "inline": true},
-                            {"name": "Dungeon clears", "value": `${data.dungeons.Total}`, "inline": true},
-                            {"name": "Power Level", "value": `${data.stats.light}`},
-                            {"name": "Grandmaster clears", "value": `${data.grandmasters.Total}`, "inline": true}
+                            {"name": "Power Level", "value": `${data.stats?.power ?? "UNKNOWN"}`, "inline": true},
+                            {"name": "Raid", "value": `${data.raids?.Total ?? "UNKNOWN"}`, "inline": true},
+                            {"name": "Dungeon", "value": `${data.dungeons?.Total ?? "UNKNOWN"}`, "inline": true},
+                            {"name": "Grandmaster", "value": `${data.grandmasters?.Total ?? "UNKNOWN"}`, "inline": true},
+                            {"name": "PvP K/D", "value": `${Math.round((data.stats?.kd ?? 0) * 100)/100}`}
                         ]
                     };
 
-                    dcclient.sendMessage("1045010061799460864", {
+                    dcclient.sendMessage("1048344159326572605", {
                         embeds: [embed],
                         components: [
                             {
