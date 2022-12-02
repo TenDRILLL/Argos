@@ -60,6 +60,8 @@ export async function updateStatRoles(dcclient,d2client){
                     const resp = d.Response as BungieGroupQuery;
                     if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
                         tempArr[j] = statRoles.guildMember;
+                    } else {
+                        tempArr[j] = statRoles.justVisiting;
                     }
                 }).catch(e => console.log(4));
                 dcclient.getMember(statRoles.guildID,id).then(async member => {
@@ -77,8 +79,8 @@ export async function updateStatRoles(dcclient,d2client){
                     data["roles"] = [...roles, ...tempArr];
                     if(dbUser.roles !== undefined && dbUser.roles === roles) return;
                     dbUser.roles = roles;
-                    dcclient.setMember(statRoles.guildID,id,data);
                     d2client.DB.set(id,dbUser);
+                    dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
                 });
             });
         });
