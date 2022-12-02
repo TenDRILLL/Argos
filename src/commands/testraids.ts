@@ -21,7 +21,8 @@ export default class TestRaids extends Command {
         await interaction.defer();
         let dbUser = d2client.DB.get(discordID) as DBUser;
         if(dbUser.raids === undefined){
-            dbUser = await d2client.dbUserUpdater.updateStats(discordID);
+            await d2client.dbUserUpdater.updateStats(discordID);
+            dbUser = d2client.DB.get(discordID) as DBUser;
         }
         const raidObject = dbUser.raids;
         const bungoName = await d2client.getBungieName(dbUser.bungieId);
