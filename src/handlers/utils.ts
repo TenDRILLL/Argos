@@ -93,13 +93,11 @@ export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
         d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
             const resp = d.Response as PendingClanmembersQuery;
             const emojis = {1: "<:Xbox:1045358581316321280>", 2: "<:PlayStation:1045354080794595339>", 3: "<:Steam:1045354053087006800>"};
-            d2client.handledRequests.set("IDs", []);
-            const handled = d2client.handledRequests ?? {IDs: []};
-            let IDs = handled.get("IDs");
+            const handled = d2client.DB.get("handledApplications") ?? [];
             resp.results.forEach(async req => {
-                if (!IDs.includes(req.destinyUserInfo.membershipId)) {
-                    IDs.push(req.destinyUserInfo.membershipId);
-                    d2client.handledRequests.set("IDs", IDs);
+                if (!handled.includes(req.destinyUserInfo.membershipId)) {
+                    handled.push(req.destinyUserInfo.membershipId);
+                    d2client.DB.set("handledApplications", handled);
                     const data = JSON.parse(await d2client.dbUserUpdater.updateStats("",
                         {
                             destinyMembershipId: req.destinyUserInfo.membershipId,
