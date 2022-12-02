@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler, Interaction} from "./handlers/discordHandler";
-import {updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
+import {fetchPendingClanRequests, updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
 import {RawInteraction} from "./props/discord";
 
 const d2client = new requestHandler();
@@ -66,5 +66,7 @@ app.listen(port, ()=>{
     setInterval(()=>{
         console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
         updateStatRoles(dcclient,d2client);
+        console.log("Checking clan requests.");
+        fetchPendingClanRequests(dcclient,d2client,"484419124433518602");
     },5*60*1000);
 });
