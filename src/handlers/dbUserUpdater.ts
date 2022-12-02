@@ -11,9 +11,14 @@ export class DBUserUpdater {
         this.d2client = d2client;
     }
 
-    async updateStats(userid: string): Promise<DBUser>{
+    async updateStats(userid: string, partialDBUser?: PartialDBUser): Promise<string>{
         return new Promise(res => {
-            let dbUser = this.d2client.DB.get(userid);
+            let dbUser;
+            if(partialDBUser){
+                dbUser = partialDBUser;
+            } else {
+                dbUser = this.d2client.DB.get(userid);
+            }
             this.d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
                 const resp = d.Response as CharacterQuery;
                 const stats: Stats = {
@@ -119,10 +124,19 @@ export class DBUserUpdater {
                     dbUser.raids = raids;
                     dbUser.dungeons = dungeons;
                     dbUser.grandmasters = gms;
-                    this.d2client.DB.set(userid, dbUser);
-                    res(dbUser);
+                    if(partialDBUser){
+                        res(JSON.stringify(dbUser));
+                    } else {
+                        this.d2client.DB.set(userid, dbUser);
+                    }
+                    res("");
                 }).catch(e => console.log(2));
             }).catch(e => console.log(3));
         });
     }
+}
+
+class PartialDBUser {
+    destinyMembershipId: string;
+    membershipType: number;
 }
