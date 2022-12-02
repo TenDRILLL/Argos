@@ -8,7 +8,7 @@ import {fetchPendingClanRequests} from "./handlers/utils";
 const d2client = new requestHandler();
 const dcclient = new discordHandler();
 
-fetchPendingClanRequests(dcclient,d2client,"");
+fetchPendingClanRequests(dcclient,d2client,"190157848246878208");
 
 function instantiateActivityDatabase() {
     const iterator = activityIdentifiers.keys()
