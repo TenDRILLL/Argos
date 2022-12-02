@@ -28,11 +28,10 @@ export default class TestStats extends Command {
         interaction.editReply({
             embeds: [{
                 "type": "rich",
-                "title": "A new clan request",
+                "title": `${bungoName}'s Stats`,
                 "color": 0xae27ff,
                 "fields": [
-                    {"name": "User", "value": `${bungoName}`, "inline": true},
-                    {"name": "Power Level", "value": `${dbUser.stats?.light ?? "UNKNOWN"}`, "inline": true},
+                    {"name": "Power Level", "value": `${dbUser.stats?.light ?? "UNKNOWN"}`, "inline": false},
                     {"name": "Raid", "value": `${dbUser.raids?.Total ?? "UNKNOWN"}`, "inline": true},
                     {"name": "Dungeon", "value": `${dbUser.dungeons?.Total ?? "UNKNOWN"}`, "inline": true},
                     {"name": "Grandmaster", "value": `${dbUser.grandmasters?.Total ?? "UNKNOWN"}`, "inline": true},
