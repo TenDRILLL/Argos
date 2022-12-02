@@ -5,7 +5,8 @@ import { weaponNameQuery } from "../props/weaponNameQuery";
 import { weaponDatabaseObject } from "../props/weaponQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
-import { BungieGroupQuery } from "../props/bungieGroupQuery";
+import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
+import enmap from "enmap";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -85,6 +86,25 @@ export async function updateStatRoles(dcclient,d2client){
             });
         });
     }
+}
+
+export function fetchPendingClanRequests(dcclient, d2client) {
+    d2client.refreshToken("190157848246878208").then(d => {
+        d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
+            const resp = d.Response as PendingClanmembersQuery;
+            d2client.handledRequests.set("IDs", []);
+            const handled = d2client.handledRequests ?? {IDs: []};
+            let IDs = handled.get("IDs");
+            resp.results.forEach(req => {
+                if (!IDs.includes(req.destinyUserInfo.membershipId)) {
+                    console.log("new");
+                    IDs.push(req.destinyUserInfo.membershipId);
+                    d2client.handledRequests.set("IDs", IDs);
+                    dcclient.sendMessage("1045010061799460864", {content: "Message containing the clan request"});
+                }
+            })
+        }).catch(e => console.log(e));
+    });
 }
 
 function sleep(seconds){

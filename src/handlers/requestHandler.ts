@@ -19,6 +19,7 @@ export class requestHandler {
     public DB;
     public weaponDB;
     public activityIdentifierDB;
+    public handledRequests
 
     constructor(){
         this.apiKey = process.env.apikey as string;
@@ -28,6 +29,7 @@ export class requestHandler {
         this.dbUserUpdater = new DBUserUpdater(this);
         this.weaponDB = new enmap({name: "weapons"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
+        this.handledRequests = new enmap({name: "clanInvites"});
     }
 
     async rawRequest(url): Promise<JSON>{

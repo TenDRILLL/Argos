@@ -7,8 +7,10 @@ import {weaponNameQuery} from "./props/weaponNameQuery";
 import {ManifestActivity, ManifestActivityQuery, ManifestQuery} from "./props/manifest";
 import { activityIdentifiers } from "./enums/activityIdentifiers";
 import { activityIdentifierObject } from "./props/activityIdentifierObject";
+import { PendingClanmembersQuery } from "./props/bungieGroupQuery";
+import { fetchPendingClanRequests } from "./handlers/utils";
 
-const d2client = new requestHandler(process.env.apikey);
+const d2client = new requestHandler();
 const dcclient = new discordHandler();
 
 function instantiateWeaponDatabase() {
@@ -71,5 +73,14 @@ function sleep(seconds){
     });
 }
 
+//d2client.localRegister("50353a5255d8508f9cbecbf25e86f606", "190157848246878208");
+/*d2client.refreshToken("190157848246878208").then(d => {
+    d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
+        const resp = d.Response as PendingClanmembersQuery;
+        console.log(resp.results[0]);
+    }).catch(e => console.log(e));
+});*/
+
+fetchPendingClanRequests(dcclient, d2client);
 //instantiateActivityDatabase();
-instantiateWeaponDatabase();
+//instantiateWeaponDatabase();

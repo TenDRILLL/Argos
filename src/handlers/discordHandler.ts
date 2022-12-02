@@ -43,6 +43,17 @@ export class discordHandler {
             }
         });
     }
+
+    sendMessage(channelID, data) {
+        return new Promise(async (res, rej) => {
+            try {
+                await this.rest.post(Routes.channelMessages(channelID),{body: data});
+                res("");
+            } catch(e) {
+                rej(e);
+            }
+        })
+    }
 }
 
 export class Interaction {
