@@ -127,7 +127,7 @@ export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
                                     {
                                         type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}`
                                     }, {
-                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}`
+                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.bungieNetUserInfo.membershipId}`
                                     }
                                 ]
                             }
