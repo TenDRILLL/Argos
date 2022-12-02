@@ -102,7 +102,7 @@ export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
                     d2client.handledRequests.set("IDs", IDs);
                     const data = JSON.parse(await d2client.dbUserUpdater.updateStats("",
                         {
-                            destinyMembershipId: req.destinyUserInfo.membershipId,
+                            destinyId: req.destinyUserInfo.membershipId,
                             membershipType: req.destinyUserInfo.membershipType
                         }));
 
