@@ -104,29 +104,35 @@ export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
                             membershipType: req.destinyUserInfo.membershipType
                         }));
 
-                    const embed = { "type": "rich",
-                          "title": `A new clan request`,
-                          "description": "",
-                          "color": 0xae27ff,
-                          "fields": [{
-                              "name": `User`,
-                              "value": `${req.bungieNetUserInfo.supplementalDisplayName}`,
-                              "inline": true
-                            }, {
-                              "name": `Platforms`,
-                              "value": `${req.destinyUserInfo.applicableMembershipTypes.map(y => emojis[y]).join(" ")}`,
-                              "inline": true
-                            },{
-                              "name": "Raid clears",
-                              "value": `${data.raids.Total}`,
-                              "inline": true
-                            },{
-                              "name": "Cool shit",
-                              "value": `${data.stats.light} - ${data.stats.kd}`
-                          }
-                          ]};
+                    const embed = {
+                        "type": "rich",
+                        "title": "A new clan request",
+                        "color": 0xae27ff,
+                        "fields": [
+                            {"name": "User", "value": `${req.bungieNetUserInfo.supplementalDisplayName}`, "inline": true},
+                            {"name": "Platforms", "value": `${req.destinyUserInfo.applicableMembershipTypes.map(y => emojis[y]).join(" ")}`, "inline": true},
+                            {"name": "K/D", "value": `${data.stats.kd}`},
+                            {"name": "Raid clears", "value": `${data.raids.Total}`, "inline": true},
+                            {"name": "Dungeon clears", "value": `${data.dungeons.Total}`, "inline": true},
+                            {"name": "Power Level", "value": `${data.stats.light}`},
+                            {"name": "Grandmaster clears", "value": `${data.grandmasters.Total}`, "inline": true}
+                        ]
+                    };
+
                     dcclient.sendMessage("1045010061799460864", {
-                        embeds: [embed] });
+                        embeds: [embed],
+                        components: [
+                            {
+                                type: 1, components: [
+                                    {
+                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}`
+                                    }, {
+                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}`
+                                    }
+                                ]
+                            }
+                        ]
+                    });
                 }
             })
         }).catch(e => console.log(e));
