@@ -9,7 +9,8 @@ export default class ClanRequest extends Command {
     async btnRun(interaction,d2client){
         const requestData = interaction.data.custom_id.split("-");
         const [action, membershipId, membershipType] = [requestData[1], requestData[2], requestData[3] ?? "3"];
-        d2client.refreshToken(d2client.adminuserID).then(dbUser => {
+        d2client.refreshToken(d2client.adminuserID).then(() => {
+            const dbUser = d2client.DB.get(d2client.adminuserID);
             d2client.apiRequest("getBungieProfile",{id: membershipId}).then(d => {
                 const resp = d.Response as BungieProfile;
                 const data = {
@@ -43,7 +44,7 @@ export default class ClanRequest extends Command {
                         d2client.apiRequest(
                             "denyClanMember",
                             {groupId: "3506545"},
-                            {"Authorization": `Bearer ${d.tokens.accessToken}`},
+                            {"Authorization": `Bearer ${dbUser.tokens.accessToken}`},
                             "post",
                             {
                                 memberships: [data],
