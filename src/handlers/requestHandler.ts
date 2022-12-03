@@ -29,7 +29,7 @@ export class requestHandler {
         this.dbUserUpdater = new DBUserUpdater(this);
         this.weaponDB = new enmap({name: "weapons"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
-        this.adminuserID = "484419124433518602";
+        this.adminuserID = process.env.apiadminuserID as string;
     }
 
     async rawRequest(url): Promise<JSON>{

@@ -89,7 +89,7 @@ export async function updateStatRoles(dcclient,d2client){
 }
 
 export function fetchPendingClanRequests(dcclient, d2client) {
-    d2client.refreshToken(d2client.adminUserID).then(d => {
+    d2client.refreshToken(d2client.adminuserID).then(d => {
         d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
             const resp = d.Response as PendingClanmembersQuery;
             const emojis = {1: "<:Xbox:1045358581316321280>", 2: "<:PlayStation:1045354080794595339>", 3: "<:Steam:1045354053087006800>"};
