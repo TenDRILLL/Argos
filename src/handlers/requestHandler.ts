@@ -150,8 +150,8 @@ export class requestHandler {
 
 
     async handleRegistration(interaction){
-        const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}, {name: "EpicGames", id: "1048534129500770365", animated:false}];
-        const style = ["",3,1,2,1];
+        const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}, "", "", {name: "EpicGames", id: "1048534129500770365", animated:false}];
+        const style = ["",3,1,2,"","",1];
         await interaction.defer({flags: 64});
         const code = interaction.data.options[0].value;
         const discordID = interaction.member.user.id;
