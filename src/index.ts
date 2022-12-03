@@ -67,6 +67,6 @@ app.listen(port, ()=>{
         console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
         updateStatRoles(dcclient,d2client);
         console.log("Checking clan requests.");
-        fetchPendingClanRequests(dcclient,d2client,"484419124433518602");
+        fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
 });

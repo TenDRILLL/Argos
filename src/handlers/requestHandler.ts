@@ -19,6 +19,7 @@ export class requestHandler {
     public DB;
     public weaponDB;
     public activityIdentifierDB;
+    public adminuserID: string;
 
     constructor(){
         this.apiKey = process.env.apikey as string;
@@ -28,6 +29,7 @@ export class requestHandler {
         this.dbUserUpdater = new DBUserUpdater(this);
         this.weaponDB = new enmap({name: "weapons"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
+        this.adminuserID = "484419124433518602";
     }
 
     async rawRequest(url): Promise<JSON>{
@@ -36,7 +38,7 @@ export class requestHandler {
         });
     }
 
-    async apiRequest(endpoint, data, headers?): Promise<APIResponse>{
+    async apiRequest(endpoint, data, headers?, method?, requestData?): Promise<APIResponse>{
         return new Promise((res,rej)=>{
             const request = getRequest(endpoint,data);
             if(!request) return rej("Invalid request.");
@@ -49,19 +51,37 @@ export class requestHandler {
                     config.headers[headerName] = headers[headerName];
                 });
             }
-            axios.get(request, config)
-                .then(d => {
-                    const response = d.data as APIResponse;
-                    if(response.ThrottleSeconds > 0){
-                        setTimeout(()=>{
-                            res(this.apiRequest(endpoint,data));
-                        },response.ThrottleSeconds * 1000);
-                    } else {
-                        res(response);
-                    }
-            }).catch(e => {
-                rej(e.code);
-            });
+            if(method){
+                if(method === "post"){
+                    axios.post(request, config, requestData)
+                        .then(d => {
+                            const response = d.data as APIResponse;
+                            if(response.ThrottleSeconds > 0){
+                                setTimeout(()=>{
+                                    res(this.apiRequest(endpoint,data,method,requestData));
+                                },response.ThrottleSeconds * 1000);
+                            } else {
+                                res(response);
+                            }
+                        }).catch(e => {
+                        rej(`${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
+                    });
+                }
+            } else {
+                axios.get(request, config)
+                    .then(d => {
+                        const response = d.data as APIResponse;
+                        if(response.ThrottleSeconds > 0){
+                            setTimeout(()=>{
+                                res(this.apiRequest(endpoint,data));
+                            },response.ThrottleSeconds * 1000);
+                        } else {
+                            res(response);
+                        }
+                    }).catch(e => {
+                    rej(`${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
+                });
+            }
         });
     }
 
@@ -105,7 +125,7 @@ export class requestHandler {
                 this.DB.set(dbUserID,dbUser);
                 res(dbUser);
             }).catch(e => {
-                rej(e.code);
+                rej(`${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
             });
         });
     }

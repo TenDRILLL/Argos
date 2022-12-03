@@ -24,7 +24,8 @@ export async function updateStatRoles(dcclient,d2client){
         await sleep(i);
         const ids: String[] = memberIds.slice(i, i + 10);
         ids.forEach(id => {
-            d2client.dbUserUpdater.updateStats(id).then(async dbUser => {
+            d2client.dbUserUpdater.updateStats(id).then(async () => {
+                let dbUser = d2client.DB.get(id);
                 let tempRaidObj = {
                     kingsFall: dbUser.raids["King's Fall"] + dbUser.raids["King's Fall, Master"],
                     vow: dbUser.raids["Vow of the Disciple"] + dbUser.raids["Vow of the Disciple, Master"],
@@ -87,8 +88,8 @@ export async function updateStatRoles(dcclient,d2client){
     }
 }
 
-export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
-    d2client.refreshToken(adminUserID).then(d => {
+export function fetchPendingClanRequests(dcclient, d2client) {
+    d2client.refreshToken(d2client.adminUserID).then(d => {
         d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
             const resp = d.Response as PendingClanmembersQuery;
             const emojis = {1: "<:Xbox:1045358581316321280>", 2: "<:PlayStation:1045354080794595339>", 3: "<:Steam:1045354053087006800>"};
@@ -122,9 +123,9 @@ export function fetchPendingClanRequests(dcclient, d2client, adminUserID) {
                             {
                                 type: 1, components: [
                                     {
-                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}`
+                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}-${req.bungieNetUserInfo.membershipType}}`
                                     }, {
-                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.bungieNetUserInfo.membershipId}`
+                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.bungieNetUserInfo.membershipId}-${req.bungieNetUserInfo.membershipType}`
                                     }
                                 ]
                             }
