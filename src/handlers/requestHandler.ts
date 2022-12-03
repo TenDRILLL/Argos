@@ -53,7 +53,7 @@ export class requestHandler {
             }
             if(method){
                 if(method === "post"){
-                    axios.post(request, config, requestData)
+                    axios.post(request, requestData, config)
                         .then(d => {
                             const response = d.data as APIResponse;
                             if(response.ThrottleSeconds > 0){
