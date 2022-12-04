@@ -1,0 +1,66 @@
+export class weaponNameQuery{
+    displayProperties: displayProperties;
+    tooltipNotifications: Object[];
+    collectibleHash: number;
+    iconWatermark: string;
+    iconWatermarkShelved: string;
+    backgroundColor: Object[];
+    screenshot: string;
+    itemTypeDisplayName: string;
+    flavorText: string;
+    uiItemDisplayStyle: string;
+    itemTypeAndTierDisplayName: string;
+    displaySource: string;
+    action: Object[];
+    inventory: Object[];
+    stats: Object[];
+    equippingBlock: {
+        uniqueLabel: string;
+        uniqueLabelHash: number;
+        equipmentSlotTypeHash: number;
+        attributes: number;
+        equippingSoundHash: number;
+        hornSoundHash: number;
+        ammoType: number;
+        displayStrings: string[];
+    };
+    translationBlock: Object[];
+    preview: Object[];
+    quality: Object[];
+    acquireRewardSiteHash: number;
+    acquireUnlockHash: number;
+    sockets: Object[];
+    talentGrid: Object[];
+    investmentStats: Object[];
+    perks: [];
+    loreHash: number;
+    summaryItemHash: number;
+    allowActions: true;
+    doesPostmasterPullHaveSideEffects: boolean;
+    nonTransferrable: boolean;
+    itemCategoryHashes: Object[];
+    specialItemType: number;
+    itemType: number;
+    itemSubType: number;
+    classType: number;
+    breakerType: number;
+    equippable: boolean;
+    damageTypeHashes: Object[];
+    damageTypes: Object[];
+    defaultDamageType: number;
+    defaultDamageTypeHash: number;
+    isWrapper: boolean;
+    traitIds: Object[];
+    traitHashes: Object[];
+    hash: number;
+    index: number;
+    redacted: boolean;
+    blacklisted: boolean;
+}
+
+export class displayProperties {
+    description: string;
+    name: string;
+    icon: string;
+    hasIcon: boolean;
+};

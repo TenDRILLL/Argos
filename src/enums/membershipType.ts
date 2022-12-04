@@ -4,6 +4,7 @@ export const membershipType = Object.freeze({
     3: Symbol("Steam"),
     4: Symbol("Blizzard"),
     5: Symbol("Stadia"),
+    6: Symbol("EpicGames"),
     10: Symbol("TigerDemon"),
     254: Symbol("Bungie.net"),
     "-1": Symbol("All")
