@@ -137,6 +137,6 @@ export class DBUserUpdater {
 }
 
 class PartialDBUser {
-    destinyMembershipId: string;
+    destinyId: string;
     membershipType: number;
 }
