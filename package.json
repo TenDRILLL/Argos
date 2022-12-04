@@ -8,7 +8,7 @@
     "buildrun": "npm run build && npm run run",
     "run": "cd build && node index.js",
     "test": "npm run build && cd build && node test.js",
-    "deploy": "rmdir /Q /S deploy && tsc --build tsconfig-deploy.json && copyfiles -u 1 src/html/* deploy && scp -i key.pub -r ./deploy venerity@venerity.xyz:~/argos"
+    "deploy": "rmdir /Q /S deploy & tsc --build tsconfig-deploy.json && copyfiles -u 1 src/html/* deploy && scp -i key.pub -r ./deploy venerity@venerity.xyz:~/argos"
   },
   "author": "Ten#0010",
   "license": "ISC",
