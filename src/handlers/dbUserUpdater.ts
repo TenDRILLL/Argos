@@ -125,6 +125,8 @@ export class DBUserUpdater {
                     dbUser.dungeons = dungeons;
                     dbUser.grandmasters = gms;
                     if(partialDBUser){
+                        console.log(dbUser);
+                        console.log(JSON.stringify(dbUser));
                         res(JSON.stringify(dbUser));
                     } else {
                         this.d2client.DB.set(userid, dbUser);
@@ -137,6 +139,6 @@ export class DBUserUpdater {
 }
 
 class PartialDBUser {
-    destinyMembershipId: string;
+    destinyId: string;
     membershipType: number;
 }
