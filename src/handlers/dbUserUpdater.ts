@@ -125,8 +125,6 @@ export class DBUserUpdater {
                     dbUser.dungeons = dungeons;
                     dbUser.grandmasters = gms;
                     if(partialDBUser){
-                        console.log(dbUser);
-                        console.log(JSON.stringify(dbUser));
                         res(JSON.stringify(dbUser));
                     } else {
                         this.d2client.DB.set(userid, dbUser);
