@@ -24,7 +24,7 @@ export default class Symbols extends Command {
         const actionRows: SymbolActionRow[] = [];
         while(symbolButtons.length > 0){actionRows.push({type: 1, components: symbolButtons.splice(0,3)})}
         actionRows[actionRows.length-1].components = [...actionRows[actionRows.length-1].components, {custom_id: `symbols-${interaction.member.user.id}-${symbolObject.id}-confirm`, label: "Confirm", style: 1, type: 2, disabled: true}];
-
+        actionRows.push({type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${interaction.member.user.id}`, disabled: false}]});
         interaction.reply({
             embeds: [embed],
             components: actionRows
@@ -56,7 +56,7 @@ export default class Symbols extends Command {
                 selected--;
             }
             components[numTimes].components[num-(numTimes*3)-1] = button;
-            components[components.length-1].components[components[components.length-1].components.length-1].disabled = selected !== symbolObject.required;
+            components[components.length-2].components[components[components.length-2].components.length-1].disabled = selected !== symbolObject.required;
             components.forEach(actionrow => {
                 actionrow.components.forEach(button => {
                     if(button.style === 2){
@@ -92,7 +92,7 @@ export default class Symbols extends Command {
             });
 
             interaction.editReply({
-                components: [],
+                components: [{type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${interaction.member.user.id}`, disabled: false}]}],
                 embeds
             })
         }
