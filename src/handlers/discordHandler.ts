@@ -159,4 +159,15 @@ export class Interaction {
             }
         });
     }
+
+    autocomplete(data){
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.interactionCallback(this.id,this.token),{body: {type: 8, data}});
+                res("");
+            } catch(e){
+                rej(e);
+            }
+        });
+    }
 }
