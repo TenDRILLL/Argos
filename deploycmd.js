@@ -40,6 +40,18 @@ const commands = [
         name: "registrationlink",
         description: "Send registration link."
     }, {
+        name: "symbols",
+        description: "Check the locations of symbols in order to gain a Deepsight weapon at the end of the activity.",
+        options: [
+            {
+                name: "activity",
+                type: 3,
+                description: "Please select the activity from the list below.",
+                required: true,
+                autocomplete: true
+            }
+        ]
+    }, {
         name: "d2stats",
         description: "Get Destiny 2 statistics of yourself or the requested user.",
         options: [
