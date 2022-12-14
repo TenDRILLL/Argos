@@ -52,8 +52,8 @@ function instantiateActivityDatabase() {
         let key = result.value;
         let typeOfActivity;
         if (i <= 16) typeOfActivity = 0;
-        else if (i > 16 && i <= 38) typeOfActivity = 1;
-        else {typeOfActivity = 2}
+        else if (i > 16 && i <= 38) typeOfActivity = 2;
+        else {typeOfActivity = 1}
         const originalKey = key;
         if (MasterTest.test(key) ||PrestigeTest.test(key)) {
             key = key.substring(0, key.toString().lastIndexOf(','));
@@ -135,3 +135,18 @@ function getXurLocations() {
         });
     })
 }
+//instantiateActivityDatabase()
+//updateActivityIdentifierDB(d2client);
+
+//d2client.dbUserUpdater.updateStats("190157848246878208"); // GMs still incorrect
+
+/*
+for (let [key, data] of d2client.activityIdentifierDB) {
+    const IDs = data["IDs"];
+    const type = data["type"];
+    const difficultName = data["difficultName"];
+    const difficultIDs = data["difficultIDs"];
+    console.log(`${key} ${type}`);
+    IDs.forEach(d => console.log(`----> ${d}`)) 
+}
+*/

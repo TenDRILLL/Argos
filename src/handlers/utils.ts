@@ -176,8 +176,8 @@ export function updateActivityIdentifierDB(d2client) {
         const PrestigeTest = new RegExp(/Prestige/g)
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
-                const activity = x as ManifestActivity;
-                const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
+                const activity = x as ManifestActivity;      
+                const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.name) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
                 if (MasterTest.test(activity.displayProperties.name)) { //Check if name contains Master
                     saved.difficultName = "Master";
                     saved.difficultIDs.push(activity.hash);
@@ -187,13 +187,13 @@ export function updateActivityIdentifierDB(d2client) {
                     saved.difficultIDs.push(activity.hash);
                 }
                 if (608898761/*dungeon*/ === activity.activityTypeHash) {
-                    saved.type = 0;
+                    saved.type = 1;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
                 }
                 } else if (2043403989/*raid*/ === activity.activityTypeHash) {
-                    saved.type = 1;
+                    saved.type = 0;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved) }
