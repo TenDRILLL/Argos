@@ -197,11 +197,11 @@ export function updateActivityIdentifierDB(d2client) {
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved) }
-                } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
+                } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster") {
                     saved.type = 2;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.description), saved)
+                        d2client.activityIdentifierDB.set(activity.displayProperties.description, saved)
                     }
                 }
             })
