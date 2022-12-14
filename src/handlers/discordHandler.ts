@@ -148,10 +148,20 @@ export class Interaction {
         });
     }
 
-    delete(){
+    deferUpdate(){
         return new Promise(async (res,rej)=>{
             try {
                 await this.client.rest.post(Routes.interactionCallback(this.id,this.token), {body: {type: 6}});
+                res("");
+            } catch(e){
+                rej(e);
+            }
+        });
+    }
+
+    delete(){
+        return new Promise(async (res,rej)=>{
+            try {
                 await this.client.rest.delete(Routes.webhookMessage(this.discordID,this.token,"@original"));
                 res("");
             } catch(e){
