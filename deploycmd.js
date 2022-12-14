@@ -15,28 +15,6 @@ const commands = [
             }
         ]
     }, {
-        name: "testraids",
-        description: "Test raids",
-        options: [
-            {
-                type: 6,
-                name: "user",
-                description: "The Discord user whose raids you wish to test.",
-                required: false
-            }
-        ]
-    }, {
-        name: "teststats",
-        description: "Test stats",
-        options: [
-            {
-                type: 6,
-                name: "user",
-                description: "The Discord user whose stats you wish to test.",
-                required: false
-            }
-        ]
-    }, {
         name: "registrationlink",
         description: "Send registration link."
     }, {
