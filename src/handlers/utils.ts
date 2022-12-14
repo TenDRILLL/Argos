@@ -19,11 +19,13 @@ export function VerifyDiscordRequest() {
 }
 
 export async function updateStatRoles(dcclient,d2client){
-    const memberIds: String[] = Array.from(d2client.DB.keys());
+    const memberIds: string[] = Array.from(d2client.DB.keys());
     for (let i = 0; i < memberIds.length; i += 10) {
         await sleep(i);
-        const ids: String[] = memberIds.slice(i, i + 10);
+        const ids: string[] = memberIds.slice(i, i + 10);
+        const ignore = ["handledApplications"];
         ids.forEach(id => {
+            if(ignore.includes(id)) return;
             d2client.dbUserUpdater.updateStats(id).then(async () => {
                 let dbUser = d2client.DB.get(id);
                 let tempRaidObj = {
@@ -34,7 +36,7 @@ export async function updateStatRoles(dcclient,d2client){
                     garden: dbUser.raids["Garden of Salvation"],
                     lastWish: dbUser.raids["Last Wish"]
                 };
-                let tempArr: String[] = [];
+                let tempArr: string[] = [];
                 let j;
                 Object.keys(statRoles.raids).forEach((key) => { //kingsFall
                     j = tempArr.length;
