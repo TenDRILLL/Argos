@@ -86,6 +86,6 @@ export default class ClanRequest extends Command {
                 flags: 64
             });
         }
-        interaction.delete();
+        interaction.delete(interaction.message.id);
     }
 }
