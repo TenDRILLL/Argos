@@ -57,7 +57,7 @@ const commands = [
                         required: false
                     }
                 ]
-            }, {
+            }/*, {
                 type: 1,
                 name: "dungeons",
                 description: "Requested user's dungeon completions per dungeon.",
@@ -69,7 +69,7 @@ const commands = [
                         required: false
                     }
                 ]
-            }, {
+            }*//*, {
                 type: 1,
                 name: "grandmasters",
                 description: "Requested user's Grandmaster Nightfall completions per Grandmaster Nightfall.",
@@ -81,7 +81,7 @@ const commands = [
                         required: false
                     }
                 ]
-            }
+            }*/
         ]
     }
 ];
