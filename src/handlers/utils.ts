@@ -165,34 +165,44 @@ export function getWeaponInfo(d2client,weaponID): Promise<entityQuery> {
 
 export function normalizeActivityName(raidName) {
     const parts: string[] = raidName.split(":");
-    const preOrMas = parts[parts.length-1] === " Master" || parts[parts.length-1] === " Prestige";
-    return parts.length === 1 || !(preOrMas) ? parts[0] : parts.join(",");
+    return parts[0];
 }
 
 export function updateActivityIdentifierDB(d2client) {
     d2client.apiRequest("getManifests",{}).then(d => {
         const resp = d.Response as ManifestQuery;
         const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
+        const MasterTest = new RegExp(/Master/g);
+        const PrestigeTest = new RegExp(/Prestige/g)
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
                 const activity = x as ManifestActivity;
+                const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
+                if (MasterTest.test(activity.displayProperties.name)) { //Check if name contains Master
+                    saved.difficultName = "Master";
+                    saved.difficultIDs.push(activity.hash);
+                    }
+                else if (PrestigeTest.test(activity.displayProperties.name)) { //Check if name contains Prestige
+                    saved.difficultName = "Prestige";
+                    saved.difficultIDs.push(activity.hash);
+                }
                 if (608898761/*dungeon*/ === activity.activityTypeHash) {
-                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: [], type: 0};
+                    saved.type = 0;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
                 }
                 } else if (2043403989/*raid*/ === activity.activityTypeHash) {
-                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: [], type: 1};
+                    saved.type = 1;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved) }
                 } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
-                        const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 2};
-                        if (!saved.IDs.includes(activity.hash)) {
-                            saved.IDs.push(activity.hash);
-                            d2client.activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
-                        }
+                    saved.type = 2;
+                    if (!saved.IDs.includes(activity.hash)) {
+                        saved.IDs.push(activity.hash);
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.description), saved)
+                    }
                 }
             })
         });    
