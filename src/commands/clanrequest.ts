@@ -35,7 +35,7 @@ export default class ClanRequest extends Command {
                             this.deleteData(interaction,d2client,destinyMembershipId,d2);
                         }).catch(e => {
                             interaction.reply({
-                                content: e,
+                                content: e.toString() ?? "Unknown error.",
                                 flags: 64
                             });
                         });
@@ -54,7 +54,7 @@ export default class ClanRequest extends Command {
                             this.deleteData(interaction,d2client,destinyMembershipId,d2);
                         }).catch(e => {
                             interaction.reply({
-                                content: e,
+                                content: e.toString() ?? "Unknown error.",
                                 flags: 64
                             });
                         });
