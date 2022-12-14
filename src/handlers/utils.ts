@@ -1,8 +1,7 @@
 import {verifyKey} from "discord-interactions";
 import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
-import { weaponNameQuery } from "../props/weaponNameQuery";
-import { weaponDatabaseObject } from "../props/weaponQuery";
+import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
@@ -150,15 +149,15 @@ function sleep(seconds){
     });
 }
 
-export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabaseObject> {
-    return new Promise<weaponDatabaseObject>(res => {
-        if ((!weaponDB.has(weaponID))) {
-            res(weaponDB.get(weaponID));
+export function getWeaponInfo(d2client,weaponID): Promise<entityQuery> {
+    return new Promise<entityQuery>(res => {
+        if ((d2client.entityDB.has(weaponID))) {
+            res(d2client.entityDB.get(weaponID));            
         } else {
-            d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then(u => {
-                const item = u.Response as weaponNameQuery;
-                weaponDB.set(item.hash.toString(), {Name: item.displayProperties.name, Type: item.itemTypeDisplayName});
-                res({Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject);
+            d2client.apiRequest("getEntity", {hashIdentifier: weaponID}).then(u => {
+                const item = u.Response as entityQuery;
+                d2client.entityDB.set(item.hash.toString(), item);
+                res(item);
             }).catch(e => console.log(e));
         }
     });
@@ -177,18 +176,23 @@ export function updateActivityIdentifierDB(d2client) {
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
                 const activity = x as ManifestActivity;
-                if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(activity.activityTypeHash)) {
-                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
+                if (608898761/*dungeon*/ === activity.activityTypeHash) {
+                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: [], type: 0};
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
                 }
-            }   else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
-                    const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: []};
+                } else if (2043403989/*raid*/ === activity.activityTypeHash) {
+                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: [], type: 1};
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
-                    }
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved) }
+                } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
+                        const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 2};
+                        if (!saved.IDs.includes(activity.hash)) {
+                            saved.IDs.push(activity.hash);
+                            d2client.activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
+                        }
                 }
             })
         });    
