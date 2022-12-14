@@ -15,7 +15,7 @@ export default class ClanRequest extends Command {
                 const resp = d.Response as BungieProfile;
                 const data = {
                     membershipType,
-                    destinyMembershipId,
+                    membershipId: destinyMembershipId,
                     displayName: resp.displayName,
                     bungieGlobalDisplayName: resp.cachedBungieGlobalDisplayName ?? "",
                     bungieGlobalDisplayNameCode: resp.cachedBungieGlobalDisplayNameCode ?? "",
@@ -75,10 +75,17 @@ export default class ClanRequest extends Command {
             apps.splice(apps.indexOf(id),1);
             d2client.DB.set("handledApplications");
         }
-        interaction.reply({
-            content: JSON.stringify(d),
-            flags: 64
-        });
+        if(d.Response["ErrorCode"] === 1){
+            interaction.reply({
+                content: "Accepted.",
+                flags: 64
+            });
+        } else {
+            interaction.reply({
+                content: JSON.stringify(d),
+                flags: 64
+            });
+        }
         interaction.delete();
     }
 }
