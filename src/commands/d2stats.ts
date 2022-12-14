@@ -37,8 +37,7 @@ export default class D2Stats extends Command {
                 //break;
             default:
                 return interaction.editReply({
-                    content: "Not implemented yet.",
-                    flags: 64
+                    content: "Not implemented yet."
                 }).catch(e => console.log(e));
         }
     }
