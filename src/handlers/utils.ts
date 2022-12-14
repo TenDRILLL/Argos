@@ -123,9 +123,9 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                             {
                                 type: 1, components: [
                                     {
-                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
+                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
                                     }, {
-                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
+                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
                                     }
                                 ]
                             }
