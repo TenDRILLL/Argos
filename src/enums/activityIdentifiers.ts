@@ -1,4 +1,4 @@
-export const activityIdentifiers = new Map<String, number[]>([
+export const activityIdentifiers = new Map<string, number[]>([
     ["Crown of Sorrow",[960175301,3333172150]],
     ["Deep Stone Crypt",[910380154,3976949817]],
     ["Garden of Salvation",[2497200493,2659723068,3458480158,3845997235]],
@@ -52,7 +52,7 @@ export const activityIdentifiers = new Map<String, number[]>([
     ["The Whisper", [74501540, 1099555105]]
 ]);
 
-export const directActivityModeType = new Map<String, number>([
+export const directActivityModeType = new Map<string, number>([
     ["None", 0],
     ["Story", 2],
     ["Strike", 3],
