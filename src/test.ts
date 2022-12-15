@@ -7,38 +7,18 @@ import {fetchPendingClanRequests, getWeaponInfo, updateActivityIdentifierDB} fro
 import { CharacterQuery } from "./props/characterQuery";
 import { entityQuery } from "./props/entityQuery";
 import { vendorQuery, vendorSaleComponent } from "./props/vendorQuery";
+import {BungieProfile} from "./props/bungieProfile";
 import enmap from "enmap";
 
 const d2client = new requestHandler();
 const dcclient = new discordHandler();
 
-//fetchPendingClanRequests(dcclient,d2client);
-//d2client.localRegister("6fa39615f2bd4a87109269ba207a086d", "190157848246878208");
-/*d2client.refreshToken("190157848246878208").then(q => {
-    d2client.apiRequest("getDestinyCharacters", {
-        membershipType: 3,
-        destinyMembershipId: "4611686018468779813"}).then(t => {
-            const resp = t.Response as CharacterQuery;
-            d2client.apiRequest("getVendor", {
-                membershipType: 3,
-                destinyMembershipId: "4611686018468779813",
-                characterId: resp.characters[0].characterId.toString(),
-                vendorHash: "2190858386"},
-                {"Authorization": `Bearer ${q.tokens.accessToken}`}
-            ).then(d => {
-                console.log(d.Response["sales"]["data"]);
-        }).catch(e => console.log(e));
-    })
+/*d2client.refreshToken("484419124433518602").then(()=>{
+
 });*/
 
-// ["3875551374", "1541131350", "3856705927", "3654674561", "3562696927", "2255796155", "1030017949", "1622998472", "2050789284",
-// "3184681056", "541188001", "1097616550", "893527433", "614426548", "2701297915", "4224643669", "3346592680", "2234841490", "1151338093"].forEach(e => {
-//     getWeaponInfo(d2client, e).then(q => {
-//         if (q.inventory.tierTypeName == 'Exotic' && q.displayProperties.name != "Exotic Engram") {
-//             console.log(q.displayProperties.name);
-//         }
-//     })
-// });
+
+//fetchPendingClanRequests(dcclient,d2client);
 
 function instantiateActivityDatabase() {
     const iterator = activityIdentifiers.keys()
@@ -111,7 +91,7 @@ function generateEmbed(components: vendorSaleComponent[], d2client) {
 //             }).catch(e => {
 //                 console.log(`Xur isn't anywhere / something went wrong ${e}`)
 //                 console.log(`Xur doesn't seem to be on any planet.`);
-            
+
 //             });
 //     }).catch(f => console.log(f))
 // }).catch(e => console.log(e)
@@ -135,8 +115,8 @@ function getXurLocations() {
         });
     })
 }
-//instantiateActivityDatabase()
-//updateActivityIdentifierDB(d2client);
+instantiateActivityDatabase()
+updateActivityIdentifierDB(d2client);
 
 //d2client.dbUserUpdater.updateStats("190157848246878208"); // GMs still incorrect
 
@@ -147,6 +127,6 @@ for (let [key, data] of d2client.activityIdentifierDB) {
     const difficultName = data["difficultName"];
     const difficultIDs = data["difficultIDs"];
     console.log(`${key} ${type}`);
-    IDs.forEach(d => console.log(`----> ${d}`)) 
+    IDs.forEach(d => console.log(`----> ${d}`))
 }
 */
