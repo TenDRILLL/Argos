@@ -88,6 +88,13 @@ const commands = [
 
 const rest = new REST({ version: '10' }).setToken(process.env.discordToken);
 
+/*rest.put(`/applications/${process.env.discordId}/role-connections/metadata`, {body: [{
+        type: 7,
+        key: "registered",
+        name: "Connected to Argos",
+        description: "The user has registered to Argos, the Planetary Core."
+}]}).then(x=>console.log(x)).catch(e=>console.log(e));*/
+
 rest.put(Routes.applicationCommands(process.env.discordId), { body: commands })
     .then(() => console.log('Successfully registered application commands.'))
     .catch(console.error);

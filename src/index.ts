@@ -61,6 +61,16 @@ app.post("/api/interactions", async (req,res)=>{
     res.status(200);
 });
 
+app.post("/api/linkedroles",(req,res)=>{ //Will be used to check how discord sends the data and appearantly will be the thing we update the roles with?!
+    console.log(req.body);
+    res.status(200);
+});
+
+app.get("/api/oauth",(req,res)=>{ //Not used for anything rn, but Discord wanted it so we can invite the bot with rolespermissionwrite.
+    console.log(req.body);
+    res.send("200");
+});
+
 app.listen(port, ()=>{
     console.log(`BungoAPIShits http://localhost:${port}/`);
     setInterval(()=>{
