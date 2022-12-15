@@ -1,4 +1,4 @@
-import {DBUser, Stats, RaidObject, DungeonsObject, GrandmastersObject} from "../props/dbUser";
+import {DBUser, Stats} from "../props/dbUser";
 import {CharacterQuery} from "../props/characterQuery";
 import {ActivityQuery} from "../props/activity";
 import {activityIdentifiers} from "../enums/activityIdentifiers";
@@ -72,6 +72,7 @@ export class DBUserUpdater {
                         });
                     });
                     dbUser.stats = stats;
+                    
                     dbUser.raids = TotalClears[0];
                     dbUser.dungeons = TotalClears[1];
                     dbUser.grandmasters = TotalClears[2];

@@ -27,14 +27,10 @@ export async function updateStatRoles(dcclient,d2client){
             if(ignore.includes(id)) return;
             d2client.dbUserUpdater.updateStats(id).then(async () => {
                 let dbUser = d2client.DB.get(id);
-                let tempRaidObj = {
-                    kingsFall: dbUser.raids["King's Fall"],
-                    vow: dbUser.raids["Vow of the Disciple"],
-                    vault: dbUser.raids["Vault of Glass"],
-                    crypt: dbUser.raids["Deep Stone Crypt"],
-                    garden: dbUser.raids["Garden of Salvation"],
-                    lastWish: dbUser.raids["Last Wish"]
-                };
+                let tempRaidObj = {};
+                statRoles.raidNames.forEach(e => {
+                    tempRaidObj[e.toString()] = dbUser.raid[e.toString()]
+                })
                 let tempArr: string[] = [];
                 let j;
                 Object.keys(statRoles.raids).forEach((key) => { //kingsFall

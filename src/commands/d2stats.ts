@@ -17,7 +17,7 @@ export default class D2Stats extends Command {
         if(!d2client.DB.has(discordID)) return interaction.reply({content: "The requested user has not registered with me.", flags: 64});
         await interaction.defer();
         let dbUser = d2client.DB.get(discordID) as DBUser;
-        if(dbUser.stats === undefined){
+        if(dbUser.stats === undefined || dbUser.raids == undefined || dbUser.dungeons == undefined || dbUser.grandmasters == undefined){
             await d2client.dbUserUpdater.updateStats(discordID);
             dbUser = d2client.DB.get(discordID) as DBUser;
         }
