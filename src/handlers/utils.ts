@@ -5,6 +5,7 @@ import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
+import { DBUser } from "../props/dbUser";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -26,10 +27,10 @@ export async function updateStatRoles(dcclient,d2client){
         ids.forEach(id => {
             if(ignore.includes(id)) return;
             d2client.dbUserUpdater.updateStats(id).then(async () => {
-                let dbUser = d2client.DB.get(id);
+                let dbUser = d2client.DB.get(id) as DBUser;
                 let tempRaidObj = {};
                 statRoles.raidNames.forEach(e => {
-                    tempRaidObj[e.toString()] = dbUser.raid[e.toString()]
+                    tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
                 })
                 let tempArr: string[] = [];
                 let j;
@@ -49,7 +50,7 @@ export async function updateStatRoles(dcclient,d2client){
                 });
                 j = tempArr.length;
                 Object.keys(statRoles.lightLevel).forEach(key => {
-                    if(dbUser.stats.light >= key){
+                    if(dbUser.stats.light >= parseInt(key)){
                         tempArr[j] = statRoles.lightLevel[key];
                     }
                 });

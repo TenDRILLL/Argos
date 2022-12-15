@@ -124,7 +124,7 @@ export default class D2Stats extends Command {
             }
             const displayName = activity.split(",").map(a => a.trim())[0] == "Leviathan" && activity.split(",").length != 1 ? activity.split(",").map(a => a.trim())[1] : activity;
             if (activityIdentifiers.get(activity)["difficultName"] != "") {
-                const difficultNumber = activityObject[ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)]];
+                const difficultNumber = activityObject[ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)]] ?? 0;
                 delete ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)];
                 if (j % 2 == 0) {
                     firstRow["value"] += `**${displayName}**
