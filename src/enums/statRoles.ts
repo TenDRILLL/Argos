@@ -1,7 +1,14 @@
 export class statRoles {
     static guildID = "912643327189475378";
     static registeredID = "912653151839088670";
-
+    static raidNames = {
+        kingsFall: "King's Fall",
+        vow: "Vow of the Disciple",
+        vault: "Vault of Glass",
+        crypt: "Deep Stone Crypt",
+        garden: "Garden of Salvation",
+        lastWish: "Last Wish"
+    }
     static raids = {
         kingsFall: {
             1: "1019286935455412235",

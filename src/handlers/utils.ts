@@ -28,9 +28,9 @@ export async function updateStatRoles(dcclient,d2client){
             d2client.dbUserUpdater.updateStats(id).then(async () => {
                 let dbUser = d2client.DB.get(id);
                 let tempRaidObj = {
-                    kingsFall: dbUser.raids["King's Fall"] + dbUser.raids["King's Fall, Master"],
-                    vow: dbUser.raids["Vow of the Disciple"] + dbUser.raids["Vow of the Disciple, Master"],
-                    vault: dbUser.raids["Vault of Glass"] + dbUser.raids["Vault of Glass, Master"],
+                    kingsFall: dbUser.raids["King's Fall"],
+                    vow: dbUser.raids["Vow of the Disciple"],
+                    vault: dbUser.raids["Vault of Glass"],
                     crypt: dbUser.raids["Deep Stone Crypt"],
                     garden: dbUser.raids["Garden of Salvation"],
                     lastWish: dbUser.raids["Last Wish"]
@@ -190,18 +190,38 @@ export function updateActivityIdentifierDB(d2client) {
                     saved.type = 1;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved);
+                        if (!d2client.entityDB.get("activityOrder").includes(normalizeActivityName(activity.displayProperties.name))) {
+                            const temp = d2client.entityDB.get("activityOrder");
+                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
+                            temp.push(normalizeActivityName(activity.displayProperties.name));
+                            d2client.entityDB.set("activityOrder", temp);
+                        }
                 }
                 } else if (2043403989/*raid*/ === activity.activityTypeHash) {
                     saved.type = 0;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved) }
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved); 
+                        if (!d2client.entityDB.get("activityOrder").includes(normalizeActivityName(activity.displayProperties.name))) {
+                            const temp = d2client.entityDB.get("activityOrder");
+                            temp.push(normalizeActivityName(activity.displayProperties.name));
+                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
+                            d2client.entityDB.set("activityOrder", temp);
+                        }
+                    }
                 } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster") {
+                    const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
                     saved.type = 2;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(activity.displayProperties.description, saved)
+                        d2client.activityIdentifierDB.set(activity.displayProperties.description, saved);
+                        if (!d2client.entityDB.get("activityOrder").includes(activity.originalDisplayProperties.description)) {
+                            const temp = d2client.entityDB.get("activityOrder");
+                            temp.push(activity.originalDisplayProperties.description);
+                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
+                            d2client.entityDB.set("activityOrder", temp);
+                        }
                     }
                 }
             })

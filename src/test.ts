@@ -44,6 +44,8 @@ function instantiateActivityDatabase() {
     const iterator = activityIdentifiers.keys()
     d2client.activityIdentifierDB.deleteAll();
     d2client.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
+    d2client.entityDB.delete("activityOrder");
+    d2client.entityDB.set("activityOrder",[]);
     const MasterTest = new RegExp(/Master/);
     const PrestigeTest = new RegExp(/Prestige/)
     let result = iterator.next();
@@ -71,6 +73,11 @@ function instantiateActivityDatabase() {
         values?.forEach(ID => {
             saved.IDs.push(ID);
         })
+        if (!d2client.entityDB.get("activityOrder").includes(key)) {
+            const temp = d2client.entityDB.get("activityOrder");
+            temp.push(key);
+            d2client.entityDB.set("activityOrder", temp);
+        }
         d2client.activityIdentifierDB.set(key, saved);
         result = iterator.next();
         i += 1
@@ -138,15 +145,69 @@ function getXurLocations() {
 //instantiateActivityDatabase()
 //updateActivityIdentifierDB(d2client);
 
-//d2client.dbUserUpdater.updateStats("190157848246878208"); // GMs still incorrect
+//d2client.dbUserUpdater.updateStats("190157848246878208");
 
-/*
-for (let [key, data] of d2client.activityIdentifierDB) {
-    const IDs = data["IDs"];
-    const type = data["type"];
-    const difficultName = data["difficultName"];
-    const difficultIDs = data["difficultIDs"];
-    console.log(`${key} ${type}`);
-    IDs.forEach(d => console.log(`----> ${d}`)) 
+function generateFields(activityObject) {
+    const order = d2client.entityDB.get("activityOrder");
+    const activityIdentifiers = d2client.activityIdentifierDB;
+    let firstRow = {"name": "\u200B", "value": "", "inline": true};
+    let secondRow = {"name": "\u200B", "value": "", "inline": true};
+    delete activityObject["Total"];
+    let j = 0
+    const ordered = Object.keys(activityObject).sort((b,a) => order.findIndex(e => e == a) - order.findIndex(e => e == b));
+    for (var i = 0; i < ordered.length; i++) {
+        const activity = ordered[i];
+        if (activity == undefined) {
+            continue;
+        }
+        const displayName = activity.split(",").map(a => a.trim())[0] == "Leviathan" && activity.split(",").length != 1 ? activity.split(",").map(a => a.trim())[1] : activity;
+        if (activityIdentifiers.get(activity)["difficultName"] != "") {
+            const difficultNumber = activityObject[ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)]] ?? 0;
+            delete ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)];
+            if (j % 2 == 0) {
+                firstRow["value"] += `**${displayName}**
+${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
+    
+`
+                } else {
+                    secondRow["value"] += `**${displayName}**
+${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
+    
+`
+                }
+        }
+        else {
+            if (j % 2 == 0) {
+            firstRow["value"] += `**${activity}**
+${activityObject[activity]}
+
+`
+            } else {
+                secondRow["value"] += `**${activity}**
+${activityObject[activity]}
+
+`
+            }
+        }
+        delete ordered[0];
+        j += 1;
+    }
+    return [firstRow,secondRow];    
 }
-*/
+
+function generateEmbed2(dbUser, bungoName) {
+    const raidObject = dbUser.grandmasters;
+    const embed = {
+        "title": `Grandmaster completions: ${bungoName}`,
+        "color": 11413503,
+        "description": `**${raidObject["Total"]}** total clears.`,
+        "footer": {
+            "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
+            "text": "Argos, Planetary Core"
+        },
+        "fields": generateFields(raidObject)
+    }
+    dcclient.sendMessage("1045010061799460864", {embeds: [embed]});
+}
+
+generateEmbed2(d2client.DB.get("190157848246878208"), "Ugi");

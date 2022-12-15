@@ -27,14 +27,14 @@ export default class D2Stats extends Command {
                 this.summary(interaction,dbUser,bungoName,authorID);
                 break;
             case "raids":
-                this.raids(interaction,dbUser,bungoName,authorID);
+                this.raids(interaction,dbUser,bungoName,authorID,d2client);
                 break;
             case "dungeons":
-                //this.dungeons(interaction,dbUser,bungoName,authorID);
-                //break;
+                this.dungeons(interaction,dbUser,bungoName,authorID, d2client);
+                break;
             case "grandmasters":
-                //this.grandmasters(interaction,dbUser,bungoName,authorID);
-                //break;
+                this.grandmasters(interaction,dbUser,bungoName,authorID, d2client);
+                break;
             default:
                 return interaction.editReply({
                     content: "Not implemented yet."
@@ -57,7 +57,7 @@ export default class D2Stats extends Command {
         this.sendEmbed(interaction,embed,authorID);
     }
 
-    async raids(interaction,dbUser,bungoName,authorID){
+    async raids(interaction,dbUser,bungoName,authorID, d2client){
         const raidObject = dbUser.raids;
         const embed = {
             "title": `Raid completions: ${bungoName}`,
@@ -67,50 +67,38 @@ export default class D2Stats extends Command {
                 "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
                 "text": "Argos, Planetary Core"
             },
-            "fields": [
-                {
-                    "name": "\u200B",
-                    "value":
-                        `**King's Fall**
-${raidObject["King's Fall"] + raidObject["King's Fall, Master"]} - M: ${raidObject["King's Fall, Master"]}
+            "fields": this.generateFields(d2client, raidObject)
+        }
+        this.sendEmbed(interaction,embed,authorID);
+    }
 
-**Vault of Glass**
-${raidObject["Vault of Glass"] + raidObject["Vault of Glass, Master"]} - M: ${raidObject["Vault of Glass, Master"]}
+    async dungeons(interaction,dbUser,bungoName,authorID, d2client){
+        const dungeonObject = dbUser.dungeons;
+        const embed = {
+            "title": `Dungeon completions: ${bungoName}`,
+            "color": 11413503,
+            "description": `**${dungeonObject["Total"]}** total clears.`,
+            "footer": {
+                "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
+                "text": "Argos, Planetary Core"
+            },
+            "fields": this.generateFields(d2client, dungeonObject)
+        }
+        this.sendEmbed(interaction,embed,authorID);
+    }
 
-**Garden of Salvation**
-${raidObject["Garden of Salvation"]}
-
-**Crown of Sorrow**
-${raidObject["Crown of Sorrow"]}
-
-**Spire of Stars**
-${raidObject["Leviathan, Spire of Stars"] + raidObject["Leviathan, Spire of Stars, Prestige"]} - P: ${raidObject["Leviathan, Spire of Stars, Prestige"]}
-
-**Leviathan**
-${raidObject["Leviathan"] + raidObject["Leviathan, Prestige"]} - P: ${raidObject["Leviathan, Prestige"]}`,
-                    "inline":true
-                },
-                {
-                    "name": "\u200B",
-                    "value":
-                        `**Vow of the Disciple**
-${raidObject["Vow of the Disciple"] + raidObject["Vow of the Disciple, Master"]} - M: ${raidObject["Vow of the Disciple, Master"]}
-
-**Deep Stone Crypt**
-${raidObject["Deep Stone Crypt"]}
-
-**Last Wish**
-${raidObject["Last Wish"]}
-
-**Scourge of the Past**
-${raidObject["Scourge of the Past"]}
-
-**Eater of Worlds**
-${raidObject["Leviathan, Eater of Worlds"] + raidObject["Leviathan, Eater of Worlds, Prestige"]} - P: ${raidObject["Leviathan, Eater of Worlds, Prestige"]}`,
-                    "inline":true
-                }
-            ]
-        };
+    async grandmasters(interaction,dbUser,bungoName,authorID, d2client){
+        const GMObject = dbUser.grandmasters;
+        const embed = {
+            "title": `Grandmaster completions: ${bungoName}`,
+            "color": 11413503,
+            "description": `**${GMObject["Total"]}** total clears.`,
+            "footer": {
+                "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
+                "text": "Argos, Planetary Core"
+            },
+            "fields": this.generateFields(d2client, GMObject)
+        }
         this.sendEmbed(interaction,embed,authorID);
     }
 
@@ -119,5 +107,53 @@ ${raidObject["Leviathan, Eater of Worlds"] + raidObject["Leviathan, Eater of Wor
             embeds: [embed],
             components: [{type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${authorID}`}]}]
         }).catch(e => console.log(e));
+    }
+
+    generateFields(d2client,activityObject) {
+        const order = d2client.entityDB.get("activityOrder");
+        const activityIdentifiers = d2client.activityIdentifierDB;
+        let firstRow = {"name": "\u200B", "value": "", "inline": true};
+        let secondRow = {"name": "\u200B", "value": "", "inline": true};
+        delete activityObject["Total"];
+        let j = 0
+        const ordered = Object.keys(activityObject).sort((b,a) => order.findIndex(e => e == a) - order.findIndex(e => e == b));
+        for (var i = 0; i < ordered.length; i++) {
+            const activity = ordered[i];
+            if (activity == undefined) {
+                continue;
+            }
+            const displayName = activity.split(",").map(a => a.trim())[0] == "Leviathan" && activity.split(",").length != 1 ? activity.split(",").map(a => a.trim())[1] : activity;
+            if (activityIdentifiers.get(activity)["difficultName"] != "") {
+                const difficultNumber = activityObject[ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)]];
+                delete ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)];
+                if (j % 2 == 0) {
+                    firstRow["value"] += `**${displayName}**
+    ${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
+        
+    `
+                } else {
+                    secondRow["value"] += `**${displayName}**
+    ${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
+        
+    `
+                    }
+            }
+            else {
+                if (j % 2 == 0) {
+                firstRow["value"] += `**${activity}**
+    ${activityObject[activity]}
+    
+    `
+                } else {
+                    secondRow["value"] += `**${activity}**
+    ${activityObject[activity]}
+    
+    `
+                }
+            }
+            delete ordered[0];
+            j += 1;
+        }
+        return [firstRow,secondRow];    
     }
 }

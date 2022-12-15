@@ -53,7 +53,7 @@ export class DBUserUpdater {
                                         }
                                     }
                                 }
-                            });
+                            });                            
                             res(activityIds);
                         }).catch(e => console.log(1));
                     }));
@@ -75,7 +75,6 @@ export class DBUserUpdater {
                     dbUser.raids = TotalClears[0];
                     dbUser.dungeons = TotalClears[1];
                     dbUser.grandmasters = TotalClears[2];
-                    console.log(dbUser.raids);
                     if(partialDBUser){
                         res(JSON.stringify(dbUser));
                     } else {
