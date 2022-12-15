@@ -36,9 +36,7 @@ export class DBUserUpdater {
                                     const IDs = data["IDs"];
                                     const type = data["type"]; // 0 raids, 1 GMS, 2 dungeons
                                     const difficultName = data["difficultName"];
-                                    const difficultIDs = data["difficultIDs"];
-                                    //console.log(`${key} ${type}`);
-                                    
+                                    const difficultIDs = data["difficultIDs"];                                    
                                     if(IDs.includes(a.activityHash)){
                                         if (activityIds[type][key]) {
                                             activityIds[type][key] += a.values.activityCompletions.basic.value;
@@ -74,10 +72,10 @@ export class DBUserUpdater {
                         });
                     });
                     dbUser.stats = stats;
-                    console.log(TotalClears);
-                 //   dbUser.raids = raids;
-                   // dbUser.dungeons = dungeons;
-                   // dbUser.grandmasters = gms;
+                    dbUser.raids = TotalClears[0];
+                    dbUser.dungeons = TotalClears[1];
+                    dbUser.grandmasters = TotalClears[2];
+                    console.log(dbUser.raids);
                     if(partialDBUser){
                         res(JSON.stringify(dbUser));
                     } else {
