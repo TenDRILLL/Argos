@@ -31,18 +31,15 @@ export class DBUserUpdater {
                         this.d2client.apiRequest("getActivityStats",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType, characterId: character.characterId}).then(d => {
                             const resp = d.Response as ActivityQuery;
                             let activityIds = {0: {"Total": 0}, 1: {"Total": 0}, 2: {"Total": 0}};
-                            resp.activities.forEach(a => {
-                                for (let [key, data] of this.d2client.activityIdentifierDB) {
-                                    const IDs = data["IDs"];
-                                    const type = data["type"]; // 0 raids, 1 GMS, 2 dungeons
-                                    const difficultName = data["difficultName"];
-                                    const difficultIDs = data["difficultIDs"];                                    
+                            for (let [key, data] of this.d2client.activityIdentifierDB) {
+                                const IDs = data["IDs"];
+                                const type = data["type"]; // 0 raids, 1 GMS, 2 dungeons
+                                const difficultName = data["difficultName"];
+                                const difficultIDs = data["difficultIDs"];
+                                activityIds[type][key] = 0;
+                                resp.activities.forEach(a => {                                    
                                     if(IDs.includes(a.activityHash)){
-                                        if (activityIds[type][key]) {
-                                            activityIds[type][key] += a.values.activityCompletions.basic.value;
-                                        } else {
-                                            activityIds[type][key] = a.values.activityCompletions.basic.value;
-                                        }
+                                        activityIds[type][key] += a.values.activityCompletions.basic.value;
                                         activityIds[type]["Total"] += a.values.activityCompletions.basic.value;
                                     }
                                     if(difficultIDs.includes(a.activityHash)){
@@ -52,13 +49,13 @@ export class DBUserUpdater {
                                             activityIds[type][`${key}, ${difficultName}`] = a.values.activityCompletions.basic.value;
                                         }
                                     }
-                                }
-                            });                            
+                                });
                             res(activityIds);
+                            }
                         }).catch(e => console.log(1));
                     }));
                 });
-                Promise.all(promises).then(data => {
+                Promise.all(promises).then(data => {                    
                     let TotalClears = {0: {"Total": 0}, 1: {"Total": 0}, 2: {"Total": 0}};
                     data.forEach(char => {
                         Object.keys(char).forEach(type => {

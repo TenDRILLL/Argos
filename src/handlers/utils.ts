@@ -170,7 +170,8 @@ export function updateActivityIdentifierDB(d2client) {
         const resp = d.Response as ManifestQuery;
         const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
         const MasterTest = new RegExp(/Master/g);
-        const PrestigeTest = new RegExp(/Prestige/g)
+        const PrestigeTest = new RegExp(/Prestige/g);
+        const HeroicTest = new RegExp(/Heroic/g);
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
                 const activity = x as ManifestActivity;      
@@ -181,6 +182,10 @@ export function updateActivityIdentifierDB(d2client) {
                     }
                 else if (PrestigeTest.test(activity.displayProperties.name)) { //Check if name contains Prestige
                     saved.difficultName = "Prestige";
+                    saved.difficultIDs.push(activity.hash);
+                }
+                else if (HeroicTest.test(activity.displayProperties.name)) { //Check if name contains Prestige
+                    saved.difficultName = "Heroic";
                     saved.difficultIDs.push(activity.hash);
                 }
                 if (608898761/*dungeon*/ === activity.activityTypeHash) {
