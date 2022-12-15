@@ -148,11 +148,32 @@ export class Interaction {
         });
     }
 
-    delete(){
+    deferUpdate(){
         return new Promise(async (res,rej)=>{
             try {
                 await this.client.rest.post(Routes.interactionCallback(this.id,this.token), {body: {type: 6}});
-                await this.client.rest.delete(Routes.webhookMessage(this.discordID,this.token,"@original"));
+                res("");
+            } catch(e){
+                rej(e);
+            }
+        });
+    }
+
+    delete(id?: string){
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.delete(Routes.webhookMessage(this.discordID,this.token,id ?? "@original"));
+                res("");
+            } catch(e){
+                rej(e);
+            }
+        });
+    }
+
+    autocomplete(data){
+        return new Promise(async (res,rej)=>{
+            try {
+                await this.client.rest.post(Routes.interactionCallback(this.id,this.token),{body: {type: 8, data}});
                 res("");
             } catch(e){
                 rej(e);

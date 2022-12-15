@@ -1,11 +1,11 @@
 import {verifyKey} from "discord-interactions";
 import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
-import { weaponNameQuery } from "../props/weaponNameQuery";
-import { weaponDatabaseObject } from "../props/weaponQuery";
+import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
+import { DBUser } from "../props/dbUser";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -19,22 +19,20 @@ export function VerifyDiscordRequest() {
 }
 
 export async function updateStatRoles(dcclient,d2client){
-    const memberIds: String[] = Array.from(d2client.DB.keys());
+    const memberIds: string[] = Array.from(d2client.DB.keys());
     for (let i = 0; i < memberIds.length; i += 10) {
         await sleep(i);
-        const ids: String[] = memberIds.slice(i, i + 10);
+        const ids: string[] = memberIds.slice(i, i + 10);
+        const ignore = ["handledApplications"];
         ids.forEach(id => {
+            if(ignore.includes(id)) return;
             d2client.dbUserUpdater.updateStats(id).then(async () => {
-                let dbUser = d2client.DB.get(id);
-                let tempRaidObj = {
-                    kingsFall: dbUser.raids["King's Fall"] + dbUser.raids["King's Fall, Master"],
-                    vow: dbUser.raids["Vow of the Disciple"] + dbUser.raids["Vow of the Disciple, Master"],
-                    vault: dbUser.raids["Vault of Glass"] + dbUser.raids["Vault of Glass, Master"],
-                    crypt: dbUser.raids["Deep Stone Crypt"],
-                    garden: dbUser.raids["Garden of Salvation"],
-                    lastWish: dbUser.raids["Last Wish"]
-                };
-                let tempArr: String[] = [];
+                let dbUser = d2client.DB.get(id) as DBUser;
+                let tempRaidObj = {};
+                statRoles.raidNames.forEach(e => {
+                    tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
+                })
+                let tempArr: string[] = [];
                 let j;
                 Object.keys(statRoles.raids).forEach((key) => { //kingsFall
                     j = tempArr.length;
@@ -52,7 +50,7 @@ export async function updateStatRoles(dcclient,d2client){
                 });
                 j = tempArr.length;
                 Object.keys(statRoles.lightLevel).forEach(key => {
-                    if(dbUser.stats.light >= key){
+                    if(dbUser.stats.light >= parseInt(key)){
                         tempArr[j] = statRoles.lightLevel[key];
                     }
                 });
@@ -123,9 +121,9 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                             {
                                 type: 1, components: [
                                     {
-                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}}`
+                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
                                     }, {
-                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
+                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
                                     }
                                 ]
                             }
@@ -148,15 +146,15 @@ function sleep(seconds){
     });
 }
 
-export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabaseObject> {
-    return new Promise<weaponDatabaseObject>(res => {
-        if ((!weaponDB.has(weaponID))) {
-            res(weaponDB.get(weaponID));
+export function getWeaponInfo(d2client,weaponID): Promise<entityQuery> {
+    return new Promise<entityQuery>(res => {
+        if ((d2client.entityDB.has(weaponID))) {
+            res(d2client.entityDB.get(weaponID));            
         } else {
-            d2client.apiRequest("getWeaponName", {hashIdentifier: weaponID}).then(u => {
-                const item = u.Response as weaponNameQuery;
-                weaponDB.set(item.hash.toString(), {Name: item.displayProperties.name, Type: item.itemTypeDisplayName});
-                res({Name: item.displayProperties.name, Type: item.itemTypeDisplayName} as weaponDatabaseObject);
+            d2client.apiRequest("getEntity", {hashIdentifier: weaponID}).then(u => {
+                const item = u.Response as entityQuery;
+                d2client.entityDB.set(item.hash.toString(), item);
+                res(item);
             }).catch(e => console.log(e));
         }
     });
@@ -164,28 +162,68 @@ export function getWeaponInfo(weaponDB,d2client,weaponID): Promise<weaponDatabas
 
 export function normalizeActivityName(raidName) {
     const parts: string[] = raidName.split(":");
-    const preOrMas = parts[parts.length-1] === " Master" || parts[parts.length-1] === " Prestige";
-    return parts.length === 1 || !(preOrMas) ? parts[0] : parts.join(",");
+    return parts[0];
 }
 
 export function updateActivityIdentifierDB(d2client) {
     d2client.apiRequest("getManifests",{}).then(d => {
         const resp = d.Response as ManifestQuery;
         const enManifest = resp.jsonWorldComponentContentPaths.en["DestinyActivityDefinition"];
+        const MasterTest = new RegExp(/Master/g);
+        const PrestigeTest = new RegExp(/Prestige/g);
+        const HeroicTest = new RegExp(/Heroic/g);
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
-                const activity = x as ManifestActivity;
-                if ([608898761/*dungeon*/, 2043403989/*raid*/].includes(activity.activityTypeHash)) {
-                    const saved = d2client.activityIdentifierDB.get(normalizeActivityName(activity.displayProperties.name)) as activityIdentifierObject ?? {IDs: []};
-                    if (!saved.IDs.includes(activity.hash)) {
-                        saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved)
+                const activity = x as ManifestActivity;      
+                const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.name) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
+                if (MasterTest.test(activity.displayProperties.name)) { //Check if name contains Master
+                    saved.difficultName = "Master";
+                    saved.difficultIDs.push(activity.hash);
+                    }
+                else if (PrestigeTest.test(activity.displayProperties.name)) { //Check if name contains Prestige
+                    saved.difficultName = "Prestige";
+                    saved.difficultIDs.push(activity.hash);
                 }
-            }   else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name)) {
-                    const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: []};
+                else if (HeroicTest.test(activity.displayProperties.name)) { //Check if name contains Prestige
+                    saved.difficultName = "Heroic";
+                    saved.difficultIDs.push(activity.hash);
+                }
+                if (608898761/*dungeon*/ === activity.activityTypeHash) {
+                    saved.type = 1;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
-                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.originalDisplayProperties.description), saved)
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved);
+                        if (!d2client.entityDB.get("activityOrder").includes(normalizeActivityName(activity.displayProperties.name))) {
+                            const temp = d2client.entityDB.get("activityOrder");
+                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
+                            temp.push(normalizeActivityName(activity.displayProperties.name));
+                            d2client.entityDB.set("activityOrder", temp);
+                        }
+                }
+                } else if (2043403989/*raid*/ === activity.activityTypeHash) {
+                    saved.type = 0;
+                    if (!saved.IDs.includes(activity.hash)) {
+                        saved.IDs.push(activity.hash);
+                        d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved); 
+                        if (!d2client.entityDB.get("activityOrder").includes(normalizeActivityName(activity.displayProperties.name))) {
+                            const temp = d2client.entityDB.get("activityOrder");
+                            temp.push(normalizeActivityName(activity.displayProperties.name));
+                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
+                            d2client.entityDB.set("activityOrder", temp);
+                        }
+                    }
+                } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster") {
+                    const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
+                    saved.type = 2;
+                    if (!saved.IDs.includes(activity.hash)) {
+                        saved.IDs.push(activity.hash);
+                        d2client.activityIdentifierDB.set(activity.displayProperties.description, saved);
+                        if (!d2client.entityDB.get("activityOrder").includes(activity.originalDisplayProperties.description)) {
+                            const temp = d2client.entityDB.get("activityOrder");
+                            temp.push(activity.originalDisplayProperties.description);
+                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
+                            d2client.entityDB.set("activityOrder", temp);
+                        }
                     }
                 }
             })

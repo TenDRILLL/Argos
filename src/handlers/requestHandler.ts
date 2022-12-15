@@ -17,7 +17,7 @@ export class requestHandler {
     private secret: string;
     public dbUserUpdater: DBUserUpdater;
     public DB;
-    public weaponDB;
+    public entityDB;
     public activityIdentifierDB;
     public adminuserID: string;
 
@@ -27,7 +27,7 @@ export class requestHandler {
         this.clientID = "37090";
         this.DB = new enmap({name:"users"});
         this.dbUserUpdater = new DBUserUpdater(this);
-        this.weaponDB = new enmap({name: "weapons"});
+        this.entityDB = new enmap({name: "entities"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
         this.adminuserID = process.env.apiadminuserID as string;
     }

@@ -15,6 +15,8 @@ export default abstract class Command {
             this.cmdRun(interaction, d2client);
         } else if(interaction.type === 3){
             this.btnRun(interaction, d2client);
+        } else if(interaction.type === 4){
+            this.acRun(interaction);
         }
     }
 
@@ -24,5 +26,9 @@ export default abstract class Command {
 
     btnRun(interaction, d2client){
         console.log(`${this.name} btnRun ran, but wasn't overridden.`);
+    }
+
+    acRun(interaction){
+        console.log(`${this.name} acRun ran, but wasn't overridden.`);
     }
 }

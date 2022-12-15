@@ -245,7 +245,6 @@ export class CharacterStatWithPGA {
     }
     pga: {
         value: number;
-        displayValue: String;
-    }
-    ;
+        displayValue: string;
+    };
 }

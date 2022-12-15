@@ -1,4 +1,4 @@
-export class weaponNameQuery{
+export class entityQuery{
     displayProperties: displayProperties;
     tooltipNotifications: Object[];
     collectibleHash: number;
@@ -12,7 +12,7 @@ export class weaponNameQuery{
     itemTypeAndTierDisplayName: string;
     displaySource: string;
     action: Object[];
-    inventory: Object[];
+    inventory: inventory;
     stats: Object[];
     equippingBlock: {
         uniqueLabel: string;
@@ -56,6 +56,21 @@ export class weaponNameQuery{
     index: number;
     redacted: boolean;
     blacklisted: boolean;
+}
+
+export class inventory {
+    maxStackSize: number;
+    bucketTypeHash: number;
+    recoveryBucketTypeHash: number;
+    tierTypeHash: number;
+    isInstanceItem: boolean;
+    nonTransferrableOriginal: boolean;
+    tierTypeName: string;
+    tierType: number;
+    expirationTooltip: string;
+    expiredInActivityMessage: string;
+    expiredInOrbitMessage: string;
+    suppressExpirationWhenObjectivesComplete: boolean;
 }
 
 export class displayProperties {

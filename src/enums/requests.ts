@@ -7,13 +7,15 @@ requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMem
 requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=1100");
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
 requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/UniqueWeapons");
-requests.set("getWeaponName","/Destiny2/Manifest/DestinyInventoryItemDefinition/hashIdentifier/");
+requests.set("getEntity","/Destiny2/Manifest/DestinyInventoryItemDefinition/hashIdentifier/");
 requests.set("getManifests","/Destiny2/Manifest/");
 requests.set("getDestinyEntityDefinition","/Destiny2/Manifest/entityType/hashIdentifier");
 requests.set("getGroupMembers", "/GroupV2/groupId/Members/");
 requests.set("getPendingClanInvites", "/GroupV2/groupId/Members/Pending/");
 requests.set("approveClanMember","/GroupV2/groupId/Members/ApproveList/");
 requests.set("denyClanMember","/GroupV2/groupId/Members/DenyList/");
+requests.set("getVendorSales", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=402");
+requests.set("getVendorInformation", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=402");
 
 export function getRequest(id,data){
     if(requests.has(id)){

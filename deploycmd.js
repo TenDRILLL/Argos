@@ -15,30 +15,20 @@ const commands = [
             }
         ]
     }, {
-        name: "testraids",
-        description: "Test raids",
-        options: [
-            {
-                type: 6,
-                name: "user",
-                description: "The Discord user whose raids you wish to test.",
-                required: false
-            }
-        ]
-    }, {
-        name: "teststats",
-        description: "Test stats",
-        options: [
-            {
-                type: 6,
-                name: "user",
-                description: "The Discord user whose stats you wish to test.",
-                required: false
-            }
-        ]
-    }, {
         name: "registrationlink",
         description: "Send registration link."
+    }, {
+        name: "symbols",
+        description: "Check the locations of symbols in order to gain a Deepsight weapon at the end of the activity.",
+        options: [
+            {
+                name: "activity",
+                type: 3,
+                description: "Please select the activity from the list below.",
+                required: true,
+                autocomplete: true
+            }
+        ]
     }, {
         name: "d2stats",
         description: "Get Destiny 2 statistics of yourself or the requested user.",
@@ -97,6 +87,13 @@ const commands = [
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.discordToken);
+
+/*rest.put(`/applications/${process.env.discordId}/role-connections/metadata`, {body: [{
+        type: 7,
+        key: "registered",
+        name: "Connected to Argos",
+        description: "The user has registered to Argos, the Planetary Core."
+}]}).then(x=>console.log(x)).catch(e=>console.log(e));*/
 
 rest.put(Routes.applicationCommands(process.env.discordId), { body: commands })
     .then(() => console.log('Successfully registered application commands.'))

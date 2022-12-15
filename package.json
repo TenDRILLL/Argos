@@ -8,7 +8,7 @@
     "buildrun": "npm run build && npm run run",
     "run": "cd build && node index.js",
     "test": "npm run build && cd build && node test.js",
-    "deploy": "rmdir /Q /S deploy & tsc --build tsconfig-deploy.json && copyfiles -u 1 src/html/* deploy && scp -i key.pub -r ./deploy venerity@venerity.xyz:~/argos"
+    "deploy": "npm run build && node deploy.js"
   },
   "author": "Ten#0010",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "dotenv": "^16.0.3",
     "enmap": "^5.9.2",
     "express": "^4.18.2",
+    "ssh2-sftp-client": "^9.0.4",
     "typescript": "^4.9.3"
   }
 }
