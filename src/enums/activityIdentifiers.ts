@@ -17,6 +17,14 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["King's Fall",[1374392663]],
     ["King's Fall, Master",[2964135793]],
 
+    ["Broodhold", [3879949581, 89113250, 135872558, 265186825]],
+    ["The Festering Core", [3455414851, 766116576]],
+    ["The Hollowed Lair", [283725097, 1561733170]],
+    ["Savathûn's Song", [2168858559, 3849697860]],
+    ["Tree of Probabilities", [2023667984, 2660931443]],
+    ["Strange Terrain", [3883876601]],
+    ["A Garden World", [1002842615, 2533203708]],
+
     ["The Glassway", [4197461112, 3812135451]],
     ["The Lightblade", [968885838, 1964120205]],
     ["Fallen S.A.B.E.R.", [3293630132, 676886831]],
@@ -32,14 +40,6 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["Birthplace of the Vile", [967120713, 2766844306]],
     ["Lake of Shadows", [3919254032, 1302909043, 3109193568, 207226563]],
     ["The Scarlet Keep", [1495545956, 3449817631]],
-
-    ["Broodhold", [3879949581, 89113250, 135872558, 265186825]],
-    ["The Festering Core", [3455414851, 766116576]],
-    ["The Hollowed Lair", [283725097, 1561733170]],
-    ["Savathûn's Song", [2168858559, 3849697860]],
-    ["Tree of Probabilities", [2023667984, 2660931443]],
-    ["Strange Terrain", [3883876601]],
-    ["A Garden World", [1002842615, 2533203708]],
 
     ["The Whisper", [74501540]],
     ["The Whisper, Heroic", [1099555105]],
