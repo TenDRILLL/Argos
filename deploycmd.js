@@ -18,6 +18,9 @@ const commands = [
         name: "registrationlink",
         description: "Send registration link."
     }, {
+        name: "xur",
+        description: "Check items offered by xur."
+    }, {
         name: "symbols",
         description: "Check the locations of symbols in order to gain a Deepsight weapon at the end of the activity.",
         options: [
