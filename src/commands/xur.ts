@@ -34,8 +34,7 @@ export default class Xur extends Command {
                     }).catch(e => {
                         console.log(`Xur isn't anywhere / something went wrong ${e}`)
                         interaction.editReply({
-                            content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him,
-${e.toString()}`,
+                            content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him`,
                             flags: 64
                         }).catch(e => console.log(e));
                     });
