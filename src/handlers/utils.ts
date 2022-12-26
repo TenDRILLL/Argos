@@ -1,11 +1,16 @@
 import {verifyKey} from "discord-interactions";
 import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
+import axios from "axios";
 import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
 import { DBUser } from "../props/dbUser";
+import {Routes} from "discord-api-types/v10";
+import {BungieProfile} from "../props/bungieProfile";
+import {LinkedProfileResponse} from "../props/linkedProfileResponse";
+import {URLSearchParams} from "url";
 
 export function VerifyDiscordRequest() {
     return function (req, res, buf, encoding) {
@@ -16,6 +21,129 @@ export function VerifyDiscordRequest() {
             res.status(401).send("Bad request signature");
         }
     };
+}
+
+export function newRegistration(dcclient, d2client, dccode, d2code, res){
+    GetDiscordInformation(dcclient,dccode).then(dcdata => {
+        const data = new URLSearchParams();
+        data.append("grant_type","authorization_code");
+        data.append("code", d2code);
+        data.append("client_id",d2client.clientID);
+        data.append("client_secret",d2client.secret);
+        d2client.token(data).then(x => {
+            let id = x.membership_id;
+            if(id){
+                d2client.apiRequest("getBungieProfile",{id}).then(profile => {
+                    const reply = profile.Response as BungieProfile;
+                    let membershipType;
+                    if(reply.steamDisplayName){membershipType = 3} else if(reply.xboxDisplayName){membershipType = 1} else if(reply.psnDisplayName){membershipType = 2} else if(reply.egsDisplayName){membershipType = 6} else {return;}
+                    d2client.apiRequest("getBungieLinkedProfiles",{membershipType, membershipId: id}).then(resp => {
+                        const reply2 = resp.Response as LinkedProfileResponse;
+                        const primary = reply2.profiles.find(x => x.isCrossSavePrimary);
+                        if(primary){
+                            d2client.DB.set(dcdata.user.id,{
+                                bungieId: id,
+                                destinyId: primary.membershipId,
+                                membershipType: primary.membershipType,
+                                tokens: {
+                                    accessToken: x.access_token,
+                                    accessExpiry: Date.now() + (x.expires_in*1000),
+                                    refreshToken: x.refresh_token,
+                                    refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
+                                },
+                                discordTokens: {
+                                    accessToken: dcdata.tokens.access_token,
+                                    accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
+                                    refreshToken: dcdata.tokens.refresh_token,
+                                    scope: dcdata.tokens.scope,
+                                    tokenType: dcdata.tokens.token_type
+                                }
+                            });
+                            res.cookie("conflux",crypt("zavala",dcdata.user.id)).redirect("/panel");
+                            return;
+                        } else {
+                            if(reply2.profiles.length === 1){
+                                d2client.DB.set(dcdata.user.id,{
+                                    bungieId: id,
+                                    destinyId: reply2.profiles[0].membershipId,
+                                    membershipType: reply2.profiles[0].membershipType,
+                                    tokens: {
+                                        accessToken: x.access_token,
+                                        accessExpiry: Date.now() + (x.expires_in*1000),
+                                        refreshToken: x.refresh_token,
+                                        refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
+                                    },
+                                    discordTokens: {
+                                        accessToken: dcdata.tokens.access_token,
+                                        accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
+                                        refreshToken: dcdata.tokens.refresh_token,
+                                        scope: dcdata.tokens.scope,
+                                        tokenType: dcdata.tokens.token_type
+                                    }
+                                });
+                                res.cookie("conflux",crypt("zavala",dcdata.user.id)).redirect("/panel");
+                                dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
+                                    if(!member) return;
+                                    //@ts-ignore
+                                    if(member.roles.includes(statRoles.registeredID)) return;
+                                    //@ts-ignore
+                                    let roles = [...member.roles as string[], statRoles.registeredID];
+                                    //@ts-ignore
+                                    dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
+                                });
+                                return;
+                            }
+                            d2client.DB.set(dcdata.user.id,{
+                                bungieId: id,
+                                tokens: {
+                                    accessToken: x.access_token,
+                                    accessExpiry: Date.now() + (x.expires_in*1000),
+                                    refreshToken: x.refresh_token,
+                                    refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
+                                },
+                                discordTokens: {
+                                    accessToken: dcdata.tokens.access_token,
+                                    accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
+                                    refreshToken: dcdata.tokens.refresh_token,
+                                    scope: dcdata.tokens.scope,
+                                    tokenType: dcdata.tokens.token_type
+                                }
+                            });
+                            let endResult = "<p>Select your primary account:</p>";
+                            let platforms = ["", "XBOX","PlayStation","Steam"];
+                            reply2.profiles.forEach(x => {
+                                const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
+                                endResult += `<br>
+                                            <a href="/register/${acc}">
+                                            ${platforms[x.membershipType]}: ${x.displayName}
+                                            </a>`;
+                            });
+                            res.cookie("conflux",crypt("zavala",dcdata.user.id))
+                                .send(endResult);
+                        }
+                    }).catch(e => console.log(e));
+                }).catch(e => console.log(e));
+            } else {
+                console.log("Registration failed, please generate a new code.");
+            }
+        }).catch(e => res.send(`Error fetching Bungie Tokens: ${e.message}`));
+    }).catch(e => res.send(`Error fetching Discord Data: ${e.message}`));
+}
+
+export function GetDiscordInformation(dcclient,code):Promise<dcdata>{
+    return new Promise((res,rej)=>{
+        const data = new URLSearchParams();
+        data.append("client_id",process.env.discordId as string);
+        data.append("client_secret",process.env.discordSecret as string);
+        data.append("grant_type","authorization_code");
+        data.append("code",code);
+        data.append("redirect_uri","https://api.venerity.xyz/api/oauth");
+        axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}}).then(x => {
+            axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${x.data.token_type} ${x.data.access_token}`}}).then(y => {
+                res({tokens: x.data, user: y.data});
+            }).catch(e => {console.log("Discord user information failed."); rej(e)});
+        }).catch(e => {console.log("Discord token failed."); rej(e)});
+    });
 }
 
 export async function updateStatRoles(dcclient,d2client){
@@ -229,4 +357,56 @@ export function updateActivityIdentifierDB(d2client) {
             })
         });    
     }).catch(e => console.log(e));
+}
+
+const crypt = (salt, text) => {
+    const textToChars = (text) => text.split("").map((c) => c.charCodeAt(0));
+    const byteHex = (n) => ("0" + Number(n).toString(16)).substr(-2);
+    const applySaltToChar = (code) => textToChars(salt).reduce((a, b) => a ^ b, code);
+    if(!salt || !text) return false;
+    return text
+        .split("")
+        .map(textToChars)
+        .map(applySaltToChar)
+        .map(byteHex)
+        .join("");
+};
+
+const decrypt = (salt, encoded) => {
+    if(!salt || !encoded) return false;
+    const textToChars = (text) => text.split("").map((c) => c.charCodeAt(0));
+    const applySaltToChar = (code) => textToChars(salt).reduce((a, b) => a ^ b, code);
+    return encoded
+        .match(/.{1,2}/g)
+        .map((hex) => parseInt(hex, 16))
+        .map(applySaltToChar)
+        .map((charCode) => String.fromCharCode(charCode))
+        .join("");
+};
+
+export {crypt, decrypt};
+
+class dcdata {
+    tokens: {
+        access_token: string;
+        expires_in: number;
+        refresh_token: string;
+        scope: string;
+        token_type: string;
+    };
+    user: {
+        id: string;
+        username: string;
+        avatar: string;
+        avatar_decoration: string;
+        discriminator: string;
+        public_flags: number;
+        flags: number;
+        banner: string;
+        banner_color: string;
+        accent_color: number;
+        locale: string;
+        mfa_enabled: boolean;
+        premium_type: number;
+    };
 }

@@ -1,10 +1,12 @@
 import Express from "express";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler, Interaction} from "./handlers/discordHandler";
-import {fetchPendingClanRequests, updateStatRoles, VerifyDiscordRequest} from "./handlers/utils";
+import {fetchPendingClanRequests, newRegistration, updateStatRoles, VerifyDiscordRequest, decrypt} from "./handlers/utils";
 import {RawInteraction} from "./props/discord";
+import {statRoles} from "./enums/statRoles";
 
 const d2client = new requestHandler();
 const dcclient = new discordHandler();
@@ -14,6 +16,7 @@ const port = 11542;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(Express.json({verify: VerifyDiscordRequest()}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.get("/",(req,res)=>{
     res.sendFile(`${__dirname}/html/crota.html`);
@@ -24,21 +27,8 @@ app.get("/db",(req,res)=>{
 });
 
 app.get("/authorization", (req, res) => {
-    res.send(`
-<style>
-    body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
-    h1 {font-family:Arial, sans-serif; text-align: center;}
-    h2 {font-family:Arial, sans-serif; text-align: center;}
-    div{left: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%);}
-</style>
-<div>
-    <h2 style="color:white">Your unique registration code:</h2>
-    <h1 style="color:white"><b>${req.url.split("=")[1]}</b></h1>
-    <h2 style="color:white">Please return to Discord, and use the
-    <span style="background: #414776; font-family: Uni Sans,serif;">/register</span>
-    command to finalize your registration.</h2>
-</div>
-`);
+    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.send("ERROR: No registration code found.");
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Fapi%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
 });
 
 app.post("/api/interactions", async (req,res)=>{
@@ -67,8 +57,51 @@ app.post("/api/linkedroles",(req,res)=>{ //Will be used to check how discord sen
 });
 
 app.get("/api/oauth",(req,res)=>{ //Not used for anything rn, but Discord wanted it so we can invite the bot with rolespermissionwrite.
-    console.log(req.body);
-    res.send("200");
+    if(req.url.split("?").length < 2){return res.send("You should not be here on your own.");}
+    let urlData: {code: string | undefined, state: string | undefined, error: string | undefined, error_description: string | undefined} = {code: undefined, state: undefined, error: undefined, error_description: undefined};
+    req.url.split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
+    if(urlData.code === undefined || urlData.state === undefined){if(urlData.error && urlData.error_description){return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);} else {return res.send("You should not be here on your own.");}}
+    const discordCode = urlData.code;
+    const bungieCode = urlData.state;
+    newRegistration(dcclient, d2client, discordCode, bungieCode, res);
+});
+
+app.get("/register/:account",(req, res)=>{
+    if(req.params.account === undefined || req.cookies["conflux"] === undefined){
+        return res.send("You should not be here on your own.");
+    }
+    const account = decrypt("malahayati",req.params.account).split("/seraph/");
+    const discordID = decrypt("zavala",req.cookies["conflux"]);
+    if(account.length !== 2) return res.send("You should not be here on your own.");
+    //Account 0 = type
+    //Account 1 = id
+    if(!d2client.DB.has(discordID)) return res.send("You shouldn't be here on your own.");
+    let dbUser = d2client.DB.get(discordID);
+    dbUser["destinyId"] = account[1];
+    dbUser["membershipType"] = account[0];
+    d2client.DB.set(discordID,dbUser);
+    res.redirect("/panel");
+    dcclient.getMember(statRoles.guildID,discordID).then(member => {
+        if(!member) return;
+        //@ts-ignore
+        if(member.roles.includes(statRoles.registeredID)) return;
+        //@ts-ignore
+        let roles = [...member.roles as string[], statRoles.registeredID];
+        //@ts-ignore
+        dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
+    });
+});
+
+app.get("/panel",(req,res)=>{
+    if(req.cookies["conflux"]){
+        res.send(JSON.stringify(d2client.DB.get(decrypt("zavala",req.cookies["conflux"]))));
+    } else {
+        res.send("Soon™️");
+    }
+});
+
+app.get("/logout",(req,res)=>{
+    res.clearCookie("conflux").send("Logged out.");
 });
 
 app.listen(port, ()=>{

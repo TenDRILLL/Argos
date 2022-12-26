@@ -22,7 +22,7 @@ export class discordHandler {
         this.commands = await load();
     }
 
-    getMember(guildID,userID){
+    getMember(guildID,userID):Promise<unknown>{
         return new Promise(async (res,rej)=>{
             try {
                 const member = await this.rest.get(Routes.guildMember(guildID,userID));
