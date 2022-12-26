@@ -59,7 +59,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     tokenType: dcdata.tokens.token_type
                                 }
                             });
-                            res.cookie("conflux",crypt("zavala",dcdata.user.id)).redirect("/panel");
+                            res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
                             dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
                                 if(!member) return;
                                 //@ts-ignore
@@ -91,7 +91,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                         tokenType: dcdata.tokens.token_type
                                     }
                                 });
-                                res.cookie("conflux",crypt("zavala",dcdata.user.id)).redirect("/panel");
+                                res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
                                 dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
                                     if(!member) return;
                                     //@ts-ignore
@@ -129,7 +129,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                             ${platforms[x.membershipType]}: ${x.displayName}
                                             </a>`;
                             });
-                            res.cookie("conflux",crypt("zavala",dcdata.user.id))
+                            res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
                                 .send(endResult);
                         }
                     }).catch(e => console.log(e));
