@@ -110,7 +110,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 }
                             });
                             let endResult = "<p>Select your primary account:</p>";
-                            let platforms = ["", "XBOX","PlayStation","Steam"];
+                            let platforms = ["","Xbox","PlayStation","Steam","","","Epic Games"];
                             reply2.profiles.forEach(x => {
                                 const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
                                 endResult += `<br>
