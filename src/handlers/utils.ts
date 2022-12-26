@@ -60,6 +60,16 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 }
                             });
                             res.cookie("conflux",crypt("zavala",dcdata.user.id)).redirect("/panel");
+                            dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
+                                if(!member) return;
+                                //@ts-ignore
+                                if(member.roles.includes(statRoles.registeredID)) return;
+                                //@ts-ignore
+                                let roles = [...member.roles as string[], statRoles.registeredID];
+                                //@ts-ignore
+                                dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
+                            });
+                            updateStatRolesUser(dcclient,d2client,dcdata.user.id);
                             return;
                         } else {
                             if(reply2.profiles.length === 1){
@@ -91,6 +101,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     //@ts-ignore
                                     dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
                                 });
+                                updateStatRolesUser(dcclient,d2client,dcdata.user.id);
                                 return;
                             }
                             d2client.DB.set(dcdata.user.id,{
@@ -154,64 +165,68 @@ export async function updateStatRoles(dcclient,d2client){
         const ignore = ["handledApplications"];
         ids.forEach(id => {
             if(ignore.includes(id)) return;
-            d2client.dbUserUpdater.updateStats(id).then(async () => {
-                let dbUser = d2client.DB.get(id) as DBUser;
-                let tempRaidObj = {};
-                statRoles.raidNames.forEach(e => {
-                    tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
-                })
-                let tempArr: string[] = [];
-                let j;
-                Object.keys(statRoles.raids).forEach((key) => { //kingsFall
-                    j = tempArr.length;
-                    Object.keys(statRoles.raids[key]).forEach(key2 => { //1
-                        if(tempRaidObj[key] >= key2){
-                            tempArr[j] = statRoles.raids[key][key2];
-                        }
-                    });
-                });
-                j = tempArr.length;
-                Object.keys(statRoles.kd).forEach(key => {
-                    if(dbUser.stats.kd*10 >= parseInt(key)){
-                        tempArr[j] = statRoles.kd[key];
-                    }
-                });
-                j = tempArr.length;
-                Object.keys(statRoles.lightLevel).forEach(key => {
-                    if(dbUser.stats.light >= parseInt(key)){
-                        tempArr[j] = statRoles.lightLevel[key];
-                    }
-                });
-                j = tempArr.length;
-                await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
-                    const resp = d.Response as BungieGroupQuery;
-                    if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
-                        tempArr[j] = statRoles.guildMember;
-                    } else {
-                        tempArr[j] = statRoles.justVisiting;
-                    }
-                }).catch(e => console.log(4));
-                dcclient.getMember(statRoles.guildID,id).then(async member => {
-                    let data = {};
-                    const d2name = await d2client.getBungieTag(dbUser.bungieId);
-                    if(member.nick){
-                        if(!member.nick.endsWith(d2name)){
-                            data["nick"] = d2name;
-                        }
-                    } else {
-                        data["nick"] = d2name;
-                    }
-                    let roles = member.roles;
-                    roles = roles.filter(x => !statRoles.allIDs.includes(x));
-                    data["roles"] = [...roles, ...tempArr];
-                    if(dbUser.roles !== undefined && dbUser.roles === roles) return;
-                    dbUser.roles = roles;
-                    d2client.DB.set(id,dbUser);
-                    dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
-                });
-            });
+            updateStatRolesUser(dcclient,d2client,id);
         });
     }
+}
+
+export function updateStatRolesUser(dcclient,d2client,id){
+    d2client.dbUserUpdater.updateStats(id).then(async () => {
+        let dbUser = d2client.DB.get(id) as DBUser;
+        let tempRaidObj = {};
+        statRoles.raidNames.forEach(e => {
+            tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
+        })
+        let tempArr: string[] = [];
+        let j;
+        Object.keys(statRoles.raids).forEach((key) => { //kingsFall
+            j = tempArr.length;
+            Object.keys(statRoles.raids[key]).forEach(key2 => { //1
+                if(tempRaidObj[key] >= key2){
+                    tempArr[j] = statRoles.raids[key][key2];
+                }
+            });
+        });
+        j = tempArr.length;
+        Object.keys(statRoles.kd).forEach(key => {
+            if(dbUser.stats.kd*10 >= parseInt(key)){
+                tempArr[j] = statRoles.kd[key];
+            }
+        });
+        j = tempArr.length;
+        Object.keys(statRoles.lightLevel).forEach(key => {
+            if(dbUser.stats.light >= parseInt(key)){
+                tempArr[j] = statRoles.lightLevel[key];
+            }
+        });
+        j = tempArr.length;
+        await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
+            const resp = d.Response as BungieGroupQuery;
+            if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
+                tempArr[j] = statRoles.guildMember;
+            } else {
+                tempArr[j] = statRoles.justVisiting;
+            }
+        }).catch(e => console.log(4));
+        dcclient.getMember(statRoles.guildID,id).then(async member => {
+            let data = {};
+            const d2name = await d2client.getBungieTag(dbUser.bungieId);
+            if(member.nick){
+                if(!member.nick.endsWith(d2name)){
+                    data["nick"] = d2name;
+                }
+            } else {
+                data["nick"] = d2name;
+            }
+            let roles = member.roles;
+            roles = roles.filter(x => !statRoles.allIDs.includes(x));
+            data["roles"] = [...roles, ...tempArr];
+            if(dbUser.roles !== undefined && dbUser.roles === roles) return;
+            dbUser.roles = roles;
+            d2client.DB.set(id,dbUser);
+            dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
+        });
+    });
 }
 
 export function fetchPendingClanRequests(dcclient, d2client) {

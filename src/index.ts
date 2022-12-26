@@ -4,7 +4,14 @@ import cookieParser from "cookie-parser";
 
 import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler, Interaction} from "./handlers/discordHandler";
-import {fetchPendingClanRequests, newRegistration, updateStatRoles, VerifyDiscordRequest, decrypt} from "./handlers/utils";
+import {
+    fetchPendingClanRequests,
+    newRegistration,
+    updateStatRoles,
+    VerifyDiscordRequest,
+    decrypt,
+    updateStatRolesUser
+} from "./handlers/utils";
 import {RawInteraction} from "./props/discord";
 import {statRoles} from "./enums/statRoles";
 
@@ -90,6 +97,7 @@ app.get("/register/:account",(req, res)=>{
         //@ts-ignore
         dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
     });
+    updateStatRolesUser(dcclient,d2client,discordID);
 });
 
 app.get("/panel",(req,res)=>{
