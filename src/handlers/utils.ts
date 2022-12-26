@@ -120,15 +120,33 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     tokenType: dcdata.tokens.token_type
                                 }
                             });
-                            let endResult = "<p>Select your primary account:</p>";
+                            const order = [1,3,2,6];
+                            const icons = ["", "https://cdn.discordapp.com/emojis/1045358581316321280.webp?size=96&quality=lossless",
+                                                "https://cdn.discordapp.com/emojis/1057027325809672192.webp?size=96&quality=lossless", 
+                                                "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
+                                            "","",
+                                                "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
+                            let endResult = `<body>
+                            <style>body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+                            h1 {font-family:Arial, sans-serif; color:white; position: relative;text-align: center; margin: 0;}
+                            ul {left: 48%;flex-direction: row;align-items: center;position: absolute;top: 40%;transform: translate(-50%, -50%);}
+                            img {margin-right: 10px; position: relative; clear: right; width: 44px; height: 44px;}
+                            .container {display: flex; flex-direction: column; border: 0;}
+                            h2 {display: inline; position: relative; font-family:Arial;}
+                            a { color: #121212; text-decoration: none; display: flex; align-items: center; padding: 0px 10px 0px 10px; border:1px solid #E2E5DE; border-radius: 15px; background: #E2E5DE;}
+                            div {display: flex; flex-direction: row; width: 100%; min-height: 60px; justify-content: center; padding: 5px;}</style>
+                           <ul><h1>Choose a platform to use</h1><div class="container">`;
                             let platforms = ["","Xbox","PlayStation","Steam","","","Epic Games"];
-                            reply2.profiles.forEach(x => {
+                            reply2.profiles.sort(function (a,b) { return order.indexOf(a.membershipType) - order.indexOf(b.membershipType)})
+                                    .forEach(x => {
                                 const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
-                                endResult += `<br>
-                                            <a href="/register/${acc}">
-                                            ${platforms[x.membershipType]}: ${x.displayName}
-                                            </a>`;
+                                endResult += `<div><a href="/register/${acc}">
+                                            <img src=${icons[x.membershipType]}>
+                                            <h2>${x.displayName}</h2>
+                                            </a></div>`
                             });
+                            endResult += "</div> </ul> </body>"
+                            console.log(endResult);
                             res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
                                 .send(endResult);
                         }
