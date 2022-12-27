@@ -122,7 +122,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                             const icons = ["", "https://cdn.discordapp.com/emojis/1045358581316321280.webp?size=96&quality=lossless",
                                                 "https://cdn.discordapp.com/emojis/1057027325809672192.webp?size=96&quality=lossless", 
                                                 "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
-                                            "","",
+                                                "","",
                                                 "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
                             let endResult = `<body>
                             <style>body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
@@ -144,7 +144,6 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                             </a></div>`
                             });
                             endResult += "</div> </ul> </body>"
-                            console.log(endResult);
                             res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
                                 .send(endResult);
                         }
