@@ -4,6 +4,8 @@ import Command from "../commands/Command";
 import {load} from "../commands/CommandLoader";
 import {REST} from "@discordjs/rest";
 import {Routes} from "discord-api-types/v10";
+import axios from "axios";
+import {DBUser} from "../props/dbUser";
 
 export class discordHandler {
     private discordID: string;
@@ -53,6 +55,30 @@ export class discordHandler {
                 rej(e);
             }
         })
+    }
+
+    refreshToken(d2client,dbUserID): Promise<DBUser> {
+        return new Promise((res, rej) => {
+            let dbUser = d2client.DB.get(dbUserID);
+            if(dbUser === undefined || dbUser.discordTokens === undefined) return rej("No tokens!");
+            const data = new URLSearchParams();
+            data.append("client_id",process.env.discordId as string);
+            data.append("client_secret",process.env.discordSecret as string);
+            data.append("grant_type","refresh_token");
+            data.append("refresh_token",dbUser.discordTokens.refreshToken);
+            axios.post(Routes.oauth2TokenExchange(),data,{headers: {"Content-Type": "application/x-www-form-urlencoded"}}).then(d => {
+                let dcdata = d.data;
+                dbUser.discordTokens = {
+                    accessToken: dcdata.tokens.access_token,
+                    accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
+                    refreshToken: dcdata.tokens.refresh_token,
+                    scope: dcdata.tokens.scope,
+                    tokenType: dcdata.tokens.token_type
+                };
+                d2client.DB.set(dbUserID,dbUser);
+                res(dbUser);
+            }).catch(e => rej(e.message));
+        });
     }
 }
 
