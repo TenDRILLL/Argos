@@ -120,7 +120,6 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     tokenType: dcdata.tokens.token_type
                                 }
                             });
-                            const order = [1,3,2,6];
                             const icons = ["", "https://cdn.discordapp.com/emojis/1045358581316321280.webp?size=96&quality=lossless",
                                                 "https://cdn.discordapp.com/emojis/1057027325809672192.webp?size=96&quality=lossless", 
                                                 "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
@@ -137,7 +136,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                             div {display: flex; flex-direction: row; width: 100%; min-height: 60px; justify-content: center; padding: 5px;}</style>
                            <ul><h1>Choose a platform to use</h1><div class="container">`;
                             let platforms = ["","Xbox","PlayStation","Steam","","","Epic Games"];
-                            reply2.profiles.sort(function (a,b) { return order.indexOf(a.membershipType) - order.indexOf(b.membershipType)})
+                            reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length})
                                     .forEach(x => {
                                 const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
                                 endResult += `<div><a href="/register/${acc}">
