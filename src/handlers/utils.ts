@@ -7,7 +7,6 @@ import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/mani
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
 import { DBUser } from "../props/dbUser";
-import {Routes} from "discord-api-types/v10";
 import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {URLSearchParams} from "url";
@@ -191,6 +190,9 @@ export async function updateStatRoles(dcclient,d2client){
 export function updateStatRolesUser(dcclient,d2client,id){
     d2client.dbUserUpdater.updateStats(id).then(async () => {
         let dbUser = d2client.DB.get(id) as DBUser;
+        if(dbUser.discordTokens){
+            dbUser = await dcclient.refreshToken(id).catch(e => {/*Don't log this as it's normal for now.*/});
+        }
         let tempRaidObj = {};
         statRoles.raidNames.forEach(e => {
             tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
