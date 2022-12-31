@@ -66,18 +66,18 @@ export class discordHandler {
             data.append("client_secret",process.env.discordSecret as string);
             data.append("grant_type","refresh_token");
             data.append("refresh_token",dbUser.discordTokens.refreshToken);
-            axios.post(Routes.oauth2TokenExchange(),data,{headers: {"Content-Type": "application/x-www-form-urlencoded"}}).then(d => {
+            axios.post("https://discord.com/api/oauth2/token",data,{headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(d => {
                 let dcdata = d.data;
                 dbUser.discordTokens = {
-                    accessToken: dcdata.tokens.access_token,
-                    accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
-                    refreshToken: dcdata.tokens.refresh_token,
-                    scope: dcdata.tokens.scope,
-                    tokenType: dcdata.tokens.token_type
+                    accessToken: dcdata.access_token,
+                    accessExpiry: Date.now() + (dcdata.expires_in*1000),
+                    refreshToken: dcdata.refresh_token,
+                    scope: dcdata.scope,
+                    tokenType: dcdata.token_type
                 };
                 d2client.DB.set(dbUserID,dbUser);
                 res(dbUser);
-            }).catch(e => rej(e.message));
+            }).catch(e => {rej(e.message);});
         });
     }
 }

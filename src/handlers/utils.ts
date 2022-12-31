@@ -189,7 +189,11 @@ export function updateStatRolesUser(dcclient,d2client,id){
     d2client.dbUserUpdater.updateStats(id).then(async () => {
         let dbUser = d2client.DB.get(id) as DBUser;
         if(dbUser.discordTokens){
-            dbUser = await dcclient.refreshToken(id).catch(e => {/*Don't log this as it's normal for now.*/});
+            dbUser = await dcclient.refreshToken(d2client, id).catch(e => {/*Don't log this as it's normal for now.*/});
+        }
+        if (dbUser == undefined) {
+            console.log(`${dbUser} - ${id}`);
+            return;
         }
         let tempRaidObj = {};
         statRoles.raidNames.forEach(e => {
@@ -206,13 +210,13 @@ export function updateStatRolesUser(dcclient,d2client,id){
             });
         });
         j = tempArr.length;
-        Object.keys(statRoles.kd).forEach(key => {
+        Object.keys(statRoles.kd).sort().forEach(key => {
             if(dbUser.stats.kd*10 >= parseInt(key)){
                 tempArr[j] = statRoles.kd[key];
             }
         });
         j = tempArr.length;
-        Object.keys(statRoles.lightLevel).forEach(key => {
+        Object.keys(statRoles.lightLevel).sort().forEach(key => {
             if(dbUser.stats.light >= parseInt(key)){
                 tempArr[j] = statRoles.lightLevel[key];
             }
