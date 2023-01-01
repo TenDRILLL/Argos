@@ -210,14 +210,14 @@ export function updateStatRolesUser(dcclient,d2client,id){
             });
         });
         j = tempArr.length;
-        Object.keys(statRoles.kd).sort().forEach(key => {
-            if(dbUser.stats.kd*10 >= parseInt(key)){
+        Object.keys(statRoles.kd).map(d => parseInt(d)).sort((a,b) => a-b ).forEach(key => {
+            if(dbUser.stats.kd*10 >= key){
                 tempArr[j] = statRoles.kd[key];
             }
         });
         j = tempArr.length;
-        Object.keys(statRoles.lightLevel).sort().forEach(key => {
-            if(dbUser.stats.light >= parseInt(key)){
+        Object.keys(statRoles.lightLevel).map(d => parseInt(d)).sort((a,b) => a-b ).forEach(key => {
+            if(dbUser.stats.light >= key){
                 tempArr[j] = statRoles.lightLevel[key];
             }
         });
