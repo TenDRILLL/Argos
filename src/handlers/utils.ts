@@ -231,22 +231,24 @@ export function updateStatRolesUser(dcclient,d2client,id){
             }
         }).catch(e => console.log(4));
         dcclient.getMember(statRoles.guildID,id).then(async member => {
-            let data = {};
+            let data: { nick: string, roles: string[] } = {
+                nick: "",
+                roles: []
+            };
             const d2name = await d2client.getBungieTag(dbUser.bungieId);
             if(member.nick){
                 if(!member.nick.endsWith(d2name)){
-                    data["nick"] = d2name;
+                    data.nick = d2name;
                 }
             } else {
-                data["nick"] = d2name;
+                data.nick = d2name;
             }
-            let roles = member.roles;
-            roles = roles.filter(x => !statRoles.allIDs.includes(x));
-            data["roles"] = [...roles, ...tempArr];
-            if(dbUser.roles !== undefined && dbUser.roles === roles) return;
-            dbUser.roles = roles;
-            d2client.DB.set(id,dbUser);
-            dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
+            const roles = member.roles.sort();
+            data.roles = roles.filter(x => !statRoles.allIDs.includes(x));
+            data.roles = [...data.roles, ...tempArr].sort();
+            if(data.roles.every((role, i) => roles[i] === role)){
+                dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
+            }
         });
     });
 }
