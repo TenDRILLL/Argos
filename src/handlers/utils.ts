@@ -239,6 +239,8 @@ export function updateStatRolesUser(dcclient,d2client,id){
             if(member.nick){
                 if(!member.nick.endsWith(d2name)){
                     data.nick = d2name;
+                } else {
+                    data.nick = member.nick;
                 }
             } else {
                 data.nick = d2name;
