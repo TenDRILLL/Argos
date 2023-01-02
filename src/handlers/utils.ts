@@ -231,16 +231,13 @@ export function updateStatRolesUser(dcclient,d2client,id){
             }
         }).catch(e => console.log(4));
         dcclient.getMember(statRoles.guildID,id).then(async member => {
-            let data: { nick: string, roles: string[] } = {
-                nick: "",
+            let data: { nick?: string, roles: string[] } = {
                 roles: []
             };
             const d2name = await d2client.getBungieTag(dbUser.bungieId);
             if(member.nick){
                 if(!member.nick.endsWith(d2name)){
                     data.nick = d2name;
-                } else {
-                    data.nick = member.nick;
                 }
             } else {
                 data.nick = d2name;
