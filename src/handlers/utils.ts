@@ -245,7 +245,7 @@ export function updateStatRolesUser(dcclient,d2client,id){
             const roles = member.roles.sort();
             data.roles = roles.filter(x => !statRoles.allIDs.includes(x));
             data.roles = [...data.roles, ...tempArr].sort();
-            if(data.roles.every((role, i) => roles[i] === role)){
+            if(!(data.roles.length === roles.length && data.roles.every((role, i) => roles[i] === role))){
                 dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
             }
         });
