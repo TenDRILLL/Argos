@@ -67,7 +67,7 @@ export default class D2Stats extends Command {
                 "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
                 "text": "Argos, Planetary Core"
             },
-            "fields": this.generateFields(d2client, raidObject, 2)
+            "fields": this.generateFields(d2client, raidObject)
         }
         this.sendEmbed(interaction,embed,authorID);
     }
@@ -82,7 +82,7 @@ export default class D2Stats extends Command {
                 "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
                 "text": "Argos, Planetary Core"
             },
-            "fields": this.generateFields(d2client, dungeonObject, 2)
+            "fields": this.generateFields(d2client, dungeonObject)
         }
         this.sendEmbed(interaction,embed,authorID);
     }
@@ -97,7 +97,7 @@ export default class D2Stats extends Command {
                 "icon_url": "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp",
                 "text": "Argos, Planetary Core"
             },
-            "fields": this.generateFields(d2client, GMObject, 3)
+            "fields": this.generateFields(d2client, GMObject)
         }
         this.sendEmbed(interaction,embed,authorID);
     }
@@ -109,13 +109,11 @@ export default class D2Stats extends Command {
         }).catch(e => console.log(e));
     }
 
-    generateFields(d2client,activityObject,number) {
+    generateFields(d2client,activityObject) {
         const order = d2client.entityDB.get("activityOrder");
         const activityIdentifiers = d2client.activityIdentifierDB;
-        let rows: object[] = [];
-        for (let i = 0; i < number; i++) {
-            rows.push({"name": "\u200B", "value": "", "inline": true})
-        }
+        let firstRow = {"name": "\u200B", "value": "", "inline": true};
+        let secondRow = {"name": "\u200B", "value": "", "inline": true};
         delete activityObject["Total"];
         let j = 0
         const ordered = Object.keys(activityObject).sort((b,a) => order.findIndex(e => e == a) - order.findIndex(e => e == b));
@@ -128,20 +126,34 @@ export default class D2Stats extends Command {
             if (activityIdentifiers.get(activity)["difficultName"] != "") {
                 const difficultNumber = activityObject[ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)]] ?? 0;
                 delete ordered[ordered.findIndex(e => e == `${activity}, ${activityIdentifiers.get(activity)["difficultName"]}`)];
-                rows[j % number]["value"] += `**${displayName}**
-${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
-    
-`
-                }
+                if (j % 2 == 0) {
+                    firstRow["value"] += `**${displayName}**
+    ${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
+        
+    `
+                } else {
+                    secondRow["value"] += `**${displayName}**
+    ${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName"].substring(0,1)}: ${difficultNumber}
+        
+    `
+                    }
+            }
             else {
-                rows[j % number]["value"] += `**${activity}**
-${activityObject[activity]}
-
-`
+                if (j % 2 == 0) {
+                firstRow["value"] += `**${activity}**
+    ${activityObject[activity]}
+    
+    `
+                } else {
+                    secondRow["value"] += `**${activity}**
+    ${activityObject[activity]}
+    
+    `
                 }
+            }
             delete ordered[0];
             j += 1;
         }
-        return rows;
+        return [firstRow,secondRow];    
     }
 }

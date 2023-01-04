@@ -26,5 +26,4 @@ export class BungieProfile {
     statusDate: string;
     cachedBungieGlobalDisplayName: string;
     cachedBungieGlobalDisplayNameCode: number;
-    egsDisplayName: string;
 }

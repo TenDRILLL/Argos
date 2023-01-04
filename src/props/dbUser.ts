@@ -12,14 +12,7 @@ export class DBUser {
         accessExpiry: number;
         refreshToken: string;
         refreshExpiry: number;
-    };
-    discordTokens: {
-        accessToken: string;
-        expiresIn: number;
-        refreshToken: string;
-        scope: string;
-        tokenType: string;
-    };
+    }
 }
 
 export class ActivityObject {

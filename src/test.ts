@@ -3,6 +3,11 @@ import {requestHandler} from "./handlers/requestHandler";
 import {discordHandler} from "./handlers/discordHandler";
 import { activityIdentifiers } from "./enums/activityIdentifiers";
 import { activityIdentifierObject } from "./props/activityIdentifierObject";
+import {fetchPendingClanRequests, getWeaponInfo, updateActivityIdentifierDB} from "./handlers/utils";
+import { CharacterQuery } from "./props/characterQuery";
+import { entityQuery } from "./props/entityQuery";
+import { vendorQuery, vendorSaleComponent } from "./props/vendorQuery";
+import {BungieProfile} from "./props/bungieProfile";
 import enmap from "enmap";
 
 const d2client = new requestHandler();
@@ -58,5 +63,36 @@ function instantiateActivityDatabase() {
     console.log("Activity DB done.");
 }
 
-//instantiateActivityDatabase();
-//updateActivityIdentifierDB(d2client);
+
+function generateEmbed(components: vendorSaleComponent[], d2client) {
+    const weapondata = Promise.all(
+        components.map(async e => {
+            return await getWeaponInfo(d2client, e.itemHash);
+        })
+    )
+    return [{
+        "title": "Xûr is on {planet} at {location}",
+        "color": 0xAE27FF,
+        "description": "He is currently selling the following exotics",
+        "fiels": []
+    }]
+}
+
+function getXurLocations() {
+    d2client.refreshToken(d2client.adminuserID).then(q => {
+        d2client.apiRequest("getDestinyCharacters", {
+            membershipType: 3,
+            destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId}).then(t => {
+                const resp = t.Response as CharacterQuery;
+                d2client.apiRequest("getVendorInformation", {
+                    membershipType: 3,
+                    destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId,
+                    characterId: resp.characters[0].characterId.toString(),
+                    vendorHash: "2190858386" /*xur id*/},
+                    {"Authorization": `Bearer ${q.tokens.accessToken}`}
+                ).then(d => {
+                    console.log(d);
+                })
+        });
+    })
+}
