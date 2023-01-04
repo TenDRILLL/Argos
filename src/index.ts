@@ -13,6 +13,8 @@ import {
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 
+console.log("Starting")
+
 let commands;
 const d2client = new requestHandler();
 const dcclient = new Client({
@@ -150,6 +152,8 @@ dcclient.on("ready", async ()=>{
         fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
 });
+
+dcclient.login();
 
 //Use this if you need to change the commands.
 //updateCmds();
