@@ -3,6 +3,7 @@ import { CharacterQuery } from "../props/characterQuery";
 import { entityQuery } from "../props/entityQuery";
 import {vendorQuery, vendorSaleComponent} from "../props/vendorQuery";
 import Command from "./Command";
+import {Embed} from "discord-http-interactions";
 
 export default class Xur extends Command {
     constructor(){
@@ -19,7 +20,7 @@ export default class Xur extends Command {
                     d2client.apiRequest("getVendorInformation", {
                         membershipType: 3,
                         destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId,
-                        characterId: resp.characters.filter(character => character.deleted === false)[0].characterId,
+                        characterId: resp.characters.filter(character => !character.deleted)[0].characterId,
                         vendorHash: "2190858386" /*xur id*/},
                         {"Authorization": `Bearer ${q.tokens.accessToken}`}
                     ).then(d => {
@@ -28,14 +29,14 @@ export default class Xur extends Command {
                         this.generateEmbed(info.sales.data, d2client, location).then(embed => {
                             interaction.editReply({
                                 embeds: [embed],
-                                flags: 64
+                                ephemeral: true
                             }).catch(e => console.log(e));
                         })
                     }).catch(e => {
                         console.log(`Xur isn't anywhere / something went wrong ${e}`)
                         interaction.editReply({
                             content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him`,
-                            flags: 64
+                            ephemeral: true
                         }).catch(e => console.log(e));
                     });
             })
@@ -52,21 +53,20 @@ export default class Xur extends Command {
             )})
         return Promise.all(promises).then(data => {
             const xurLocations = ["Hangar, The Tower", "Winding Cove, EDZ", "Watcher’s Grave, Nessus"];
-            const embed = {
-                "title": `Xûr is at ${xurLocations[locationIndex]}`,
-                "color": 0xAE27FF,
-                "description": "He is currently selling the following exotics",
-                "fields": this.generateFields(data.filter(entity => entity.inventory.tierTypeName === "Exotic" && !["Exotic Engram","Xenology"].includes(entity.displayProperties.name)),3)
-            }
-            return embed;
+            return new Embed()
+                .setTitle(`Xûr is at ${xurLocations[locationIndex]}`)
+                .setColor(0xAE27FF)
+                .setDescription("He is currently selling the following exotics")
+                .setFields(this.generateFields(data.filter(entity => entity.inventory.tierTypeName === "Exotic" && !["Exotic Engram","Xenology"].includes(entity.displayProperties.name)),3))
         })
     };
-    generateFields(exotics,number) {
-        let rows: object[] = [];
+
+    generateFields(exotics,number): {name: string, value: string, inline?: boolean}[] {
+        let rows: {name: string, value: string, inline?: boolean}[] = [];
         for (let i = 0; i < number; i++) {
             rows.push({"name": "\u200B", "value": "", "inline": true})
         }
-        for (var i = 0; i < exotics.length; i++) {
+        for (let i = 0; i < exotics.length; i++) {
             const exotic = exotics[i];
             rows[i % number]["value"] += `**${exotic.displayProperties.name}**
 ${i < exotics.length-number ? exotic.itemTypeAndTierDisplayName+"\n\u200b" : exotic.itemTypeAndTierDisplayName}

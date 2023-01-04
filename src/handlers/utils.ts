@@ -1,4 +1,3 @@
-import {verifyKey} from "discord-interactions";
 import {statRoles} from "../enums/statRoles";
 import "dotenv/config";
 import axios from "axios";
@@ -10,17 +9,6 @@ import { DBUser } from "../props/dbUser";
 import {BungieProfile} from "../props/bungieProfile";
 import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {URLSearchParams} from "url";
-
-export function VerifyDiscordRequest() {
-    return function (req, res, buf, encoding) {
-        const signature = req.get("X-Signature-Ed25519");
-        const timestamp = req.get("X-Signature-Timestamp");
-        const isValidRequest = verifyKey(buf, signature, timestamp, process.env.discordKey as string);
-        if (!isValidRequest) {
-            res.status(401).send("Bad request signature");
-        }
-    };
-}
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
     GetDiscordInformation(dcclient,dccode).then(dcdata => {
@@ -118,7 +106,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     scope: dcdata.tokens.scope,
                                     tokenType: dcdata.tokens.token_type
                                 }
-                            });
+                            }); //["","Xbox","PlayStation","Steam","","","Epic Games"]
                             const icons = ["", "https://cdn.discordapp.com/emojis/1045358581316321280.webp?size=96&quality=lossless",
                                                 "https://cdn.discordapp.com/emojis/1057027325809672192.webp?size=96&quality=lossless", 
                                                 "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
@@ -134,7 +122,6 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                             a { color: #121212; text-decoration: none; display: flex; align-items: center; padding: 0px 10px 0px 10px; border:1px solid #E2E5DE; border-radius: 15px; background: #E2E5DE;}
                             div {display: flex; flex-direction: row; width: 100%; min-height: 60px; justify-content: center; padding: 5px;}</style>
                            <ul><h1>Choose a platform to use</h1><div class="container">`;
-                            let platforms = ["","Xbox","PlayStation","Steam","","","Epic Games"];
                             reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length})
                                     .forEach(x => {
                                 const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
@@ -154,6 +141,30 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
             }
         }).catch(e => res.send(`Error fetching Bungie Tokens: ${e.message}`));
     }).catch(e => res.send(`Error fetching Discord Data: ${e.message}`));
+}
+
+export function refreshDiscordToken(d2client,dbUserID): Promise<DBUser> {
+    return new Promise((res, rej) => {
+        let dbUser = d2client.DB.get(dbUserID);
+        if(dbUser === undefined || dbUser.discordTokens === undefined) return rej("No tokens!");
+        const data = new URLSearchParams();
+        data.append("client_id",process.env.discordId as string);
+        data.append("client_secret",process.env.discordSecret as string);
+        data.append("grant_type","refresh_token");
+        data.append("refresh_token",dbUser.discordTokens.refreshToken);
+        axios.post("https://discord.com/api/oauth2/token",data,{headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(d => {
+            let dcdata = d.data;
+            dbUser.discordTokens = {
+                accessToken: dcdata.access_token,
+                accessExpiry: Date.now() + (dcdata.expires_in*1000),
+                refreshToken: dcdata.refresh_token,
+                scope: dcdata.scope,
+                tokenType: dcdata.token_type
+            };
+            d2client.DB.set(dbUserID,dbUser);
+            res(dbUser);
+        }).catch(e => {rej(e.message);});
+    });
 }
 
 export function GetDiscordInformation(dcclient,code):Promise<dcdata>{
@@ -189,7 +200,9 @@ export function updateStatRolesUser(dcclient,d2client,id){
     d2client.dbUserUpdater.updateStats(id).then(async () => {
         let dbUser = d2client.DB.get(id) as DBUser;
         if(dbUser.discordTokens){
-            dbUser = await dcclient.refreshToken(d2client, id).catch(e => {/*Don't log this as it's normal for now.*/});
+            dbUser = await refreshDiscordToken(d2client, id).catch(e => {
+                /*Don't log this as it's normal for now, after we enforce the new registration this becomes a valid error.*/
+            }) as DBUser;
         }
         if (dbUser == undefined) {
             console.log(`${dbUser} - ${id}`);

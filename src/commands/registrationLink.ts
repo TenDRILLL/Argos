@@ -1,4 +1,5 @@
 import Command from "./Command";
+import {ActionRow, Button, ButtonStyle} from "discord-http-interactions";
 
 export default class RegistrationLink extends Command {
     constructor(){
@@ -8,22 +9,17 @@ export default class RegistrationLink extends Command {
     async cmdRun(interaction, d2client){
         interaction.reply({
             content: "Sent.",
-            flags: 64
+            ephemeral: true
         }).then(()=>{
             interaction.newMessage({
                 content: "**To unlock Destiny channels and roles, register here.**",
                 components: [
-                    {
-                        type: 1,
-                        components: [
-                            {
-                                type: 2,
-                                label: "Register",
-                                style: 5,
-                                url: "https://register.venerity.xyz/"
-                            }
-                        ]
-                    }
+                    new ActionRow().setComponents([
+                        new Button()
+                            .setLabel("Register")
+                            .setStyle(ButtonStyle.Link)
+                            .setUrl("https://register.venerity.xyz/")
+                    ])
                 ]
             }).catch(e => console.log(e));
         });

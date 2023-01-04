@@ -1,5 +1,6 @@
 import {Interaction} from "../handlers/discordHandler";
 import {requestHandler} from "../handlers/requestHandler";
+import {InteractionType} from "discord-http-interactions";
 
 export default abstract class Command {
     private readonly name: string;
@@ -11,11 +12,11 @@ export default abstract class Command {
     getName(): string { return this.name; }
 
     run(interaction: Interaction, d2client: requestHandler){
-        if(interaction.type === 2){
+        if(interaction.type === InteractionType.ApplicationCommand){
             this.cmdRun(interaction, d2client);
-        } else if(interaction.type === 3){
+        } else if(interaction.type === InteractionType.MessageComponent){
             this.btnRun(interaction, d2client);
-        } else if(interaction.type === 4){
+        } else if(interaction.type === InteractionType.ApplicationCommandAutocomplete){
             this.acRun(interaction);
         }
     }
