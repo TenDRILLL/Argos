@@ -14,8 +14,7 @@ requests.set("getGroupMembers", "/GroupV2/groupId/Members/");
 requests.set("getPendingClanInvites", "/GroupV2/groupId/Members/Pending/");
 requests.set("approveClanMember","/GroupV2/groupId/Members/ApproveList/");
 requests.set("denyClanMember","/GroupV2/groupId/Members/DenyList/");
-requests.set("getVendorSales", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=402");
-requests.set("getVendorInformation", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=402");
+requests.set("getVendorInformation", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=400,402");
 
 export function getRequest(id,data){
     if(requests.has(id)){
