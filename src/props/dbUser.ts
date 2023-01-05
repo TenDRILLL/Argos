@@ -15,7 +15,7 @@ export class DBUser {
     };
     discordTokens: {
         accessToken: string;
-        expiresIn: number;
+        accessExpiry: number;
         refreshToken: string;
         scope: string;
         tokenType: string;

@@ -8,7 +8,9 @@ import {
     newRegistration,
     updateStatRoles,
     decrypt,
-    updateStatRolesUser, GetDiscordInformation, crypt, refreshDiscordToken
+    updateStatRolesUser,
+    GetDiscordInformation,
+    crypt
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
@@ -177,7 +179,7 @@ dcclient.on("panel",async (req,res)=>{
     }
     if(d2client.DB.has(discID)){
         await d2client.dbUserUpdater.updateStats(discID);
-        let data = await refreshDiscordToken(d2client,discID);
+        let data = await d2client.DB.get(discID);
         let dcUser = await GetDiscordInformation(dcclient,data.discordTokens.accessToken);
         const resp = await getPanelPage(d2client, discID, data, dcUser);
         res.send(resp);

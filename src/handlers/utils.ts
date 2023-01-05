@@ -39,13 +39,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     refreshToken: x.refresh_token,
                                     refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                 },
-                                discordTokens: {
-                                    accessToken: dcdata.tokens.access_token,
-                                    accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
-                                    refreshToken: dcdata.tokens.refresh_token,
-                                    scope: dcdata.tokens.scope,
-                                    tokenType: dcdata.tokens.token_type
-                                },
+                                discordTokens: dcdata.tokens,
                                 discordUser: dcdata.user
                             });
                             res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
@@ -72,13 +66,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                         refreshToken: x.refresh_token,
                                         refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                     },
-                                    discordTokens: {
-                                        accessToken: dcdata.tokens.access_token,
-                                        accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
-                                        refreshToken: dcdata.tokens.refresh_token,
-                                        scope: dcdata.tokens.scope,
-                                        tokenType: dcdata.tokens.token_type
-                                    },
+                                    discordTokens: dcdata.tokens,
                                     discordUser: dcdata.user
                                 });
                                 res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
@@ -102,13 +90,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     refreshToken: x.refresh_token,
                                     refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                 },
-                                discordTokens: {
-                                    accessToken: dcdata.tokens.access_token,
-                                    accessExpiry: Date.now() + (dcdata.tokens.expires_in*1000),
-                                    refreshToken: dcdata.tokens.refresh_token,
-                                    scope: dcdata.tokens.scope,
-                                    tokenType: dcdata.tokens.token_type
-                                },
+                                discordTokens: dcdata.tokens,
                                 discordUser: dcdata.user
                             });
                             const endResult = choosePlatformhtml(reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}))
@@ -148,19 +130,13 @@ export function refreshDiscordToken(d2client,dbUserID): Promise<DBUser> {
     });
 }
 
-export function GetDiscordInformation(dcclient,code):Promise<dcdata>{
+export function GetDiscordInformation(dcclient,id):Promise<dcdata>{
     return new Promise((res,rej)=>{
-        const data = new URLSearchParams();
-        data.append("client_id",process.env.discordId as string);
-        data.append("client_secret",process.env.discordSecret as string);
-        data.append("grant_type","authorization_code");
-        data.append("code",code);
-        data.append("redirect_uri","https://api.venerity.xyz/api/oauth");
-        axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}}).then(x => {
-            axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${x.data.token_type} ${x.data.access_token}`}}).then(y => {
-                res({tokens: x.data, user: y.data});
+        refreshDiscordToken(dcclient,id).then(x => {
+            axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${x.discordTokens.tokenType} ${x.discordTokens.accessToken}`}}).then(y => {
+                res({tokens: x.discordTokens, user: y.data});
             }).catch(e => {console.log("Discord user information failed."); rej(e)});
-        }).catch(e => {console.log("Discord token failed."); rej(e)});
+        });
     });
 }
 
@@ -180,13 +156,16 @@ export async function updateStatRoles(dcclient,d2client){
 export function updateStatRolesUser(dcclient,d2client,id){
     d2client.dbUserUpdater.updateStats(id).then(async () => {
         let dbUser = d2client.DB.get(id) as DBUser;
+        let discordTokens = {};
         if(dbUser.discordTokens){
-            dbUser = await refreshDiscordToken(d2client, id).catch(e => {
-                console.log(`Discord token refreshal failure: ${e}`);
-            }) as DBUser;
+            await refreshDiscordToken(dcclient, id).then(d => {
+                discordTokens = d.discordTokens;
+            }).catch(e => {
+                console.log(`Refreshing Discord token failed: ${e}`);
+            });
         }
-        if (dbUser == undefined) {
-            console.log(`${dbUser} - ${id}`);
+        if (!dbUser) {
+            console.log(`NO DB USER FOR - ${id}`);
             return;
         }
         let tempRaidObj = {};
@@ -420,11 +399,11 @@ export {crypt, decrypt};
 
 class dcdata {
     tokens: {
-        access_token: string;
-        expires_in: number;
-        refresh_token: string;
+        accessToken: string;
+        accessExpiry: number;
+        refreshToken: string;
         scope: string;
-        token_type: string;
+        tokenType: string;
     };
     user: {
         id: string;
