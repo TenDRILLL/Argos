@@ -4,7 +4,7 @@ import { DBUser } from "../props/dbUser";
 import { RawManifestQuery } from "../props/manifest";
 import { crypt } from "./utils";
 
-export async function getPanelPage(d2client, ID, d, discordUser) {
+export async function getPanelPage(d2client, ID, d, /*discordUser*/) {
     const DBData = d as DBUser;
     const name = await d2client.getBungieName(DBData.bungieId as string);
     const characterResponse = await d2client.apiRequest("getDestinyCharacters", {
@@ -50,27 +50,6 @@ export async function getPanelPage(d2client, ID, d, discordUser) {
         nav ul li {float: left; position: relative; width: 33%; display: inline-block; list-style-type: none; }
         #dc-avatar {vertical-align: middle; display: inline; width: 25px; height: 25px; border-radius: 50%; margin-top: -2px; }
     </style>
-    <nav>
-        <ul>
-            <li>
-                <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png">
-                <p>${discordUser.username}#${discordUser.discriminator}</p>
-            </li>
-            <li>
-                <h1 id="heading text"> 
-                    Welcome, ${name}
-                </h1>
-            </li>
-            <li>
-                <button id="button" onclick="location.href = '/logout'">
-                    Logout
-                </button>
-            </li>
-        </ul>
-    </nav>
-    <div id="test">
-            
-        </div>
     <div id="content">
         <div id="characters">`
     const recordDefinitionPath = await d2client.apiRequest("getManifests", {}).then(d => { return d.Response["jsonWorldComponentContentPaths"]["en"]["DestinyRecordDefinition"]; });
@@ -300,3 +279,24 @@ export function logout(){
     },2000);
     </script>`;
 }
+
+/*
+    <!--<nav>
+        <ul>
+            <li>
+                <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png">
+                <p>${discordUser.username}#${discordUser.discriminator}</p>
+            </li>
+            <li>
+                <h1 id="heading text">
+                    Welcome, ${name}
+                </h1>
+            </li>
+            <li>
+                <button id="button" onclick="location.href = '/logout'">
+                    Logout
+                </button>
+            </li>
+        </ul>
+    </nav>-->
+*/

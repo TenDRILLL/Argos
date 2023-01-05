@@ -155,10 +155,7 @@ export function GetDiscordOauthExchange(code): Promise<dcdata>{
 export function GetDiscordInformation(d2client,id):Promise<dcdata>{
     return new Promise(async (res,rej)=>{
         if(!d2client.DB.has(id)) rej(`No user in DB with id : ${id}`);
-        let dbuser = d2client.DB.get(id);
-        if(dbuser.discordTokens.accessExpiry - Date.now() < 1){
-            dbuser = await refreshDiscordToken(d2client,id);
-        }
+        let dbuser = await refreshDiscordToken(d2client,id);
         axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${dbuser.discordTokens.tokenType} ${dbuser.discordTokens.accessToken}`}}).then(y => {
             res({tokens: dbuser.discordTokens, user: y.data});
         }).catch(e => {rej(e)});
@@ -422,7 +419,7 @@ const decrypt = (salt, encoded) => {
 
 export {crypt, decrypt};
 
-class dcdata {
+export class dcdata {
     tokens: {
         accessToken: string;
         accessExpiry: number;

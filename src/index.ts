@@ -10,11 +10,12 @@ import {
     decrypt,
     updateStatRolesUser,
     GetDiscordInformation,
-    crypt, GetDiscordOauthExchange
+    crypt, GetDiscordOauthExchange, dcdata
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import {getPanelPage, getPreload, logout, unauthenticatedPanel} from "./handlers/htmlPages";
+import {DBUser} from "./props/dbUser";
 
 console.log("Starting")
 
@@ -178,9 +179,14 @@ dcclient.on("panel",async (req,res)=>{
     }
     if(d2client.DB.has(discID)){
         await d2client.dbUserUpdater.updateStats(discID);
-        let data = await d2client.DB.get(discID);
-        let dcUser = await GetDiscordInformation(d2client,discID);
-        const resp = await getPanelPage(d2client, discID, data, dcUser.user);
+        let data: DBUser = await d2client.DB.get(discID);
+        /*let dcUser: dcdata;
+        try {
+            dcUser = await GetDiscordInformation(d2client,discID);
+        } catch (e) {
+            dcUser = {tokens: data.discordTokens, user: data.discordUser};
+        }*/
+        const resp = await getPanelPage(d2client, discID, data, /*dcUser.user*/);
         res.send(resp);
     } else {
         res.send(unauthenticatedPanel());
