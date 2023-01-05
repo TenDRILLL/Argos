@@ -115,7 +115,7 @@ export async function getPanelPage(d2client, ID, d) {
     ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Raid completions</th></tr></thead>`;
     Object.keys(DBData.raids).forEach(raid => {
-        if (!(DBData.raids[raid] == 0)) {
+        if (!(DBData.raids[raid] === 0 || raid !== "Total")) {
         ans += `<tbody><tr>
                 <td class="raidName">${raid}</td>
                 <td class="raidAmount">${DBData.raids[raid]}</td>
@@ -126,7 +126,7 @@ export async function getPanelPage(d2client, ID, d) {
     ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Dungeon completions</th></tr></thead>`;
     Object.keys(DBData.dungeons).forEach(dungeon => {
-        if (!(DBData.dungeons[dungeon] == 0)) {
+        if (!(DBData.dungeons[dungeon] === 0 || dungeon !== "Total")) {
             ans += `<tbody><tr>
             <td class="raidName">${dungeon}</td>
             <td class="raidAmount">${DBData.dungeons[dungeon]}</td>
@@ -137,7 +137,7 @@ export async function getPanelPage(d2client, ID, d) {
     ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Grandmaster completions</th></tr></thead>`;
     Object.keys(DBData.grandmasters).forEach(gm => {
-        if (!(DBData.grandmasters[gm] == 0)) {
+        if (!(DBData.grandmasters[gm] === 0 || gm !== "Total")) {
             ans += `<tbody><tr>
                 <td class="raidName">${gm}</td>
                 <td class="raidAmount">${DBData.grandmasters[gm]}</td>
