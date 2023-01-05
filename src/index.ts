@@ -51,6 +51,10 @@ const dcclient = new Client({
             method: "GET",
             endpoint: "/panel"
         }, {
+            name: "panelPreload",
+            method: "GET",
+            endpoint: "/api/panel"
+        }, {
             name: "logout",
             method: "GET",
             endpoint: "/logout"
@@ -149,6 +153,16 @@ dcclient.on("register",(req, res)=>{
         dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
     });
     updateStatRolesUser(dcclient,d2client,discordID);
+});
+
+dcclient.on("panelPreload",(req,res)=>{
+    res.send(`<p>Redirecting, please wait...</p>
+<script>
+    setTimeout(()=>{
+        window.location = "/panel";        
+    },10);
+</script>
+`);
 });
 
 dcclient.on("panel",async (req,res)=>{
