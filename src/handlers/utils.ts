@@ -179,7 +179,7 @@ export function updateStatRolesUser(dcclient,d2client,id){
         let dbUser = d2client.DB.get(id) as DBUser;
         if(dbUser.discordTokens){
             dbUser = await refreshDiscordToken(d2client, id).catch(e => {
-                /*Don't log this as it's normal for now, after we enforce the new registration this becomes a valid error.*/
+                console.log(`Discord token refreshal failure: ${e}`);
             }) as DBUser;
         }
         if (dbUser == undefined) {
