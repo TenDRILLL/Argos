@@ -41,6 +41,10 @@ const dcclient = new Client({
         }, {
             name: "oauth",
             method: "GET",
+            endpoint: "/oauth"
+        }, {
+            name: "oauthPreload",
+            method: "GET",
             endpoint: "/api/oauth"
         }, {
             name: "register",
@@ -106,6 +110,16 @@ dcclient.on("db",(req,res)=>{
 dcclient.on("authorization", (req, res) => {
     if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.send("ERROR: No registration code found.");
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Fapi%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
+});
+
+dcclient.on("oauthPreload",(req,res)=>{
+    res.send(`<p>Redirecting, please wait...</p>
+<script>
+    setTimeout(()=>{
+        window.location = "/oauth";        
+    },10);
+</script>
+`);
 });
 
 dcclient.on("oauth", (req,res)=>{
