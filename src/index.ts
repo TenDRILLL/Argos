@@ -10,11 +10,10 @@ import {
     decrypt,
     updateStatRolesUser,
     GetDiscordInformation,
-    crypt
+    crypt, GetDiscordOauthExchange
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
-import axios from "axios";
 import {getPanelPage, getPreload, unauthenticatedPanel} from "./handlers/htmlPages";
 
 console.log("Starting")
@@ -126,7 +125,7 @@ dcclient.on("oauth", (req,res)=>{
         if(urlData.error && urlData.error_description){
             return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
         } else if(urlData.state === undefined) {
-            GetDiscordInformation(dcclient,urlData.code).then(dcdata => {
+            GetDiscordOauthExchange(urlData.code).then(dcdata => {
                 return res.cookie("conflux", crypt("zavala", dcdata.user.id)).redirect("/api/panel");
             }).catch(e => {
                 return res.send(e.message);

@@ -12,7 +12,7 @@ import { URLSearchParams } from "url";
 import { choosePlatformhtml } from "./htmlPages";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
-    GetDiscordInformation(dcclient,dccode).then(dcdata => {
+    GetDiscordOauthExchange(dccode).then(dcdata => {
         const data = new URLSearchParams();
         data.append("grant_type","authorization_code");
         data.append("code", d2code);
@@ -127,6 +127,22 @@ export function refreshDiscordToken(d2client,dbUserID): Promise<DBUser> {
             d2client.DB.set(dbUserID,dbUser);
             res(dbUser);
         }).catch(e => {rej(e.message);});
+    });
+}
+
+export function GetDiscordOauthExchange(code): Promise<dcdata>{
+    return new Promise((res,rej)=>{
+        const data = new URLSearchParams();
+        data.append("client_id",process.env.discordId as string);
+        data.append("client_secret",process.env.discordSecret as string);
+        data.append("grant_type","authorization_code");
+        data.append("code",code);
+        data.append("redirect_uri","https://api.venerity.xyz/api/oauth");
+        axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}}).then(x => {
+            axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${x.data.token_type} ${x.data.access_token}`}}).then(y => {
+                res({tokens: x.data, user: y.data});
+            }).catch(e => {console.log("Discord user information failed."); rej(e)});
+        }).catch(e => {console.log("Discord token failed."); rej(e)});
     });
 }
 
