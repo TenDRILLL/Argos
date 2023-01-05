@@ -72,7 +72,7 @@ export async function getPanelPage(d2client, ID, d) {
                 <div class="className">${classHashes.get(character.character.data.classHash)}</div>
                 <div class="lightLevel">${character.character.data.light}</div>
             </div>
-                <span class="titleName">${recordDefinitions[character.character.data.titleRecordHash]["titleInfo"]["titlesByGender"]["Male"]}</span>
+                <span class="titleName">${recordDefinitions[character.character.data.titleRecordHash] !== undefined ? recordDefinitions[character.character.data.titleRecordHash]["titleInfo"]["titlesByGender"]["Male"] : ""}</span>
         </div>
         </div>
         <div class="characterStats">
