@@ -179,7 +179,7 @@ dcclient.on("panel",async (req,res)=>{
     if(d2client.DB.has(discID)){
         await d2client.dbUserUpdater.updateStats(discID);
         let data = await d2client.DB.get(discID);
-        let dcUser = await GetDiscordInformation(dcclient,discID);
+        let dcUser = await GetDiscordInformation(d2client,discID);
         const resp = await getPanelPage(d2client, discID, data, dcUser);
         res.send(resp);
     } else {
@@ -194,7 +194,6 @@ dcclient.on("logout",(req,res)=>{
 dcclient.on("ready", async ()=>{
     commands = await load();
     console.log(`BungoAPIShits http://localhost:${dcclient.port}/`);
-    updateStatRoles(dcclient,d2client);
     setInterval(()=>{
         console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
         updateStatRoles(dcclient,d2client);
