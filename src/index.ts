@@ -13,7 +13,7 @@ import {
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import axios from "axios";
-import { getPanelPage } from "./handlers/htmlPages";
+import {getPanelPage, getPreload} from "./handlers/htmlPages";
 
 console.log("Starting")
 
@@ -113,13 +113,7 @@ dcclient.on("authorization", (req, res) => {
 });
 
 dcclient.on("oauthPreload",(req,res)=>{
-    res.send(`<p>Redirecting, please wait...</p>
-<script>
-    setTimeout(()=>{
-        window.location = "/oauth";        
-    },10);
-</script>
-`);
+    res.send(getPreload(`/oauth?${req.url.split("?")[1]}`));
 });
 
 dcclient.on("oauth", (req,res)=>{
@@ -170,13 +164,7 @@ dcclient.on("register",(req, res)=>{
 });
 
 dcclient.on("panelPreload",(req,res)=>{
-    res.send(`<p>Redirecting, please wait...</p>
-<script>
-    setTimeout(()=>{
-        window.location = "/panel";        
-    },10);
-</script>
-`);
+    res.send(getPreload("/panel"));
 });
 
 dcclient.on("panel",async (req,res)=>{

@@ -177,3 +177,13 @@ export function choosePlatformhtml(platforms) {
         endResult += "</div> </ul> </body>";
         return endResult;
 }
+
+export function getPreload(url){
+    return `<p>Redirecting, please wait...</p>
+<script>
+    setTimeout(()=>{
+        window.location = "${url}";        
+    },10);
+</script>
+`
+}
