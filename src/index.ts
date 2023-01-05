@@ -142,7 +142,7 @@ dcclient.on("register",(req, res)=>{
     dbUser["destinyId"] = account[1];
     dbUser["membershipType"] = account[0];
     d2client.DB.set(discordID,dbUser);
-    res.redirect("/panel");
+    res.redirect("/api/panel");
     dcclient.getMember(statRoles.guildID,discordID).then(member => {
         if(!member) return;
         //@ts-ignore
