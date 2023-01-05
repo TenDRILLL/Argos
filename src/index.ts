@@ -168,7 +168,7 @@ dcclient.on("panelPreload",(req,res)=>{
 });
 
 dcclient.on("panel",async (req,res)=>{
-    if(req.cookies["conflux"]){
+    if(req.cookies["conflux"] && d2client.DB.get(decrypt("zavala",req.cookies["conflux"]))){
         await d2client.dbUserUpdater.updateStats(decrypt("zavala",req.cookies["conflux"]));
         const data = await axios.get(`https://api.venerity.xyz/db/${req.cookies["conflux"]}`);
         const resp = await getPanelPage(d2client,decrypt("zavala",req.cookies["conflux"]), data);
