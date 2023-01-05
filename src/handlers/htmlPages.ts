@@ -45,15 +45,32 @@ export async function getPanelPage(d2client, ID, d, discordUser) {
         th {border: solid 1px red; height: 30px; }
         tbody { max-height: 40px; }
         table {display: block;}
+        nav { text-align: center; padding: 0; background-color: #000000; margin: 0; overflow: hidden; }
+        nav ul {margin: 0; padding: 0; }
+        nav ul li {float: left; position: relative; width: 33%; display: inline-block; list-style-type: none; }
+        #dc-avatar {vertical-align: middle; display: inline; width: 25px; height: 25px; border-radius: 50%; margin-top: -2px; }
     </style>
-    <div id="heading">
-        <h1 id="heading text"> 
-            Welcome, ${name}
-        </h1>
-    </div>
-    <button id="button" onclick="location.href = '/logout'">
-        Logout
-    </button>
+    <nav>
+        <ul>
+            <li>
+                <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png">
+                <p>${discordUser.username}#${discordUser.discriminator}</p>
+            </li>
+            <li>
+                <h1 id="heading text"> 
+                    Welcome, ${name}
+                </h1>
+            </li>
+            <li>
+                <button id="button" onclick="location.href = '/logout'">
+                    Logout
+                </button>
+            </li>
+        </ul>
+    </nav>
+    <div id="test">
+            
+        </div>
     <div id="content">
         <div id="characters">`
     const recordDefinitionPath = await d2client.apiRequest("getManifests", {}).then(d => { return d.Response["jsonWorldComponentContentPaths"]["en"]["DestinyRecordDefinition"]; });

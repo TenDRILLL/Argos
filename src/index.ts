@@ -180,7 +180,7 @@ dcclient.on("panel",async (req,res)=>{
         await d2client.dbUserUpdater.updateStats(discID);
         let data = await d2client.DB.get(discID);
         let dcUser = await GetDiscordInformation(d2client,discID);
-        const resp = await getPanelPage(d2client, discID, data, dcUser);
+        const resp = await getPanelPage(d2client, discID, data, dcUser.user);
         res.send(resp);
     } else {
         res.send(unauthenticatedPanel());
