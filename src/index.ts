@@ -108,7 +108,17 @@ dcclient.on("oauth", (req,res)=>{
     if(req.url.split("?").length < 2){return res.send("You should not be here on your own.");}
     let urlData: {code: string | undefined, state: string | undefined, error: string | undefined, error_description: string | undefined} = {code: undefined, state: undefined, error: undefined, error_description: undefined};
     req.url.split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
-    if(urlData.code === undefined || urlData.state === undefined){if(urlData.error && urlData.error_description){return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);} else {return res.send("You should not be here on your own.");}}
+    if(urlData.code === undefined || urlData.state === undefined){
+        if(urlData.error && urlData.error_description){
+            return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
+        } else if(urlData.state === undefined) {
+            //TODO: GetDiscordInformation(urlData.code);
+            //TODO: If DiscordInfo getting fails, display error message.
+            //TODO: Go to panel with encrypted ID from DiscordInformation.
+        } else {
+            return res.send("You should not be here on your own.");
+        }
+    }
     const discordCode = urlData.code;
     const bungieCode = urlData.state;
     newRegistration(dcclient, d2client, discordCode, bungieCode, res);
