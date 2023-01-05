@@ -187,3 +187,7 @@ export function getPreload(url){
 </script>
 `
 }
+
+export function unauthenticatedPanel(){
+    return `<a href="https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Fapi%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections">Login thx</a>`;
+}

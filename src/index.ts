@@ -13,7 +13,7 @@ import {
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import axios from "axios";
-import {getPanelPage, getPreload} from "./handlers/htmlPages";
+import {getPanelPage, getPreload, unauthenticatedPanel} from "./handlers/htmlPages";
 
 console.log("Starting")
 
@@ -174,7 +174,7 @@ dcclient.on("panel",async (req,res)=>{
         const resp = await getPanelPage(d2client,decrypt("zavala",req.cookies["conflux"]), data);
         res.send(resp)
     } else {
-        res.send("Soon™️");
+        res.send(unauthenticatedPanel());
     }
 });
 
@@ -185,6 +185,7 @@ dcclient.on("logout",(req,res)=>{
 dcclient.on("ready", async ()=>{
     commands = await load();
     console.log(`BungoAPIShits http://localhost:${dcclient.port}/`);
+    updateStatRoles(dcclient,d2client);
     setInterval(()=>{
         console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
         updateStatRoles(dcclient,d2client);
