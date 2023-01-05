@@ -179,7 +179,7 @@ dcclient.on("panel",async (req,res)=>{
     if(d2client.DB.has(discID)){
         await d2client.dbUserUpdater.updateStats(discID);
         let data = await d2client.DB.get(discID);
-        let dcUser = await GetDiscordInformation(dcclient,data.discordTokens.accessToken);
+        let dcUser = await GetDiscordInformation(dcclient,discID);
         const resp = await getPanelPage(d2client, discID, data, dcUser);
         res.send(resp);
     } else {
