@@ -8,7 +8,7 @@ import {
     newRegistration,
     updateStatRoles,
     decrypt,
-    updateStatRolesUser
+    updateStatRolesUser, GetDiscordInformation, crypt, refreshDiscordToken
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
@@ -124,16 +124,19 @@ dcclient.on("oauth", (req,res)=>{
         if(urlData.error && urlData.error_description){
             return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
         } else if(urlData.state === undefined) {
-            //TODO: GetDiscordInformation(urlData.code);
-            //TODO: If DiscordInfo getting fails, display error message.
-            //TODO: Go to panel with encrypted ID from DiscordInformation.
+            GetDiscordInformation(dcclient,urlData.code).then(dcdata => {
+                return res.cookie("conflux", crypt("zavala", dcdata.user.id)).redirect("/api/panel");
+            }).catch(e => {
+                return res.send(e.message);
+            });
         } else {
             return res.send("You should not be here on your own.");
         }
+    } else {
+        const discordCode = urlData.code;
+        const bungieCode = urlData.state;
+        newRegistration(dcclient, d2client, discordCode, bungieCode, res);
     }
-    const discordCode = urlData.code;
-    const bungieCode = urlData.state;
-    newRegistration(dcclient, d2client, discordCode, bungieCode, res);
 });
 
 dcclient.on("register",(req, res)=>{
@@ -168,11 +171,16 @@ dcclient.on("panelPreload",(req,res)=>{
 });
 
 dcclient.on("panel",async (req,res)=>{
-    if(req.cookies["conflux"] && d2client.DB.get(decrypt("zavala",req.cookies["conflux"]))){
-        await d2client.dbUserUpdater.updateStats(decrypt("zavala",req.cookies["conflux"]));
-        const data = await axios.get(`https://api.venerity.xyz/db/${req.cookies["conflux"]}`);
-        const resp = await getPanelPage(d2client,decrypt("zavala",req.cookies["conflux"]), data);
-        res.send(resp)
+    let discID = "";
+    if(req.cookies["conflux"]){
+        discID = decrypt("zavala",req.cookies["conflux"]);
+    }
+    if(d2client.DB.has(discID)){
+        await d2client.dbUserUpdater.updateStats(discID);
+        let data = await refreshDiscordToken(d2client,discID);
+        let dcUser = await GetDiscordInformation(dcclient,data.discordTokens.accessToken);
+        const resp = await getPanelPage(d2client, discID, data, dcUser);
+        res.send(resp);
     } else {
         res.send(unauthenticatedPanel());
     }

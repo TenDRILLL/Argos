@@ -4,7 +4,7 @@ import { DBUser } from "../props/dbUser";
 import { RawManifestQuery } from "../props/manifest";
 import { crypt } from "./utils";
 
-export async function getPanelPage(d2client, ID, d) {
+export async function getPanelPage(d2client, ID, d, discordUser) {
     const DBData = d.data as DBUser;
     const name = await d2client.getBungieName(DBData.bungieId as string);
     const characterResponse = await d2client.apiRequest("getDestinyCharacters", {
