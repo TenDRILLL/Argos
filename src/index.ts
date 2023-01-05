@@ -14,7 +14,7 @@ import {
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
-import {getPanelPage, getPreload, unauthenticatedPanel} from "./handlers/htmlPages";
+import {getPanelPage, getPreload, logout, unauthenticatedPanel} from "./handlers/htmlPages";
 
 console.log("Starting")
 
@@ -188,7 +188,7 @@ dcclient.on("panel",async (req,res)=>{
 });
 
 dcclient.on("logout",(req,res)=>{
-    res.clearCookie("conflux").send("Logged out.");
+    res.clearCookie("conflux").send(logout());
 });
 
 dcclient.on("ready", async ()=>{
