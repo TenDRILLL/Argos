@@ -12,6 +12,8 @@ import {
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
+import axios from "axios";
+import { getPanelPage } from "./handlers/htmlPages";
 
 console.log("Starting")
 
@@ -139,9 +141,12 @@ dcclient.on("register",(req, res)=>{
     updateStatRolesUser(dcclient,d2client,discordID);
 });
 
-dcclient.on("panel",(req,res)=>{
+dcclient.on("panel",async (req,res)=>{
     if(req.cookies["conflux"]){
-        res.send(JSON.stringify(d2client.DB.get(decrypt("zavala",req.cookies["conflux"]))));
+        await d2client.dbUserUpdater.updateStats(decrypt("zavala",req.cookies["conflux"]));
+        const data = await axios.get(`https://api.venerity.xyz/db/${req.cookies["conflux"]}`);
+        const resp = await getPanelPage(d2client,decrypt("zavala",req.cookies["conflux"]), data);
+        res.send(resp)
     } else {
         res.send("Soon™️");
     }
