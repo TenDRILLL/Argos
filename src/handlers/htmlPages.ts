@@ -188,7 +188,7 @@ export function choosePlatformhtml(platforms) {
 }
 
 export function getPreload(url){
-    return `<body onload='startAnimation()'>
+    return `<body'>
     <style>
       * {
       box-sizing: border-box;
@@ -618,21 +618,21 @@ export function getPreload(url){
     </div>
     </body>
     <script>
-      function startAnimation() {
-        const container = document.querySelector(".container");
-        const classNames = ["warlock", "titan", "hunter", "default"];
-        let i = 0;
-    
-        const changeClass = () => {
-          container.classList.remove(classNames[i]);
-          i = i < classNames.length - 1 ? i + 1 : 0;
-          container.classList.add(classNames[i]);
-        };
-    
-        setInterval(changeClass, 2500);
-        window.location="${url}"
-    }
-    </script>
+    window.onload = function() {
+      const container = document.querySelector(".container");
+      const classNames = ["warlock", "titan", "hunter", "default"];
+      let i = 0;
+
+      const changeClass = () => {
+        container.classList.remove(classNames[i]);
+        i = i < classNames.length - 1 ? i + 1 : 0;
+        container.classList.add(classNames[i]);
+      };
+      changeClass();
+      setInterval(changeClass, 3000);
+      window.location="${url}"
+  }
+  </script>
 `
 }
 
