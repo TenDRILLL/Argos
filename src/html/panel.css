@@ -1,0 +1,151 @@
+body {
+    background-color:#36393f;
+    background-repeat:no-repeat;
+    background-position:top left;
+    background-attachment:fixed;
+     height: 100vh;
+     margin: 0;
+     color: white
+}
+ #heading {
+    display: flex;
+     justify-content: center;
+}
+ #characters {
+    display: flex;
+    flex-direction: row;
+     margin: 20px 5px;
+}
+ #completions {
+    display: flex;
+    flex-direction: row;
+     margin: 20px 10px;
+     margin-left: auto;
+}
+ #content {
+    display: flex;
+    flex-direction: row;
+}
+ .singleCharacter {
+    display: flex;
+    flex-direction: column;
+    font-family: "Open Sans",sans-serif,"Destiny Symbols";
+    margin: 0 15px
+}
+ .characterBanner {
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: row;
+    width: 208px;
+    height: 46px;
+}
+ .completionTable {
+    margin: 2px;
+}
+ .raidName {
+    padding-top: 10px 30px 10px 30px;
+     max-height: 40px;
+}
+ .raidAmount {
+     padding: 10px 20px 10px 20px;
+}
+ .className {
+    font-size: 20px;
+     flex: 1;
+}
+ .lightLevel {
+    align-content: flex-end;
+     color: yellow;
+     margin-right: 5px;
+     font-size: 18px ;
+}
+ .nameAndLightContainer {
+     align-items: center;
+     display: flex;
+     flex-flow: row nowrap;
+     margin: 3px
+}
+ .titleName {
+    flex: 1;
+     overflow: hidden;
+     font-size: 12px;
+     font-style: italic;
+     color: yellow;
+     line-height: 10px;
+     margin-left: 3px;
+}
+ .characterStats {
+     display: flex;
+     flex-direction: column;
+}
+ .statRow {
+    display: flex;
+     flex-direction: row;
+     margin-top: 5px;
+}
+ .statRow div {
+    margin: 0;
+     font-size: 11px;
+     display: flex;
+     flex-direction: row;
+     margin: 0 2px;
+     align-items: center;
+}
+ .statRow img {
+    height: 14px;
+     width: 14px;
+}
+ button {
+    background-color: #152238;
+     width: 90px;
+    font-size: 18px;
+     font-family: tahoma;
+     margin-top: 5px;
+     border-radius: 7px;
+     border: solid 1px gray;
+}
+ h1 {
+    margin: 5px;
+}
+ th {
+    border: solid 1px red;
+     height: 30px;
+     text-align: center;
+}
+ tbody {
+     max-height: 40px;
+}
+ table {
+    display: block;
+}
+ nav {
+     text-align: center;
+     padding: 0;
+     background-color: #152238;
+     margin: 0;
+     overflow: hidden;
+}
+ nav ul {
+    margin: 0;
+     padding: 0;
+}
+ nav ul li {
+    float: left;
+     position: relative;
+     width: 33%;
+     display: block;
+     list-style-type: none;
+     margin: 15px 0;
+}
+ nav ul li p {
+    margin: 0;
+}
+ #dc-avatar {
+    vertical-align: middle;
+     display: inline;
+     width: 25px;
+     height: 25px;
+     border-radius: 50%;
+     margin-top: -2px;
+}
