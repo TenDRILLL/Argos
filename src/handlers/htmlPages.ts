@@ -21,15 +21,16 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         })
         const characters: characterInventoryQuery[] = (await Promise.all(promises)).map(e => e.Response as characterInventoryQuery);
         let ans = `<body>
-    <style>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <style>
         body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed; height: 100vh; margin: 0; color: white}
         #heading {display: flex; justify-content: center;}
-        #button {line-height: 25px; width: 90px;font-size: 8pt; font-family: tahoma;margin-top: 1px; margin-right: 2px;position:absolute; top:0; right:0; border: None; background-color: #d3d3d3; }
-        #characters {display: flex;flex-direction: row;}
-        #completions {display: flex;flex-direction: row;margin-left: auto;}
+        #characters {display: flex;flex-direction: row; margin: 20px 5px; }
+        #completions {display: flex;flex-direction: row; margin: 20px 10px; margin-left: auto; }
         #content {display: flex;flex-direction: row;}
         .singleCharacter {display: flex;flex-direction: column;font-family: "Open Sans",sans-serif,"Destiny Symbols";margin: 0 15px}
         .characterBanner {background-size: cover;background-repeat: no-repeat;display: flex;flex-direction: row;width: 208px;height: 46px;}
+        .completionTable {margin: 2px;}
         .raidName {padding-top: 10px 30px 10px 30px; max-height: 40px; }
         .raidAmount { padding: 10px 20px 10px 20px; }
         .className {font-size: 20px; flex: 1;}
@@ -37,18 +38,18 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         .nameAndLightContainer { align-items: center; display: flex; flex-flow: row nowrap; margin: 3px}
         .titleName {flex: 1; overflow: hidden; font-size: 12px; font-style: italic; color: yellow; line-height: 10px; margin-left: 3px;}
         .characterStats { display: flex; flex-direction: column;}
-        .maxLight {display: flex; flex-direction: row; margin: 5px 0;}
-        .maxLight div {display: flex; flex-direction: row;}
-        .maxLight img {height: 16px; width: 16px; opacity: 0.6;}
-        .statRow {display: flex; flex-direction: row; }
+        .statRow {display: flex; flex-direction: row; margin-top: 5px;}
         .statRow div {margin: 0; font-size: 11px; display: flex; flex-direction: row; margin: 0 2px; align-items: center;}
         .statRow img {height: 14px; width: 14px;}
-        th {border: solid 1px red; height: 30px; }
+        button {background-color: #152238; width: 90px;font-size: 18px; font-family: tahoma; margin-top: 5px; border-radius: 7px; border: solid 1px gray;}
+        h1 {margin: 5px;}
+        th {border: solid 1px red; height: 30px; text-align: center;}
         tbody { max-height: 40px; }
         table {display: block;}
-        nav { text-align: center; padding: 0; background-color: #000000; margin: 0; overflow: hidden; }
+        nav { text-align: center; padding: 0; background-color: #152238; margin: 0; overflow: hidden; }
         nav ul {margin: 0; padding: 0; }
-        nav ul li {float: left; position: relative; width: 33%; display: inline-block; list-style-type: none; }
+        nav ul li {float: left; position: relative; width: 33%; display: block; list-style-type: none; margin: 15px 0; }
+        nav ul li p {margin: 0; }
         #dc-avatar {vertical-align: middle; display: inline; width: 25px; height: 25px; border-radius: 50%; margin-top: -2px; }
     </style>
     <nav>
@@ -63,10 +64,8 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                 </h1>
             </li>
             <li>
-                <button id="button" onclick="location.href = '/logout'">
-                    Logout
-                </button>
-            </li>
+              <button><span class="glyphicon glyphicon-log-out"></span> Logout</button>
+          </li>
         </ul>
     </nav>
     <div id="content">
@@ -75,8 +74,8 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         const recordDefinitions = await d2client.rawRequest(`https://www.bungie.net${recordDefinitionPath}`) as RawManifestQuery;
         const classHashes = new Map([
             [671679327, "Hunter"],
-            [2271682572, "Titan"],
-            [3655393761, "Warlock"]
+            [3655393761, "Titan"],
+            [2271682572, "Warlock"]
         ]);
         characters.sort((a,b) => b.character.data.light-a.character.data.light).forEach(character => {
             ans += `<div class="singleCharacter">
@@ -91,12 +90,6 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         </div>
         </div>
         <div class="characterStats">
-            <div class="maxLight">
-                <div>
-                    <img src="https://www.bungie.net/common/destiny2_content/icons/7c30e0e489e51a3920b4446684fbcdb1.png">
-                    <div>${character.character.data.light}</div>
-                </div>
-            </div>
             <div class="statRow">
                     <div>
                         <img src="https://www.bungie.net/common/destiny2_content/icons/e26e0e93a9daf4fdd21bf64eb9246340.png">
@@ -148,7 +141,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
             </tr></tbody>`
             }
         });
-        ans += `</table;>`
+        ans += `</table>`
         ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Grandmaster completions</th></tr></thead>`;
         Object.keys(DBData.grandmasters).forEach(gm => {
