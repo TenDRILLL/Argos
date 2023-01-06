@@ -116,6 +116,7 @@ export function refreshDiscordToken(d2client,dbUserID): Promise<DBUser> {
         data.append("grant_type","refresh_token");
         data.append("refresh_token",dbUser.discordTokens.refreshToken);
         axios.post("https://discord.com/api/oauth2/token",data,{headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(d => {
+            console.log(`${dbUserID} discord-token-refreshed.`);
             let dcdata = d.data;
             dbUser.discordTokens = {
                 accessToken: dcdata.access_token,
@@ -152,12 +153,15 @@ export function GetDiscordOauthExchange(code): Promise<dcdata>{
     });
 }
 
-export function GetDiscordInformation(d2client,id):Promise<dcdata>{
+export function GetDiscordInformation(d2client,id):Promise<dcuser>{
     return new Promise(async (res,rej)=>{
         if(!d2client.DB.has(id)) rej(`No user in DB with id : ${id}`);
-        let dbuser = await refreshDiscordToken(d2client,id);
+        let dbuser = d2client.DB.get(id);
+        if(dbuser.discordTokens.accessExpiry - Date.now() < 1){
+            dbuser = await refreshDiscordToken(d2client,id);
+        }
         axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${dbuser.discordTokens.tokenType} ${dbuser.discordTokens.accessToken}`}}).then(y => {
-            res({tokens: dbuser.discordTokens, user: y.data});
+            res(y.data);
         }).catch(e => {rej(e)});
     });
 }
@@ -176,15 +180,16 @@ export async function updateStatRoles(dcclient,d2client){
 }
 
 export function updateStatRolesUser(dcclient,d2client,id){
-    d2client.dbUserUpdater.updateStats(id).then(async () => {
-        let dbUser = d2client.DB.get(id) as DBUser;
+    d2client.dbUserUpdater.updateStats(id).then(async (dbUser) => {
         let discordTokens = {};
         if(dbUser.discordTokens){
-            await refreshDiscordToken(d2client, id).then(d => {
-                discordTokens = d.discordTokens;
-            }).catch(e => {
-                console.log(`Refreshing Discord token failed: ${e}`);
-            });
+            if(dbUser.discordTokens.accessExpiry - Date.now() < 1){
+                await refreshDiscordToken(d2client, id).then(d => {
+                    discordTokens = d.discordTokens;
+                }).catch(e => {
+                    console.log(`Refreshing Discord token failed: ${e}`);
+                });
+            }
         }
         if (!dbUser) {
             console.log(`NO DB USER FOR - ${id}`);
@@ -255,6 +260,7 @@ export function fetchPendingClanRequests(dcclient, d2client) {
             const handled = d2client.DB.get("handledApplications") ?? [];
             resp.results.forEach(async req => {
                 if (!handled.includes(req.destinyUserInfo.membershipId)) {
+                    //TODO: Make a way to use the updateStats that returns required information.
                     const data = JSON.parse(await d2client.dbUserUpdater.updateStats("",
                         {
                             destinyId: req.destinyUserInfo.membershipId,
@@ -427,19 +433,21 @@ export class dcdata {
         scope: string;
         tokenType: string;
     };
-    user: {
-        id: string;
-        username: string;
-        avatar: string;
-        avatar_decoration: string;
-        discriminator: string;
-        public_flags: number;
-        flags: number;
-        banner: string;
-        banner_color: string;
-        accent_color: number;
-        locale: string;
-        mfa_enabled: boolean;
-        premium_type: number;
-    };
+    user: dcuser;
+}
+
+export class dcuser {
+    id: string;
+    username: string;
+    avatar: string;
+    avatar_decoration: string;
+    discriminator: string;
+    public_flags: number;
+    flags: number;
+    banner: string;
+    banner_color: string;
+    accent_color: number;
+    locale: string;
+    mfa_enabled: boolean;
+    premium_type: number;
 }

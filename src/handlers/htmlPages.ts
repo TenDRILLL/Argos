@@ -4,22 +4,23 @@ import { DBUser } from "../props/dbUser";
 import { RawManifestQuery } from "../props/manifest";
 import { crypt } from "./utils";
 
-export async function getPanelPage(d2client, ID, d, /*discordUser*/) {
-    const DBData = d as DBUser;
-    const name = await d2client.getBungieName(DBData.bungieId as string);
-    const characterResponse = await d2client.apiRequest("getDestinyCharacters", {
-        membershipType: 3,
-        destinyMembershipId: DBData.destinyId})
-    const resp2 = characterResponse.Response as CharacterQuery;
-    let promises: Promise<APIResponse>[] = [];
-    resp2.characters.filter(character => !character.deleted).forEach(char => {
-        promises.push(d2client.apiRequest("getDestinyInventory", {
-            membershipType: 3,
-            destinyMembershipId: DBData.destinyId,
-            characterId: char.characterId}))
+export function getPanelPage(d2client, ID, d, discordUser) {
+    return new Promise(async (res,rej)=>{
+        const DBData = d as DBUser;
+        const name = await d2client.getBungieName(DBData.bungieId as string);
+        const characterResponse = await d2client.apiRequest("getDestinyCharacters", {
+            membershipType: DBData.membershipType,
+            destinyMembershipId: DBData.destinyId})
+        const resp2 = characterResponse.Response as CharacterQuery;
+        let promises: Promise<APIResponse>[] = [];
+        resp2.characters.filter(character => !character.deleted).forEach(char => {
+            promises.push(d2client.apiRequest("getDestinyInventory", {
+                membershipType: DBData.membershipType,
+                destinyMembershipId: DBData.destinyId,
+                characterId: char.characterId}))
         })
-    const characters: characterInventoryQuery[] = (await Promise.all(promises)).map(e => e.Response as characterInventoryQuery);
-    let ans = `<body>
+        const characters: characterInventoryQuery[] = (await Promise.all(promises)).map(e => e.Response as characterInventoryQuery);
+        let ans = `<body>
     <style>
         body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed; height: 100vh; margin: 0; color: white}
         #heading {display: flex; justify-content: center;}
@@ -50,17 +51,35 @@ export async function getPanelPage(d2client, ID, d, /*discordUser*/) {
         nav ul li {float: left; position: relative; width: 33%; display: inline-block; list-style-type: none; }
         #dc-avatar {vertical-align: middle; display: inline; width: 25px; height: 25px; border-radius: 50%; margin-top: -2px; }
     </style>
+    <nav>
+        <ul>
+            <li>
+                <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png">
+                <p>${discordUser.username}#${discordUser.discriminator}</p>
+            </li>
+            <li>
+                <h1 id="heading text">
+                    Welcome, ${name}
+                </h1>
+            </li>
+            <li>
+                <button id="button" onclick="location.href = '/logout'">
+                    Logout
+                </button>
+            </li>
+        </ul>
+    </nav>
     <div id="content">
         <div id="characters">`
-    const recordDefinitionPath = await d2client.apiRequest("getManifests", {}).then(d => { return d.Response["jsonWorldComponentContentPaths"]["en"]["DestinyRecordDefinition"]; });
-    const recordDefinitions = await d2client.rawRequest(`https://www.bungie.net${recordDefinitionPath}`) as RawManifestQuery;
-    const classHashes = new Map([
-        [671679327, "Hunter"],
-        [2271682572, "Titan"],
-        [3655393761, "Warlock"]
-        ])
-    characters.sort((a,b) => b.character.data.light-a.character.data.light).forEach(character => {
-        ans += `<div class="singleCharacter">
+        const recordDefinitionPath = await d2client.apiRequest("getManifests", {}).then(d => { return d.Response["jsonWorldComponentContentPaths"]["en"]["DestinyRecordDefinition"]; });
+        const recordDefinitions = await d2client.rawRequest(`https://www.bungie.net${recordDefinitionPath}`) as RawManifestQuery;
+        const classHashes = new Map([
+            [671679327, "Hunter"],
+            [2271682572, "Titan"],
+            [3655393761, "Warlock"]
+        ]);
+        characters.sort((a,b) => b.character.data.light-a.character.data.light).forEach(character => {
+            ans += `<div class="singleCharacter">
         <div class="characterBanner" style="background-image: url(https://www.bungie.net${character.character.data.emblemBackgroundPath});">
             <div style="height: 32px; width:32px; margin: 0 8px; align-self: center; position: relative;"></div>
             <div style="display: flex; flex-direction: column; flex: 1;">
@@ -105,46 +124,47 @@ export async function getPanelPage(d2client, ID, d, /*discordUser*/) {
                     </div>
             </div>
         </div>
-    </div>`})
-    ans += "</div>";
-    ans += `<div id="completions">`;
-    ans += `<table class="completionTable">
+    </div>`});
+        ans += "</div>";
+        ans += `<div id="completions">`;
+        ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Raid completions</th></tr></thead>`;
-    Object.keys(DBData.raids).forEach(raid => {
-        if (DBData.raids[raid] !== 0 || raid === "Total") {
-        ans += `<tbody><tr>
+        Object.keys(DBData.raids).forEach(raid => {
+            if (DBData.raids[raid] !== 0 || raid === "Total") {
+                ans += `<tbody><tr>
                 <td class="raidName">${raid}</td>
                 <td class="raidAmount">${DBData.raids[raid]}</td>
                 </tr></tbody>`
-        }
-    });    
-    ans += `</table>`;
-    ans += `<table class="completionTable">
+            }
+        });
+        ans += `</table>`;
+        ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Dungeon completions</th></tr></thead>`;
-    Object.keys(DBData.dungeons).forEach(dungeon => {
-        if (DBData.dungeons[dungeon] !== 0 || dungeon === "Total") {
-            ans += `<tbody><tr>
+        Object.keys(DBData.dungeons).forEach(dungeon => {
+            if (DBData.dungeons[dungeon] !== 0 || dungeon === "Total") {
+                ans += `<tbody><tr>
             <td class="raidName">${dungeon}</td>
             <td class="raidAmount">${DBData.dungeons[dungeon]}</td>
             </tr></tbody>`
-        }
-    });
-    ans += `</table;>`
-    ans += `<table class="completionTable">
+            }
+        });
+        ans += `</table;>`
+        ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Grandmaster completions</th></tr></thead>`;
-    Object.keys(DBData.grandmasters).forEach(gm => {
-        if (DBData.grandmasters[gm] !== 0 || gm === "Total") {
-            ans += `<tbody><tr>
+        Object.keys(DBData.grandmasters).forEach(gm => {
+            if (DBData.grandmasters[gm] !== 0 || gm === "Total") {
+                ans += `<tbody><tr>
                 <td class="raidName">${gm}</td>
                 <td class="raidAmount">${DBData.grandmasters[gm]}</td>
                 </tr></tbody>`
-        }
-    });
-    ans += `</table>`;
-    ans += `</div>
+            }
+        });
+        ans += `</table>`;
+        ans += `</div>
     </div>
     </body>`;
-    return ans
+        res(ans);
+    });
 }
 
 export function choosePlatformhtml(platforms) {
@@ -279,24 +299,3 @@ export function logout(){
     },2000);
     </script>`;
 }
-
-/*
-    <!--<nav>
-        <ul>
-            <li>
-                <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png">
-                <p>${discordUser.username}#${discordUser.discriminator}</p>
-            </li>
-            <li>
-                <h1 id="heading text">
-                    Welcome, ${name}
-                </h1>
-            </li>
-            <li>
-                <button id="button" onclick="location.href = '/logout'">
-                    Logout
-                </button>
-            </li>
-        </ul>
-    </nav>-->
-*/

@@ -19,8 +19,7 @@ export default class D2Stats extends Command {
         await interaction.defer();
         let dbUser = d2client.DB.get(discordID) as DBUser;
         if(dbUser.stats === undefined || dbUser.raids == undefined || dbUser.dungeons == undefined || dbUser.grandmasters == undefined){
-            await d2client.dbUserUpdater.updateStats(discordID);
-            dbUser = d2client.DB.get(discordID) as DBUser;
+            dbUser = await d2client.dbUserUpdater.updateStats(discordID);
         }
         const bungoName = await d2client.getBungieName(dbUser.bungieId);
         switch(interaction.data["options"][0]?.name){

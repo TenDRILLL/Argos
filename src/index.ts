@@ -10,7 +10,7 @@ import {
     decrypt,
     updateStatRolesUser,
     GetDiscordInformation,
-    crypt, GetDiscordOauthExchange, dcdata
+    crypt, GetDiscordOauthExchange, dcuser
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
@@ -127,6 +127,8 @@ dcclient.on("oauth", (req,res)=>{
             return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
         } else if(urlData.state === undefined) {
             GetDiscordOauthExchange(urlData.code).then(dcdata => {
+                d2client.DB.set(dcdata.user.id,dcdata.user,"discordUser");
+                d2client.DB.set(dcdata.user.id,dcdata.tokens,"discordTokens");
                 return res.cookie("conflux", crypt("zavala", dcdata.user.id)).redirect("/api/panel");
             }).catch(e => {
                 return res.send(e.message);
@@ -172,22 +174,27 @@ dcclient.on("panelPreload",(req,res)=>{
     res.send(getPreload("/panel"));
 });
 
-dcclient.on("panel",async (req,res)=>{
+dcclient.on("panel",(req,res)=>{
     let discID = "";
     if(req.cookies["conflux"]){
         discID = decrypt("zavala",req.cookies["conflux"]);
     }
     if(d2client.DB.has(discID)){
-        await d2client.dbUserUpdater.updateStats(discID);
-        let data: DBUser = await d2client.DB.get(discID);
-        /*let dcUser: dcdata;
-        try {
-            dcUser = await GetDiscordInformation(d2client,discID);
-        } catch (e) {
-            dcUser = {tokens: data.discordTokens, user: data.discordUser};
-        }*/
-        const resp = await getPanelPage(d2client, discID, data, /*dcUser.user*/);
-        res.send(resp);
+        d2client.dbUserUpdater.updateStats(discID).then((data)=>{
+            GetDiscordInformation(d2client,discID).then(dcuser => {
+                getPanelPage(d2client, discID, data, dcuser).then(resp => {
+                    res.send(resp);
+                }).catch(e => {
+                    res.send(e);
+                });
+            }).catch(e => {
+                getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
+                    res.send(resp);
+                }).catch(e => {
+                    res.send(e);
+                });
+            });
+        });
     } else {
         res.send(unauthenticatedPanel());
     }
