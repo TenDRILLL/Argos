@@ -295,7 +295,7 @@ export function logout(){
     <p>Logged out, redirecting...</p>
     <script>
     setTimeout(()=>{
-        window.location = "/api/panel";
+        window.location = "/panel";
     },2000);
     </script>`;
 }

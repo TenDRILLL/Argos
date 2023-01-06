@@ -15,9 +15,6 @@ import {
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import {getPanelPage, getPreload, logout, unauthenticatedPanel} from "./handlers/htmlPages";
-import {DBUser} from "./props/dbUser";
-
-console.log("Starting")
 
 let commands;
 const d2client = new requestHandler();
@@ -43,11 +40,11 @@ const dcclient = new Client({
         }, {
             name: "oauth",
             method: "GET",
-            endpoint: "/oauth"
+            endpoint: "/api/oauth"
         }, {
             name: "oauthPreload",
             method: "GET",
-            endpoint: "/api/oauth"
+            endpoint: "/oauth"
         }, {
             name: "register",
             method: "GET",
@@ -55,11 +52,11 @@ const dcclient = new Client({
         }, {
             name: "panel",
             method: "GET",
-            endpoint: "/panel"
+            endpoint: "/api/panel"
         }, {
             name: "panelPreload",
             method: "GET",
-            endpoint: "/api/panel"
+            endpoint: "/panel"
         }, {
             name: "logout",
             method: "GET",
@@ -111,11 +108,11 @@ dcclient.on("db",(req,res)=>{
 
 dcclient.on("authorization", (req, res) => {
     if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.send("ERROR: No registration code found.");
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Fapi%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
 });
 
 dcclient.on("oauthPreload",(req,res)=>{
-    res.send(getPreload(`/oauth?${req.url.split("?")[1]}`));
+    res.send(getPreload(`/api/oauth?${req.url.split("?")[1]}`));
 });
 
 dcclient.on("oauth", (req,res)=>{
@@ -129,7 +126,7 @@ dcclient.on("oauth", (req,res)=>{
             GetDiscordOauthExchange(urlData.code).then(dcdata => {
                 d2client.DB.set(dcdata.user.id,dcdata.user,"discordUser");
                 d2client.DB.set(dcdata.user.id,dcdata.tokens,"discordTokens");
-                return res.cookie("conflux", crypt("zavala", dcdata.user.id)).redirect("/api/panel");
+                return res.cookie("conflux", crypt("zavala", dcdata.user.id)).redirect("/panel");
             }).catch(e => {
                 return res.send(e.message);
             });
@@ -157,7 +154,7 @@ dcclient.on("register",(req, res)=>{
     dbUser["destinyId"] = account[1];
     dbUser["membershipType"] = account[0];
     d2client.DB.set(discordID,dbUser);
-    res.redirect("/api/panel");
+    res.redirect("/panel");
     dcclient.getMember(statRoles.guildID,discordID).then(member => {
         if(!member) return;
         //@ts-ignore
@@ -171,7 +168,7 @@ dcclient.on("register",(req, res)=>{
 });
 
 dcclient.on("panelPreload",(req,res)=>{
-    res.send(getPreload("/panel"));
+    res.send(getPreload("/api/panel"));
 });
 
 dcclient.on("panel",(req,res)=>{
