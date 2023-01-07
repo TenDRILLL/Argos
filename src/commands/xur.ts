@@ -62,6 +62,12 @@ export default class Xur extends Command {
     };
 
     generateFields(exotics,number): {name: string, value: string, inline?: boolean}[] {
+        const classTypes = new Map([
+            [3, ""],
+            [1, "Hunter "],
+            [0, "Titan "],
+            [2, "Warlock "]
+        ])
         let rows: {name: string, value: string, inline?: boolean}[] = [];
         for (let i = 0; i < number; i++) {
             rows.push({"name": "\u200B", "value": "", "inline": true})
@@ -69,7 +75,7 @@ export default class Xur extends Command {
         for (let i = 0; i < exotics.length; i++) {
             const exotic = exotics[i];
             rows[i % number]["value"] += `**${exotic.displayProperties.name}**
-${i < exotics.length-number ? exotic.itemTypeAndTierDisplayName+"\n\u200b" : exotic.itemTypeAndTierDisplayName}
+${i < exotics.length-number ? `${classTypes.get(exotic.classType)} ${exotic.itemTypeDisplayName}\n\u200b` : `${classTypes.get(exotic.classType)} ${exotic.itemTypeDisplayName}`}
 
 `
                 }
