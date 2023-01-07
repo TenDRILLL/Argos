@@ -233,7 +233,7 @@ dcclient.on("ready", async ()=>{
 dcclient.login();
 
 //Use this if you need to change the commands.
-updateCmds();
+//updateCmds();
 
 function updateCmds(){
     dcclient.registerCommands(
