@@ -10,11 +10,13 @@ import {
     decrypt,
     updateStatRolesUser,
     GetDiscordInformation,
-    crypt, GetDiscordOauthExchange, dcuser
+    crypt,
+    GetDiscordOauthExchange
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import {getPanelPage, getPreload, logout, unauthenticatedPanel} from "./handlers/htmlPages";
+import {readdirSync} from "fs";
 
 let commands;
 const d2client = new requestHandler();
@@ -61,6 +63,10 @@ const dcclient = new Client({
             name: "logout",
             method: "GET",
             endpoint: "/logout"
+        }, {
+            name: "resource",
+            method: "GET",
+            endpoint: "/resource/:resourceName"
         }
     ]
 });
@@ -199,6 +205,18 @@ dcclient.on("panel",(req,res)=>{
 
 dcclient.on("logout",(req,res)=>{
     res.clearCookie("conflux").send(logout());
+});
+
+dcclient.on("resource",(req, res)=>{
+    if(req.params.resourceName === undefined){
+        return res.send("You should not be here on your own.");
+    }
+    const resources = readdirSync("./html");
+    if(resources.includes(req.params.resourceName)){
+        res.sendFile(`${__dirname}/html/${req.params.resourceName}`);
+    } else {
+        res.status(404).send(`${req.params.resourceName} resource doesn't exist.`);
+    }
 });
 
 dcclient.on("ready", async ()=>{
