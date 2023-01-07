@@ -5,7 +5,7 @@ import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
-import { DBUser } from "../props/dbUser";
+import { DBUser, partialDBUser } from "../props/dbUser";
 import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
 import { URLSearchParams } from "url";
@@ -261,12 +261,12 @@ export function fetchPendingClanRequests(dcclient, d2client) {
             resp.results.forEach(async req => {
                 if (!handled.includes(req.destinyUserInfo.membershipId)) {
                     //TODO: Make a way to use the updateStats that returns required information.
-                    const data = JSON.parse(await d2client.dbUserUpdater.updateStats("",
+                    const data = await d2client.dbUserUpdater.getPartialUserStats(
                         {
                             destinyId: req.destinyUserInfo.membershipId,
-                            membershipType: req.destinyUserInfo.membershipType
-                        }));
-
+                            membershipType: req.destinyUserInfo.membershipType,
+                        } as unknown as partialDBUser
+                        );
                     const embed = {
                         "type": "rich",
                         "title": "A new clan request",
