@@ -10,6 +10,7 @@ import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
 import { URLSearchParams } from "url";
 import { choosePlatformhtml } from "./htmlPages";
+import { ActionRow, Button, ButtonStyle, Embed } from "discord-http-interactions";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
     GetDiscordOauthExchange(dccode).then(dcdata => {
@@ -267,11 +268,10 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                             membershipType: req.destinyUserInfo.membershipType,
                         } as unknown as partialDBUser
                         );
-                    const embed = {
-                        "type": "rich",
-                        "title": "A new clan request",
-                        "color": 0xae27ff,
-                        "fields": [
+                    const embed = new Embed()
+                        .setColor(0xae27ff)
+                        .setTitle("A new clan request")
+                        .setFields([
                             {"name": "User", "value": `${req.bungieNetUserInfo.supplementalDisplayName}`, "inline": true},
                             {"name": "Platforms", "value": `${req.destinyUserInfo.applicableMembershipTypes.map(y => emojis[y]).join(" ")}`, "inline": true},
                             {"name": "Power Level", "value": `${data.stats?.light ?? "UNKNOWN"}`, "inline": true},
@@ -279,22 +279,23 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                             {"name": "Dungeon", "value": `${data.dungeons?.Total ?? "UNKNOWN"}`, "inline": true},
                             {"name": "Grandmaster", "value": `${data.grandmasters?.Total ?? "UNKNOWN"}`, "inline": true},
                             {"name": "PvP K/D", "value": `${Math.round((data.stats?.kd ?? 0) * 100)/100}`}
-                        ]
-                    };
-
-                    dcclient.sendMessage("1048344159326572605", {
+                        ])
+                    const actionRows: ActionRow[] = [];
+                    actionRows.push(
+                        new ActionRow().setComponents([
+                            new Button()
+                                .setLabel("Approve")
+                                .setStyle(ButtonStyle.Success)
+                                .setCustomId(`clanrequest-approve-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`),
+                            new Button()
+                                .setLabel("Deny")
+                                .setStyle(ButtonStyle.Danger)
+                                .setCustomId(`clanrequest-deny-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`)
+                        ])
+                    );
+                    dcclient.sendMessage({
                         embeds: [embed],
-                        components: [
-                            {
-                                type: 1, components: [
-                                    {
-                                        type: 2, label: "Approve", style: 3, custom_id: `clanrequest-approve-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
-                                    }, {
-                                        type: 2, label: "Deny", style: 4, custom_id: `clanrequest-deny-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`
-                                    }
-                                ]
-                            }
-                        ]
+                        components: actionRows
                     }).then(() => {
                         handled.push(req.destinyUserInfo.membershipId);
                         d2client.DB.set("handledApplications", handled);
