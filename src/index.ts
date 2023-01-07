@@ -71,9 +71,9 @@ const dcclient = new Client({
     ]
 });
 
-dcclient.app.use(bodyParser.urlencoded({ extended: false }));
-dcclient.app.use(bodyParser.json());
-dcclient.app.use(cookieParser());
+dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,bodyParser.urlencoded({ extended: false }));
+dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,bodyParser.json());
+dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,cookieParser());
 
 dcclient.on("interaction", interaction => {
     if(commands === undefined) return; //This shouldn't really happen, but there's a slight possibility when the bot is starting.
@@ -233,7 +233,7 @@ dcclient.on("ready", async ()=>{
 dcclient.login();
 
 //Use this if you need to change the commands.
-//updateCmds();
+updateCmds();
 
 function updateCmds(){
     dcclient.registerCommands(
@@ -245,6 +245,18 @@ function updateCmds(){
         }, {
             name: "xur",
             description: "Check items offered by xûr."
+        }, {
+            name: "leaderboard",
+            description: "Display the leaderboard for the requested statistic.",
+            options: [
+                {
+                    name: "name",
+                    type: 3,
+                    description: "Name of the leaderboard.",
+                    required: true,
+                    autocomplete: true
+                }
+            ]
         }, {
             name: "symbols",
             description: "Check the locations of symbols in order to gain a Deepsight weapon at the end of the activity.",
