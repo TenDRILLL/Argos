@@ -266,7 +266,7 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                         {
                             destinyId: req.destinyUserInfo.membershipId,
                             membershipType: req.destinyUserInfo.membershipType,
-                        } as unknown as partialDBUser
+                        }
                         );
                     const embed = new Embed()
                         .setColor(0xae27ff)
