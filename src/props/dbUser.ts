@@ -45,3 +45,12 @@ export class Stats {
     kd: number;
     light: number;
 }
+
+export class partialDBUser {
+    destinyId: string;
+    membershipType: number;
+    stats: Stats;
+    raids: ActivityObject;
+    dungeons: ActivityObject;
+    grandmasters: ActivityObject;
+}
