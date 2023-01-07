@@ -43,7 +43,7 @@ export default class Leaderboard extends Command {
             interaction.reply({
                 content: `KD leaderboard test:
 ${str.join("\n")}`,
-                allowed_mentions: {
+                allowedMentions: {
                     parse: []
                 }
             });
