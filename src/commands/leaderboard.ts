@@ -13,7 +13,7 @@ export default class Leaderboard extends Command {
         const authorID = interaction.member ? interaction.member?.user?.id : interaction.user?.id;
         const leaderboard: string = interaction.data.options[0].value;
         if (!(this.leaderboards.map(x => x.value).includes(leaderboard))) return interaction.reply({content: "Invalid leaderboard.", ephemeral: true});
-        const all: {discordID: string, stat: number}[] = [];
+        const all: {name: string, stat: number, discordID: string}[] = [];
         let stat: string[] = [];
         switch(leaderboard.split("-")[0]){
             case "kd":
@@ -37,20 +37,37 @@ export default class Leaderboard extends Command {
             if(ignore.includes(key)) return;
             const user = d2client.DB.get(key) as DBUser;
             if(user[stat[0].toString()][stat[1].toString()] !== undefined && user[stat[0].toString()][stat[1].toString()] !== 0){
-                all.push({discordID: key, stat: user[stat[0].toString()][stat[1].toString()]});
+                all.push({name: user.destinyName, stat: user[stat[0].toString()][stat[1].toString()], discordID: key});
             }
         });
-        let fields: {name: string, value: string, inline?: boolean}[] = [
-            {name: "\u200B", value: "\u200B", inline: true},
-            {name: "\u200B", value: "\u200B", inline: true},
-            {name: "\u200B", value: "\u200B", inline: true}
-        ];
-        all.sort((a, b) => b.stat - a.stat).forEach((entry,i) => {
-            const pos = i % 3;
-            fields[pos].value += `**#${i+1} <@${entry.discordID}>**
-${leaderboard === "kd" ? entry.stat.toFixed(2) : entry.stat}
-
-`;
+        let prevVal: string | number = 0;
+        let prevPos = 0;
+        const str: string[] = all.sort((a, b) => b.stat - a.stat).map((entry,i) => {
+            const value = leaderboard === "kd" ? entry.stat.toFixed(2) : entry.stat;
+            let pos;
+            if(prevVal === value){
+                pos = prevPos;
+            } else {
+                pos = i+1;
+                prevPos = pos;
+                prevVal = value;
+            }
+            switch(pos){
+                case 1:
+                    pos = "<:first:1061526156454666280>";
+                    break;
+                case 2:
+                    pos = "<:second:1061526192248852570>";
+                    break;
+                case 3:
+                    pos = "<:third:1061526230018560052>";
+                    break;
+                default:
+                    pos += ")"
+            }
+            let val = `${pos} ${entry.name} *(${value})*`;
+            if(authorID === entry.discordID) val = `**${val}**`;
+            return val;
         });
         interaction.reply({
             embeds: [
@@ -58,7 +75,7 @@ ${leaderboard === "kd" ? entry.stat.toFixed(2) : entry.stat}
                     .setDescription(`${this.leaderboards.find(x => x.value === leaderboard)?.name ?? "Leaderboard"}`)
                     .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
                     .setColor(11413503)
-                    .setFields(fields)
+                    .setFields([{name: "\u200B", value: str.join("\n")}])
             ],
             allowedMentions: {
                 parse: []
