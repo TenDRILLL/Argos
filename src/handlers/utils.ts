@@ -249,7 +249,7 @@ export function updateStatRolesUser(dcclient,d2client,id){
             if(!(data.roles.length === roles.length && data.roles.every((role, i) => roles[i] === role))){
                 dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
             }
-        });
+        }).catch(e => {});//Member not on the server.
     });
 }
 
