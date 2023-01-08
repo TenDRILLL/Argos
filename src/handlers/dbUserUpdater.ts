@@ -1,8 +1,6 @@
 import {DBUser, partialDBUser, Stats} from "../props/dbUser";
 import {CharacterQuery} from "../props/characterQuery";
 import {ActivityQuery} from "../props/activity";
-import {activityIdentifiers} from "../enums/activityIdentifiers";
-import {normalizeActivityName} from "./utils";
 
 export class DBUserUpdater {
     private d2client;
@@ -75,7 +73,7 @@ export class DBUserUpdater {
         });
     }
 
-    async getPartialUserStats(partialUser: partialDBUser): Promise<partialDBUser> {
+    async getPartialUserStats(partialUser: {destinyId: string, membershipType: number}): Promise<partialDBUser> {
         return new Promise((res, rej) => {
             this.d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: partialUser.destinyId, membershipType: partialUser.membershipType}).then(d => {
                 const resp = d.Response as CharacterQuery;
@@ -126,11 +124,14 @@ export class DBUserUpdater {
                             })
                         });
                     });
-                    partialUser.stats = stats;
-                    partialUser.raids = TotalClears[0];
-                    partialUser.dungeons = TotalClears[1];
-                    partialUser.grandmasters = TotalClears[2];
-                    res(partialUser);
+                    res({
+                        destinyId: partialUser.destinyId,
+                        membershipType: partialUser.membershipType,
+                        stats: stats,
+                        raids: TotalClears[0],
+                        dungeons: TotalClears[1],
+                        grandmasters: TotalClears[2],
+                    });
                 }).catch(e => console.log(2));
             }).catch(e => console.log(3));
         });

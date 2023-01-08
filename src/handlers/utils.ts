@@ -261,7 +261,6 @@ export function fetchPendingClanRequests(dcclient, d2client) {
             const handled = d2client.DB.get("handledApplications") ?? [];
             resp.results.forEach(async req => {
                 if (!handled.includes(req.destinyUserInfo.membershipId)) {
-                    //TODO: Make a way to use the updateStats that returns required information.
                     const data = await d2client.dbUserUpdater.getPartialUserStats(
                         {
                             destinyId: req.destinyUserInfo.membershipId,
@@ -293,7 +292,7 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                                 .setCustomId(`clanrequest-deny-${req.bungieNetUserInfo.membershipId}-${req.destinyUserInfo.membershipId}-${req.destinyUserInfo.membershipType}`)
                         ])
                     );
-                    dcclient.sendMessage({
+                    dcclient.newMessage("1048344159326572605",{
                         embeds: [embed],
                         components: actionRows
                     }).then(() => {
