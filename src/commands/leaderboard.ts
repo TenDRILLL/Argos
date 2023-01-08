@@ -41,9 +41,9 @@ export default class Leaderboard extends Command {
             }
         });
         let fields: {name: string, value: string, inline?: boolean}[] = [
-            {name: "\u200B", value: "", inline: true},
-            {name: "\u200B", value: "", inline: true},
-            {name: "\u200B", value: "", inline: true}
+            {name: "\u200B", value: "\u200B", inline: true},
+            {name: "\u200B", value: "\u200B", inline: true},
+            {name: "\u200B", value: "\u200B", inline: true}
         ];
         all.sort((a, b) => b.stat - a.stat).forEach((entry,i) => {
             const pos = i % 3;
@@ -90,13 +90,13 @@ ${leaderboard === "kd" ? entry.stat.toFixed(2) : entry.stat}
         for (let [key, data] of d2client.activityIdentifierDB) {
             if("difficultName" in data && data.difficultName !== "" && data.difficultName !== undefined){
                 this.leaderboards.push({
-                    name: `${key} Completions`,
-                    value: `${["r","d","gm"][data["type"]]}-${key}`
+                    name: `${key}, ${data["difficultName"]} Completions`,
+                    value: `${["r","d","gm"][data["type"]]}-${key}, ${data.difficultName}`
                 });
             }
             this.leaderboards.push({
-                name: `${key}, ${data["difficultName"]} Completions`,
-                value: `${["r","d","gm"][data["type"]]}-${key}, ${data.difficultName}`
+                name: `${key} Completions`,
+                value: `${["r","d","gm"][data["type"]]}-${key}`
             });
         }
 
