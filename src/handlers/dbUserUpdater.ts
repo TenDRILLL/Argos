@@ -90,7 +90,7 @@ export class DBUserUpdater {
                             let activityIds = {0: {"Total": 0}, 1: {"Total": 0}, 2: {"Total": 0}};
                             for (let [key, data] of this.d2client.activityIdentifierDB) {
                                 const IDs = data["IDs"];
-                                const type = data["type"]; // 0 raids, 1 GMS, 2 dungeons
+                                const type = data["type"]; // 0 raids, 1 dungeons, 2 GMs
                                 const difficultName = data["difficultName"];
                                 const difficultIDs = data["difficultIDs"];
                                 activityIds[type][key] = 0;

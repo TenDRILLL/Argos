@@ -115,7 +115,7 @@ export default class Leaderboard extends Command {
                 new Embed()
                     .setDescription(`${this.leaderboards.find(x => x.value === leaderboard)?.name ?? "Leaderboard"}`)
                     .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
-                    .setColor(11413503)
+                    .setColor(0xae27ff)
                     .setFields(fields)
             ],
             allowedMentions: {

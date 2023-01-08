@@ -60,7 +60,7 @@ export default class D2Stats extends Command {
         const raidObject = dbUser.raids;
         const embed = new Embed()
             .setTitle(`Raid completions: ${dbUser.destinyName}`)
-            .setColor(11413503)
+            .setColor(0xae27ff)
             .setDescription(`**${raidObject["Total"]}** total clears.`)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
             .setFields(this.generateFields(d2client, raidObject, 2));
@@ -71,7 +71,7 @@ export default class D2Stats extends Command {
         const dungeonObject = dbUser.dungeons;
         const embed = new Embed()
             .setTitle(`Dungeon completions: ${dbUser.destinyName}`)
-            .setColor(11413503)
+            .setColor(0xae27ff)
             .setDescription(`**${dungeonObject["Total"]}** total clears.`)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
             .setFields(this.generateFields(d2client, dungeonObject, 2));
@@ -82,7 +82,7 @@ export default class D2Stats extends Command {
         const GMObject = dbUser.grandmasters;
         const embed = new Embed()
             .setTitle(`Grandmaster completions: ${dbUser.destinyName}`)
-            .setColor(11413503)
+            .setColor(0xae27ff)
             .setDescription(`**${GMObject["Total"]}** total clears.`)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
             .setFields(this.generateFields(d2client, GMObject, 3));
