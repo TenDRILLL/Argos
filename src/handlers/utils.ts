@@ -33,6 +33,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                             d2client.DB.set(dcdata.user.id,{
                                 bungieId: id,
                                 destinyId: primary.membershipId,
+                                destinyName: reply.uniqueName,
                                 membershipType: primary.membershipType,
                                 tokens: {
                                     accessToken: x.access_token,
@@ -60,6 +61,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 d2client.DB.set(dcdata.user.id,{
                                     bungieId: id,
                                     destinyId: reply2.profiles[0].membershipId,
+                                    destinyName: reply.uniqueName,
                                     membershipType: reply2.profiles[0].membershipType,
                                     tokens: {
                                         accessToken: x.access_token,
@@ -85,6 +87,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                             }
                             d2client.DB.set(dcdata.user.id,{
                                 bungieId: id,
+                                destinyName: reply.uniqueName,
                                 tokens: {
                                     accessToken: x.access_token,
                                     accessExpiry: Date.now() + (x.expires_in*1000),
@@ -236,6 +239,8 @@ export function updateStatRolesUser(dcclient,d2client,id){
                 roles: []
             };
             const d2name = await d2client.getBungieTag(dbUser.bungieId);
+            if(!dbUser.destinyName || dbUser.destinyName !== d2name) dbUser.destinyName = d2name;
+            d2client.DB.set(id,dbUser);
             if(member.nick){
                 if(!member.nick.endsWith(d2name)){
                     data.nick = d2name;

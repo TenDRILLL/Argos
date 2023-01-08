@@ -21,19 +21,18 @@ export default class D2Stats extends Command {
         if(dbUser.stats === undefined || dbUser.raids == undefined || dbUser.dungeons == undefined || dbUser.grandmasters == undefined){
             dbUser = await d2client.dbUserUpdater.updateStats(discordID);
         }
-        const bungoName = await d2client.getBungieName(dbUser.bungieId);
         switch(interaction.data["options"][0]?.name){
             case "summary":
-                this.summary(interaction,dbUser,bungoName,authorID);
+                this.summary(interaction,dbUser,authorID);
                 break;
             case "raids":
-                this.raids(interaction,dbUser,bungoName,authorID,d2client);
+                this.raids(interaction,dbUser,authorID,d2client);
                 break;
             case "dungeons":
-                this.dungeons(interaction,dbUser,bungoName,authorID, d2client);
+                this.dungeons(interaction,dbUser,authorID, d2client);
                 break;
             case "grandmasters":
-                this.grandmasters(interaction,dbUser,bungoName,authorID, d2client);
+                this.grandmasters(interaction,dbUser,authorID, d2client);
                 break;
             default:
                 return interaction.editReply({
@@ -42,9 +41,9 @@ export default class D2Stats extends Command {
         }
     }
 
-    async summary(interaction,dbUser,bungoName,authorID){
+    async summary(interaction,dbUser,authorID){
         const embed = new Embed()
-            .setTitle(`${bungoName}'s Stats`)
+            .setTitle(`${dbUser.destinyName}'s Stats`)
             .setColor(0xae27ff)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
             .setFields([
@@ -57,10 +56,10 @@ export default class D2Stats extends Command {
         this.sendEmbed(interaction,embed,authorID);
     }
 
-    async raids(interaction,dbUser,bungoName,authorID, d2client){
+    async raids(interaction,dbUser,authorID, d2client){
         const raidObject = dbUser.raids;
         const embed = new Embed()
-            .setTitle(`Raid completions: ${bungoName}`)
+            .setTitle(`Raid completions: ${dbUser.destinyName}`)
             .setColor(11413503)
             .setDescription(`**${raidObject["Total"]}** total clears.`)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
@@ -68,10 +67,10 @@ export default class D2Stats extends Command {
         this.sendEmbed(interaction,embed,authorID);
     }
 
-    async dungeons(interaction,dbUser,bungoName,authorID, d2client){
+    async dungeons(interaction,dbUser,authorID, d2client){
         const dungeonObject = dbUser.dungeons;
         const embed = new Embed()
-            .setTitle(`Dungeon completions: ${bungoName}`)
+            .setTitle(`Dungeon completions: ${dbUser.destinyName}`)
             .setColor(11413503)
             .setDescription(`**${dungeonObject["Total"]}** total clears.`)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
@@ -79,10 +78,10 @@ export default class D2Stats extends Command {
         this.sendEmbed(interaction,embed,authorID);
     }
 
-    async grandmasters(interaction,dbUser,bungoName,authorID, d2client){
+    async grandmasters(interaction,dbUser,authorID, d2client){
         const GMObject = dbUser.grandmasters;
         const embed = new Embed()
-            .setTitle(`Grandmaster completions: ${bungoName}`)
+            .setTitle(`Grandmaster completions: ${dbUser.destinyName}`)
             .setColor(11413503)
             .setDescription(`**${GMObject["Total"]}** total clears.`)
             .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")

@@ -1,6 +1,7 @@
 export class DBUser {
     bungieId: string;
     destinyId: string;
+    destinyName: string;
     membershipType: number;
     stats: Stats;
     raids: ActivityObject;

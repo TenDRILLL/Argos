@@ -49,7 +49,7 @@ export class DBUserUpdater {
                         }).catch(e => console.log(1));
                     }));
                 });
-                Promise.all(promises).then(data => {                    
+                Promise.all(promises).then(async data => {
                     let TotalClears = {0: {"Total": 0}, 1: {"Total": 0}, 2: {"Total": 0}};
                     data.forEach(char => {
                         Object.keys(char).forEach(type => {
@@ -66,6 +66,7 @@ export class DBUserUpdater {
                     dbUser.raids = TotalClears[0];
                     dbUser.dungeons = TotalClears[1];
                     dbUser.grandmasters = TotalClears[2];
+                    dbUser.destinyName = await this.d2client.getBungieTag(dbUser.bungieId);
                     this.d2client.DB.set(userid, dbUser);
                     res(dbUser);
                 }).catch(e => console.log(2));
