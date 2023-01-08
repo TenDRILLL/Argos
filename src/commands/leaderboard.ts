@@ -13,7 +13,7 @@ export default class Leaderboard extends Command {
         const authorID = interaction.member ? interaction.member?.user?.id : interaction.user?.id;
         const leaderboard: string = interaction.data.options[0].value;
         if (!(this.leaderboards.map(x => x.value).includes(leaderboard))) return interaction.reply({content: "Invalid leaderboard.", ephemeral: true});
-        const all: {name: string, stat: number, discordID: string}[] = [];
+        let all: {name: string, stat: number, discordID: string}[] = [];
         let stat: string[] = [];
         switch(leaderboard.split("-")[0]){
             case "kd":
@@ -40,9 +40,17 @@ export default class Leaderboard extends Command {
                 all.push({name: user.destinyName, stat: user[stat[0].toString()][stat[1].toString()], discordID: key});
             }
         });
+        const fields: {name: string, value: string, inline?: boolean}[] = [
+            {name: "Top 3", value: "", inline: false},
+            {name: "\u200B", value: "", inline: true},
+            {name: "\u200B", value: "", inline: true}
+        ];
         let prevVal: string | number = 0;
         let prevPos = 0;
-        const str: string[] = all.sort((a, b) => b.stat - a.stat).map((entry,i) => {
+        let userInBoard = false;
+        const top3 = all.sort((a, b) => b.stat - a.stat).slice(0, all.length >= 3 ? 3 : all.length);
+        all = all.slice(3);
+        top3.forEach((entry,i) => {
             const value = leaderboard === "kd" ? entry.stat.toFixed(2) : entry.stat;
             let pos;
             if(prevVal === value){
@@ -66,16 +74,49 @@ export default class Leaderboard extends Command {
                     pos += ")"
             }
             let val = `${pos} ${entry.name} *(${value})*`;
-            if(authorID === entry.discordID) val = `**${val}**`;
-            return val;
+            if(authorID === entry.discordID) {
+                val = `**${val}**`;
+                userInBoard = true;
+            }
+            return fields[0].value += `${val}
+`;
         });
+        const length = all.length/2 > 12 ? 12 : all.length/2;
+        all.sort((a, b) => b.stat - a.stat).forEach((entry,i) => {
+            if(i >= length*2) return;
+            const value = leaderboard === "kd" ? entry.stat.toFixed(2) : entry.stat;
+            let pos;
+            if(prevVal === value){
+                pos = prevPos;
+            } else {
+                prevPos++;
+                pos = prevPos;
+                prevVal = value;
+            }
+            let val = `${pos}) ${entry.name} *(${value})*`;
+            if(authorID === entry.discordID) {
+                val = `**${val}**`;
+                userInBoard = true;
+            }
+            return fields[i >= length ? 2 : 1].value += `${val}
+`;
+        });
+        fields[1].value = fields[1].value.substring(0, fields[1].value.length - 1);
+        fields[2].value = fields[2].value.substring(0, fields[2].value.length - 1);
+        if(!userInBoard){
+            const executer = all.find(x => x.discordID === authorID);
+            fields.push({
+                name: "...",
+                value: executer ? `**${all.indexOf(executer)+4}) ${executer.name} *(${leaderboard === "kd" ? executer.stat.toFixed(2) : executer.stat})***` : "You haven't got a score yet.",
+            });
+        }
         interaction.reply({
             embeds: [
                 new Embed()
                     .setDescription(`${this.leaderboards.find(x => x.value === leaderboard)?.name ?? "Leaderboard"}`)
                     .setFooter("Argos, Planetary Core","https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp")
                     .setColor(11413503)
-                    .setFields([{name: "\u200B", value: str.join("\n")}])
+                    .setFields(fields)
             ],
             allowedMentions: {
                 parse: []
