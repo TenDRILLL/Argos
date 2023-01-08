@@ -16,7 +16,7 @@ export default abstract class Command {
         } else if(interaction.type === InteractionType.MessageComponent){
             this.btnRun(interaction, d2client);
         } else if(interaction.type === InteractionType.ApplicationCommandAutocomplete){
-            this.acRun(interaction);
+            this.acRun(interaction, d2client);
         }
     }
 
@@ -28,7 +28,7 @@ export default abstract class Command {
         console.log(`${this.name} btnRun ran, but wasn't overridden.`);
     }
 
-    acRun(interaction){
+    acRun(interaction, d2client){
         console.log(`${this.name} acRun ran, but wasn't overridden.`);
     }
 }
