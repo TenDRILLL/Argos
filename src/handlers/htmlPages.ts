@@ -7,7 +7,6 @@ import { crypt, sortActivities} from "./utils";
 export function getPanelPage(d2client, ID, d, discordUser) {
     return new Promise(async (res,rej)=>{
         const DBData = d as DBUser;
-        const name = await d2client.getBungieName(DBData.bungieId as string);
         const characterResponse = await d2client.apiRequest("getDestinyCharacters", {
             membershipType: DBData.membershipType,
             destinyMembershipId: DBData.destinyId})
@@ -34,7 +33,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
             </li>
             <li>
                 <h1 id="heading text">
-                    Welcome, ${name}
+                    Welcome, ${DBData.destinyName}
                 </h1>
             </li>
             <li>
