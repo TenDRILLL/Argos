@@ -24,11 +24,12 @@ export function getPanelPage(d2client, ID, d, discordUser) {
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" href="/resource/panel.css">
   <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+  <title>Venerity</title>
 </head>
 <body>
     <nav>
         <ul>
-            <li>
+            <li class="dc">
                 <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png">
                 <p>${discordUser.username}#${discordUser.discriminator}</p>
             </li>
@@ -38,7 +39,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                 </h1>
             </li>
             <li>
-              <button><span class="glyphicon glyphicon-log-out"></span> Logout</button>
+              <button onclick="window.location = '/logout'"><span class="glyphicon glyphicon-log-out"></span> Logout</button>
           </li>
         </ul>
     </nav>
