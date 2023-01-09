@@ -12,7 +12,7 @@ body {
    display: flex;
    justify-content: center;
 }
- #characters {
+#characters {
    display: flex;
    flex-direction: row;
    margin: 20px 5px;
@@ -32,6 +32,12 @@ body {
 #content {
    display: flex;
    flex-direction: row;
+}
+#dc-avatar {
+   display: inline;
+   width: 35px;
+   height: 35px;
+   border-radius: 50%;
 }
 .singleCharacter {
    display: flex;
@@ -54,8 +60,8 @@ body {
    padding-top: 10px 30px 10px 30px;
    max-height: 40px;
 }
- .raidAmount {
-     padding: 10px 20px 10px 20px;
+.raidAmount {
+   padding: 10px 20px 10px 20px;
 }
 .className {
    font-size: 20px;
@@ -67,13 +73,13 @@ body {
    margin-right: 5px;
    font-size: 18px ;
 }
- .nameAndLightContainer {
+.nameAndLightContainer {
    align-items: center;
    display: flex;
    flex-flow: row nowrap;
    margin: 3px
 }
- .titleName {
+.titleName {
    flex: 1;
    overflow: hidden;
    font-size: 12px;
@@ -83,7 +89,7 @@ body {
    margin-left: 3px;
    margin-top: -3px;
 }
- .characterStats {
+.characterStats {
    display: flex;
    flex-direction: column;
 }
@@ -110,6 +116,7 @@ body {
 }
 .dc p {
    align-self: center;
+   font-size: 16px;
 }
 button {
    background-color: #152238;
@@ -160,11 +167,4 @@ nav ul li {
 }
 nav ul li p {
    margin: 0;
-}
-#dc-avatar {
-   display: inline;
-   width: 25px;
-   height: 25px;
-   border-radius: 50%;
-   margin-top: -2px;
 }

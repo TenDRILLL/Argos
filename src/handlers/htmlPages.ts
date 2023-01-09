@@ -39,7 +39,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                 </h1>
             </li>
             <li>
-              <button onclick="window.location = '/logout'"><span class="glyphicon glyphicon-log-out"></span> Logout</button>
+              <button onclick="window.location = '/logout'"><span class="glyphicon glyphicon-log-out" style="margin-right: 3px"></span>Logout</button>
           </li>
         </ul>
     </nav>
