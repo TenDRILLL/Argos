@@ -1,18 +1,18 @@
 body {
-    background-color:#030303;
-    height: 100vh;
-    margin: 0;
-    color: white;
-    background-image: linear-gradient(rgba(3,3,3,0.3), rgba(3,3,3,1.0)), url("https://i.imgur.com/X4RGYBg.jpeg");
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: cover;
+   background-color:#030303;
+   height: 100vh;
+   margin: 0;
+   color: white;
+   background-image: linear-gradient(rgba(3,3,3,0.3), rgba(3,3,3,1.0)), url("https://i.imgur.com/X4RGYBg.jpeg");
+   background-repeat: no-repeat;
+   background-attachment: fixed;
+   background-size: cover;
 }
- #heading {
-    display: flex;
-     justify-content: center;
+#heading {
+   display: flex;
+   justify-content: center;
 }
- #characters {
+#characters {
    display: flex;
    flex-direction: row;
    margin: 20px 5px;
@@ -23,138 +23,148 @@ body {
    -o-user-select: none;
    user-select: none;
 }
- #completions {
-    display: flex;
-    flex-direction: row;
-     margin: 20px 10px;
-     margin-left: auto;
+#completions {
+   display: flex;
+   flex-direction: row;
+   margin: 20px 10px;
+   margin-left: auto;
 }
- #content {
-    display: flex;
-    flex-direction: row;
+#content {
+   display: flex;
+   flex-direction: row;
 }
- .singleCharacter {
-    display: flex;
-    flex-direction: column;
-    font-family: "Open Sans",sans-serif,"Destiny Symbols";
-    margin: 0 15px
+#dc-avatar {
+   display: inline;
+   width: 35px;
+   height: 35px;
+   border-radius: 50%;
 }
- .characterBanner {
-    background-size: cover;
-    background-repeat: no-repeat;
-    display: flex;
-    flex-direction: row;
-    width: 208px;
-    height: 46px;
+.singleCharacter {
+   display: flex;
+   flex-direction: column;
+   font-family: "Open Sans",sans-serif,"Destiny Symbols";
+   margin: 0 15px
 }
- .completionTable {
-    margin: 2px;
+.characterBanner {
+   background-size: cover;
+   background-repeat: no-repeat;
+   display: flex;
+   flex-direction: row;
+   width: 208px;
+   height: 46px;
 }
- .raidName {
-    padding-top: 10px 30px 10px 30px;
-     max-height: 40px;
+.completionTable {
+   margin: 2px;
 }
- .raidAmount {
-     padding: 10px 20px 10px 20px;
+.raidName {
+   padding-top: 10px 30px 10px 30px;
+   max-height: 40px;
 }
- .className {
-    font-size: 20px;
-     flex: 1;
+.raidAmount {
+   padding: 10px 20px 10px 20px;
 }
- .lightLevel {
-    align-content: flex-end;
-     color: yellow;
-     margin-right: 5px;
-     font-size: 18px ;
+.className {
+   font-size: 20px;
+   flex: 1;
 }
- .nameAndLightContainer {
-     align-items: center;
-     display: flex;
-     flex-flow: row nowrap;
-     margin: 3px
+.lightLevel {
+   align-content: flex-end;
+   color: yellow;
+   margin-right: 5px;
+   font-size: 18px ;
 }
- .titleName {
-    flex: 1;
-     overflow: hidden;
-     font-size: 12px;
-     font-style: italic;
-     color: yellow;
-     line-height: 10px;
-     margin-left: 3px;
-     margin-top: -3px;
+.nameAndLightContainer {
+   align-items: center;
+   display: flex;
+   flex-flow: row nowrap;
+   margin: 3px
 }
- .characterStats {
-     display: flex;
-     flex-direction: column;
+.titleName {
+   flex: 1;
+   overflow: hidden;
+   font-size: 12px;
+   font-style: italic;
+   color: yellow;
+   line-height: 10px;
+   margin-left: 3px;
+   margin-top: -3px;
 }
- .statRow {
-    display: flex;
-     flex-direction: row;
-     margin-top: 5px;
+.characterStats {
+   display: flex;
+   flex-direction: column;
 }
- .statRow div {
-    margin: 0;
-     font-size: 11px;
-     display: flex;
-     flex-direction: row;
-     margin: 0 2px;
-     align-items: center;
+.statRow {
+   display: flex;
+   flex-direction: row;
+   margin-top: 5px;
 }
- .statRow img {
-    height: 14px;
-     width: 14px;
+.statRow div {
+   margin: 0;
+   font-size: 11px;
+   display: flex;
+   flex-direction: row;
+   margin: 0 2px;
+   align-items: center;
 }
- button {
-    background-color: #152238;
-     width: 90px;
-    font-size: 18px;
-     font-family: tahoma;
-     margin-top: 5px;
-     border-radius: 7px;
-     border: solid 1px gray;
+.statRow img {
+   height: 14px;
+   width: 14px;
 }
- h1 {
-    margin: 5px;
+.dc img {
+   align-self: center;
+   margin-right: 10px;
 }
- th {
-    border: solid 1px red;
-     height: 30px;
-     text-align: center;
+.dc p {
+   align-self: center;
+   font-size: 16px;
 }
- tbody {
-     max-height: 40px;
+button {
+   background-color: #152238;
+   width: 90px;
+   font-size: 18px;
+   font-family: tahoma;
+   border-radius: 7px;
+   border: solid 1px gray;
+   align-self: center;
 }
- table {
-    display: block;
+h1 {
+   margin: 0;
+   align-self: center;
 }
- nav {
-     text-align: center;
-     padding: 0;
-     background-color: #152238;
-     margin: 0;
-     overflow: hidden;
-     opacity: 0.8;
+th {
+   border: solid 1px red;
+   height: 30px;
+   text-align: center;
 }
- nav ul {
-    margin: 0;
-     padding: 0;
+tbody {
+   max-height: 40px;
 }
- nav ul li {
-    float: left;
-     position: relative;
-     width: 33%;
-     display: block;
-     list-style-type: none;
-     margin: 0;
+table {
+   display: block;
 }
- nav ul li p {
-    margin: 0;
+nav {
+   text-align: center;
+   padding: 0;
+   background-color: #152238;
+   margin: 0;
+   overflow: hidden;
+   opacity: 0.8;
 }
- #dc-avatar {
-    vertical-align: middle;
-    display: inline;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    margin-top: -2px;
+nav ul {
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: row;
+   height: 45px;
+}
+nav ul li {
+   position: relative;
+   width: 33%;
+   list-style-type: none;
+   margin: 0;
+   display: flex;
+   justify-content: center;
+}
+nav ul li p {
+   margin: 0;
 }
