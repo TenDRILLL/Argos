@@ -2,7 +2,7 @@ import { APIResponse } from "../props/apiResponse";
 import { characterInventoryQuery, CharacterQuery } from "../props/characterQuery";
 import { DBUser } from "../props/dbUser";
 import { RawManifestQuery } from "../props/manifest";
-import { crypt } from "./utils";
+import { crypt, sortActivities} from "./utils";
 
 export function getPanelPage(d2client, ID, d, discordUser) {
     return new Promise(async (res,rej)=>{
@@ -96,7 +96,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         ans += `<div id="completions">`;
         ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Raid completions</th></tr></thead>`;
-        Object.keys(DBData.raids).forEach(raid => {
+        sortActivities(DBData.raids).forEach(raid => {
             if (DBData.raids[raid] !== 0 || raid === "Total") {
                 ans += `<tbody><tr>
                 <td class="raidName">${raid}</td>
@@ -107,7 +107,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         ans += `</table>`;
         ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Dungeon completions</th></tr></thead>`;
-        Object.keys(DBData.dungeons).forEach(dungeon => {
+    sortActivities(DBData.dungeons).forEach(dungeon => {
             if (DBData.dungeons[dungeon] !== 0 || dungeon === "Total") {
                 ans += `<tbody><tr>
             <td class="raidName">${dungeon}</td>
@@ -118,7 +118,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         ans += `</table>`
         ans += `<table class="completionTable">
     <thead><tr><th colspan="2">Grandmaster completions</th></tr></thead>`;
-        Object.keys(DBData.grandmasters).forEach(gm => {
+    sortActivities(DBData.grandmasters).forEach(gm => {
             if (DBData.grandmasters[gm] !== 0 || gm === "Total") {
                 ans += `<tbody><tr>
                 <td class="raidName">${gm}</td>

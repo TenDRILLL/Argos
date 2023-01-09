@@ -5,7 +5,7 @@ import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
-import { DBUser, partialDBUser } from "../props/dbUser";
+import { ActivityObject, DBUser, partialDBUser } from "../props/dbUser";
 import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
 import { URLSearchParams } from "url";
@@ -308,6 +308,24 @@ export function fetchPendingClanRequests(dcclient, d2client) {
             })
         }).catch(e => console.log(e));
     });
+}
+
+export function sortActivities(activities: ActivityObject): string[] {
+    const sorted = Object.keys(activities).sort((a,b) => activities[b]-activities[a]);
+    const size = sorted.filter(a => activities[a] !== 0).length;
+    const ans: string[] = [];
+    let i = 0
+    while (ans.length !== size) {
+        ans.push(sorted[i]);
+        if (sorted.includes(`${sorted[i]}, Master`)) {
+            ans.push(`${sorted[i]}, Master`);
+        }
+        if (sorted.includes(`${sorted[i]}, Prestige`)) {
+            ans.push(`${sorted[i]}, Prestige`);
+        }
+        i += 1;
+    }
+    return ans;
 }
 
 function sleep(seconds){
