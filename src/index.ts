@@ -15,7 +15,7 @@ import {
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
-import {getPanelPage, getPreload, logout, unauthenticatedPanel} from "./handlers/htmlPages";
+import {getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
 
 let commands;
@@ -96,7 +96,7 @@ dcclient.on("linkedRoles", data =>{ //Will be used to check how discord sends th
 });
 
 dcclient.on("site",(req,res)=>{
-    res.sendFile(`${__dirname}/html/crota.html`);
+    res.send(landingPage());
 });
 
 dcclient.on("db",(req,res)=>{
@@ -199,7 +199,7 @@ dcclient.on("panel",(req,res)=>{
             });
         });
     } else {
-        res.send(unauthenticatedPanel());
+        res.redirect("/");
     }
 });
 

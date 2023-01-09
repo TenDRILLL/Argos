@@ -23,6 +23,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
 <head>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" href="/resource/panel.css">
+  <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
 </head>
 <body>
     <nav>
@@ -139,15 +140,13 @@ export function choosePlatformhtml(platforms) {
                             "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
                             "","",
                             "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
-        let endResult = `<body>
-        <style>body {background-color:#36393f;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
-        h1 {font-family:Arial, sans-serif; color:white; position: relative;text-align: center; margin: 0;}
-        ul {left: 48%;flex-direction: row;align-items: center;position: absolute;top: 40%;transform: translate(-50%, -50%);}
-        img {margin-right: 10px; position: relative; clear: right; width: 44px; height: 44px;}
-        .container {display: flex; flex-direction: column; border: 0;}
-        h2 {display: inline; position: relative; font-family:Arial;}
-        a { color: #121212; text-decoration: none; display: flex; align-items: center; padding: 0px 10px 0px 10px; border:1px solid #E2E5DE; border-radius: 15px; background: #E2E5DE;}
-        div {display: flex; flex-direction: row; width: 100%; min-height: 60px; justify-content: center; padding: 5px;}</style>
+        let endResult = `
+        <head>
+            <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+            <title>Venerity</title>
+            <link rel="stylesheet" href="/resource/choosePlatform.css">
+        </head>
+        <body>
         <ul><h1>Choose a platform to use</h1><div class="container">`;
         platforms.forEach(x => {
             const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
@@ -164,436 +163,10 @@ export function getPreload(url){
     return `<!DOCTYPE html>
     <html>
     <head>
-      <title>Page loading...</title>
+      <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+      <title>Loading...</title>
       <style>
-      * {
-      box-sizing: border-box;
-  }
-   html {
-      font-size: 24px;
-  }
-   body {
-      margin: 0;
-       min-height: 100vh;
-       display: grid;
-      place-items: center;
-       background: #030303;
-  }
-   .container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-       height: 14rem;
-       width: 14rem;
-  }
-   .circle {
-      position: absolute;
-      border-radius: 50%;
-      border: 1px solid #7d7d7d;
-       z-index: 1;
-       background-color: transparent;
-  }
-   .shape_group {
-      position: absolute;
-      display: grid;
-      place-items: center;
-      height: 8rem;
-      width: 8rem;
-      overflow: hidden;
-  }
-   .shape_group .shape {
-      position: absolute;
-      border-left: 2.85rem solid transparent;
-      border-right: 2.85rem solid transparent;
-       border-bottom: 4.9rem solid #7d7d7d;
-  }
-   .line_group {
-      position: absolute;
-  }
-   .line_group .line {
-      position: absolute;
-      height: 100%;
-      width: 1px;
-       background: linear-gradient(to bottom, transparent 0%, #7d7d7d 20%, #7d7d7d 70%, transparent 100%);
-  }
-   .line_group .line.l1 {
-      left: 0;
-  }
-   .line_group .line.l2 {
-      left: 33%;
-  }
-   .line_group .line.l3 {
-      left: 67%;
-  }
-   .line_group .line.l4 {
-      left: 100%;
-  }
-   .default .c1 {
-      height: 10rem;
-      width: 10rem;
-      transition: all 2s ease-in-out;
-  }
-   .default .c2 {
-      height: 9rem;
-      width: 9rem;
-      transition: all 2s ease-in-out;
-  }
-   .default .c3 {
-      height: 9rem;
-      width: 9rem;
-      transition: all 2s ease-in-out;
-  }
-   .default .c4 {
-      height: 8rem;
-      width: 8rem;
-      transition: all 2s ease-in-out;
-  }
-   .default .shape_group {
-      transition: height 2s ease-in-out;
-  }
-   .default .shape_group .shape {
-      transition: transform 2s ease-in-out, border-bottom-color 0.75s ease-in 1.25s;
-       border-bottom-color: #030303;
-      transform: rotate(180deg);
-  }
-   .default .line_group {
-      transition: all 2s ease-in-out;
-  }
-   .default .line_group .line {
-      transition: all 2s ease-in-out;
-  }
-   .default .line_group.g1 {
-      height: 15rem;
-      width: 6rem;
-  }
-   .default .line_group.g2 {
-      height: 15rem;
-      width: 7.75rem;
-      transform: rotate(-60deg);
-  }
-   .default .line_group.g3 {
-      height: 15rem;
-      width: 7.75rem;
-      transform: rotate(60deg);
-  }
-   .warlock .c1 {
-      height: 6.25rem;
-      width: 6.25rem;
-       transition: all 2s ease-in-out;
-  }
-   .warlock .c2 {
-      height: 4rem;
-      width: 4rem;
-       transition: all 2s ease-in-out;
-  }
-   .warlock .c3 {
-      height: 12.5rem;
-      width: 12.5rem;
-       transition: all 1s ease-in-out 1s;
-  }
-   .warlock .c4 {
-      height: 11.5rem;
-      width: 11.5rem;
-       transition: all 1s ease-in-out 1s;
-  }
-   .warlock .shape_group .shape {
-      transition: transform 2s ease-in-out, border-bottom-color 0.75s ease-in 1.25s;
-  }
-   .warlock .shape_group .shape.s1, .warlock .shape_group .shape.s4 {
-      transform: rotate(0) translate(-1.15rem, 0.5rem);
-  }
-   .warlock .shape_group .shape.s2, .warlock .shape_group .shape.s5 {
-      transform: rotate(360deg) translate(0, 0.5rem);
-  }
-   .warlock .shape_group .shape.s3, .warlock .shape_group .shape.s6 {
-      transform: rotate(360deg) translate(1.15rem, 0.5rem);
-  }
-   .warlock .line_group {
-      transition: all 2s ease-in-out;
-  }
-   .warlock .line_group .line {
-      transition: all 2s ease-in-out;
-       box-shadow: 0 0 0 2px #030303;
-  }
-   .warlock .line_group.g1 {
-      height: 15rem;
-      width: 6rem;
-      transform: rotate(-90deg);
-  }
-   .warlock .line_group.g1 .l2, .warlock .line_group.g1 .l3 {
-      opacity: 0;
-  }
-   .warlock .line_group.g2 {
-      height: 15rem;
-      width: 4rem;
-      transform: rotate(-150deg);
-  }
-   .warlock .line_group.g2 .l1 {
-      left: 50%;
-  }
-   .warlock .line_group.g2 .l2 {
-      left: 74%;
-  }
-   .warlock .line_group.g2 .l3 {
-      left: 77%;
-  }
-   .warlock .line_group.g2 .l4 {
-      left: 100%;
-  }
-   .warlock .line_group.g3 {
-      height: 15rem;
-      width: 4rem;
-      transform: rotate(150deg);
-  }
-   .warlock .line_group.g3 .l1 {
-      left: 0%;
-  }
-   .warlock .line_group.g3 .l2 {
-      left: 24%;
-  }
-   .warlock .line_group.g3 .l3 {
-      left: 27%;
-  }
-   .warlock .line_group.g3 .l4 {
-      left: 50%;
-  }
-   .titan .c1 {
-      height: 10.5rem;
-      width: 10.5rem;
-      transition: all 2s ease-in-out;
-  }
-   .titan .c2 {
-      height: 10rem;
-      width: 10rem;
-      transition: all 2s ease-in-out;
-  }
-   .titan .c3 {
-      height: 12rem;
-      width: 12rem;
-      transition: all 1s ease-in-out 1s;
-  }
-   .titan .c4 {
-      height: 11rem;
-      width: 11rem;
-      transition: all 1s ease-in-out 1s;
-  }
-   .titan .shape_group .shape {
-      transition: transform 2s ease-in-out;
-  }
-   .titan .shape_group .shape.s1 {
-      transform: rotate(-90deg) scale(0.535) translate(-3.1rem, -2.5rem);
-  }
-   .titan .shape_group .shape.s2 {
-      transform: rotate(270deg) scale(0.535) translate(3.1rem, -2.5rem);
-  }
-   .titan .shape_group .shape.s3 {
-      transform: rotate(270deg) scale(0.485) translate(0, 3rem);
-  }
-   .titan .shape_group .shape.s4 {
-      transform: rotate(90deg) scale(0.485) translate(0, 3rem);
-  }
-   .titan .shape_group .shape.s5 {
-      transform: rotate(450deg) scale(0.535) translate(-3.1rem, -2.4rem);
-  }
-   .titan .shape_group .shape.s6 {
-      transform: rotate(450deg) scale(0.535) translate(3.1rem, -2.4rem);
-  }
-   .titan .line_group {
-      transition: all 2s ease-in-out;
-  }
-   .titan .line_group .line {
-      transition: all 2s ease-in-out;
-  }
-   .titan .line_group.g1 {
-      height: 15rem;
-      width: 5.25rem;
-      transform: rotate(-180deg);
-  }
-   .titan .line_group.g1 .l2, .titan .line_group.g1 .l3 {
-      opacity: 0;
-  }
-   .titan .line_group.g2 {
-      height: 15rem;
-       width: 5.5rem;
-      transform: rotate(-240deg);
-  }
-   .titan .line_group.g2 .l1 {
-      left: 0%;
-  }
-   .titan .line_group.g2 .l2 {
-      left: 48%;
-  }
-   .titan .line_group.g2 .l3 {
-      left: 52%;
-  }
-   .titan .line_group.g2 .l4 {
-      left: 100%;
-  }
-   .titan .line_group.g3 {
-      height: 15rem;
-      width: 5.5rem;
-      transform: rotate(240deg);
-  }
-   .titan .line_group.g3 .l1 {
-      left: 0%;
-  }
-   .titan .line_group.g3 .l2 {
-      left: 48%;
-  }
-   .titan .line_group.g3 .l3 {
-      left: 52%;
-  }
-   .titan .line_group.g3 .l4 {
-      left: 100%;
-  }
-   .hunter .c1 {
-      height: 5.5rem;
-      width: 5.5rem;
-      transition: all 2s ease-in-out;
-  }
-   .hunter .c2 {
-      height: 4rem;
-      width: 4rem;
-      transition: all 2s ease-in-out;
-  }
-   .hunter .c3 {
-      height: 9rem;
-      width: 9rem;
-      transition: all 2s ease-in-out;
-  }
-   .hunter .c4 {
-      height: 8rem;
-      width: 8rem;
-      transition: all 2s ease-in-out;
-  }
-   .hunter .shape_group {
-      transition: height 2s ease-in-out;
-      height: 6rem;
-  }
-   .hunter .shape_group .shape {
-      transition: all 2s ease-in-out, border-bottom-color 0.75s ease-in 1.25s;
-  }
-   .hunter .shape_group .shape.s1 {
-      transform: rotate(0deg) scale(0.83) translate(0, 1.2rem);
-  }
-   .hunter .shape_group .shape.s2 {
-      transform: rotate(360deg) scale(0.83) translate(0, -3.6rem);
-  }
-   .hunter .shape_group .shape.s3 {
-      transform: rotate(360deg) scale(0.83) translate(0, -1.2rem);
-  }
-   .hunter .shape_group .shape.s4 {
-      border-bottom-color: #030303;
-      transform: rotate(0deg) scale(0.4) translate(0, 0);
-  }
-   .hunter .shape_group .shape.s5 {
-      border-bottom-color: #030303;
-      transform: rotate(360deg) scale(0.4) translate(0, -5rem);
-  }
-   .hunter .shape_group .shape.s6 {
-      border-bottom-color: #030303;
-      transform: rotate(360deg) scale(0.4) translate(0, 5rem);
-  }
-   .hunter .line_group {
-      transition: all 2s ease-in-out;
-  }
-   .hunter .line_group .line {
-      transition: all 2s ease-in-out;
-  }
-   .hunter .line_group.g1 {
-      height: 15rem;
-      width: 6rem;
-      transform: rotate(-270deg);
-  }
-   .hunter .line_group.g2 {
-      height: 15rem;
-      width: 5rem;
-      transform: rotate(-330deg);
-  }
-   .hunter .line_group.g2 .l1 {
-      left: 0%;
-  }
-   .hunter .line_group.g2 .l2 {
-      left: 20%;
-  }
-   .hunter .line_group.g2 .l3 {
-      left: 40%;
-      z-index: -1;
-  }
-   .hunter .line_group.g2 .l4 {
-      left: 60%;
-      z-index: -1;
-  }
-   .hunter .line_group.g3 {
-      height: 15rem;
-      width: 5rem;
-      transform: rotate(330deg);
-  }
-   .hunter .line_group.g3 .l1 {
-      left: 40%;
-  }
-   .hunter .line_group.g3 .l2 {
-      left: 60%;
-  }
-   .hunter .line_group.g3 .l3 {
-      left: 80%;
-  }
-   .hunter .line_group.g3 .l4 {
-      left: 100%;
-  }
-   .startup .c1 {
-      height: 10rem;
-      width: 10rem;
-      transition: all 0s ease-in-out;
-  }
-   .startup .c2 {
-      height: 9rem;
-      width: 9rem;
-      transition: all 0s ease-in-out;
-  }
-   .startup .c3 {
-      height: 9rem;
-      width: 9rem;
-      transition: all 0s ease-in-out;
-  }
-   .startup .c4 {
-      height: 8rem;
-      width: 8rem;
-      transition: all 0s ease-in-out;
-  }
-   .startup .shape_group {
-      transition: height 0s ease-in-out;
-  }
-   .startup .shape_group .shape {
-      transition: transform 0s ease-in-out, border-bottom-color 0s ease-in 0s;
-       border-bottom-color: #030303;
-      transform: rotate(180deg);
-  }
-   .startup .line_group {
-      transition: all 0s ease-in-out;
-  }
-   .startup .line_group .line {
-      transition: all 2s ease-in-out;
-  }
-   .startup .line_group.g1 {
-      height: 15rem;
-      width: 6rem;
-  }
-   .startup .line_group.g2 {
-      height: 15rem;
-      width: 7.75rem;
-      transform: rotate(-60deg);
-  }
-   .startup .line_group.g3 {
-      height: 15rem;
-      width: 7.75rem;
-      transform: rotate(60deg);
-  }
-   @media only screen and (max-width: 600px) {
-       html {
-           font-size: 16px;
-      } }
+      * {      box-sizing: border-box;  }   html {      font-size: 24px;  }   body {      margin: 0;       min-height: 100vh;       display: grid;      place-items: center;       background: #030303;  }   .container {      position: relative;      display: flex;      align-items: center;      justify-content: center;       height: 14rem;       width: 14rem;  }   .circle {      position: absolute;      border-radius: 50%;      border: 1px solid #7d7d7d;       z-index: 1;       background-color: transparent;  }   .shape_group {      position: absolute;      display: grid;      place-items: center;      height: 8rem;      width: 8rem;      overflow: hidden;  }   .shape_group .shape {      position: absolute;      border-left: 2.85rem solid transparent;      border-right: 2.85rem solid transparent;       border-bottom: 4.9rem solid #7d7d7d;  }   .line_group {      position: absolute;  }   .line_group .line {      position: absolute;      height: 100%;      width: 1px;       background: linear-gradient(to bottom, transparent 0%, #7d7d7d 20%, #7d7d7d 70%, transparent 100%);  }   .line_group .line.l1 {      left: 0;  }   .line_group .line.l2 {      left: 33%;  }   .line_group .line.l3 {      left: 67%;  }   .line_group .line.l4 {      left: 100%;  }   .default .c1 {      height: 10rem;      width: 10rem;      transition: all 2s ease-in-out;  }   .default .c2 {      height: 9rem;      width: 9rem;      transition: all 2s ease-in-out;  }   .default .c3 {      height: 9rem;      width: 9rem;      transition: all 2s ease-in-out;  }   .default .c4 {      height: 8rem;      width: 8rem;      transition: all 2s ease-in-out;  }   .default .shape_group {      transition: height 2s ease-in-out;  }   .default .shape_group .shape {      transition: transform 2s ease-in-out, border-bottom-color 0.75s ease-in 1.25s;       border-bottom-color: #030303;      transform: rotate(180deg);  }   .default .line_group {      transition: all 2s ease-in-out;  }   .default .line_group .line {      transition: all 2s ease-in-out;  }   .default .line_group.g1 {      height: 15rem;      width: 6rem;  }   .default .line_group.g2 {      height: 15rem;      width: 7.75rem;      transform: rotate(-60deg);  }   .default .line_group.g3 {      height: 15rem;      width: 7.75rem;      transform: rotate(60deg);  }   .warlock .c1 {      height: 6.25rem;      width: 6.25rem;       transition: all 2s ease-in-out;  }   .warlock .c2 {      height: 4rem;      width: 4rem;       transition: all 2s ease-in-out;  }   .warlock .c3 {      height: 12.5rem;      width: 12.5rem;       transition: all 1s ease-in-out 1s;  }   .warlock .c4 {      height: 11.5rem;      width: 11.5rem;       transition: all 1s ease-in-out 1s;  }   .warlock .shape_group .shape {      transition: transform 2s ease-in-out, border-bottom-color 0.75s ease-in 1.25s;  }   .warlock .shape_group .shape.s1, .warlock .shape_group .shape.s4 {      transform: rotate(0) translate(-1.15rem, 0.5rem);  }   .warlock .shape_group .shape.s2, .warlock .shape_group .shape.s5 {      transform: rotate(360deg) translate(0, 0.5rem);  }   .warlock .shape_group .shape.s3, .warlock .shape_group .shape.s6 {      transform: rotate(360deg) translate(1.15rem, 0.5rem);  }   .warlock .line_group {      transition: all 2s ease-in-out;  }   .warlock .line_group .line {      transition: all 2s ease-in-out;       box-shadow: 0 0 0 2px #030303;  }   .warlock .line_group.g1 {      height: 15rem;      width: 6rem;      transform: rotate(-90deg);  }   .warlock .line_group.g1 .l2, .warlock .line_group.g1 .l3 {      opacity: 0;  }   .warlock .line_group.g2 {      height: 15rem;      width: 4rem;      transform: rotate(-150deg);  }   .warlock .line_group.g2 .l1 {      left: 50%;  }   .warlock .line_group.g2 .l2 {      left: 74%;  }   .warlock .line_group.g2 .l3 {      left: 77%;  }   .warlock .line_group.g2 .l4 {      left: 100%;  }   .warlock .line_group.g3 {      height: 15rem;      width: 4rem;      transform: rotate(150deg);  }   .warlock .line_group.g3 .l1 {      left: 0%;  }   .warlock .line_group.g3 .l2 {      left: 24%;  }   .warlock .line_group.g3 .l3 {      left: 27%;  }   .warlock .line_group.g3 .l4 {      left: 50%;  }   .titan .c1 {      height: 10.5rem;      width: 10.5rem;      transition: all 2s ease-in-out;  }   .titan .c2 {      height: 10rem;      width: 10rem;      transition: all 2s ease-in-out;  }   .titan .c3 {      height: 12rem;      width: 12rem;      transition: all 1s ease-in-out 1s;  }   .titan .c4 {      height: 11rem;      width: 11rem;      transition: all 1s ease-in-out 1s;  }   .titan .shape_group .shape {      transition: transform 2s ease-in-out;  }   .titan .shape_group .shape.s1 {      transform: rotate(-90deg) scale(0.535) translate(-3.1rem, -2.5rem);  }   .titan .shape_group .shape.s2 {      transform: rotate(270deg) scale(0.535) translate(3.1rem, -2.5rem);  }   .titan .shape_group .shape.s3 {      transform: rotate(270deg) scale(0.485) translate(0, 3rem);  }   .titan .shape_group .shape.s4 {      transform: rotate(90deg) scale(0.485) translate(0, 3rem);  }   .titan .shape_group .shape.s5 {      transform: rotate(450deg) scale(0.535) translate(-3.1rem, -2.4rem);  }   .titan .shape_group .shape.s6 {      transform: rotate(450deg) scale(0.535) translate(3.1rem, -2.4rem);  }   .titan .line_group {      transition: all 2s ease-in-out;  }   .titan .line_group .line {      transition: all 2s ease-in-out;  }   .titan .line_group.g1 {      height: 15rem;      width: 5.25rem;      transform: rotate(-180deg);  }   .titan .line_group.g1 .l2, .titan .line_group.g1 .l3 {      opacity: 0;  }   .titan .line_group.g2 {      height: 15rem;       width: 5.5rem;      transform: rotate(-240deg);  }   .titan .line_group.g2 .l1 {      left: 0%;  }   .titan .line_group.g2 .l2 {      left: 48%;  }   .titan .line_group.g2 .l3 {      left: 52%;  }   .titan .line_group.g2 .l4 {      left: 100%;  }   .titan .line_group.g3 {      height: 15rem;      width: 5.5rem;      transform: rotate(240deg);  }   .titan .line_group.g3 .l1 {      left: 0%;  }   .titan .line_group.g3 .l2 {      left: 48%;  }   .titan .line_group.g3 .l3 {      left: 52%;  }   .titan .line_group.g3 .l4 {      left: 100%;  }   .hunter .c1 {      height: 5.5rem;      width: 5.5rem;      transition: all 2s ease-in-out;  }   .hunter .c2 {      height: 4rem;      width: 4rem;      transition: all 2s ease-in-out;  }   .hunter .c3 {      height: 9rem;      width: 9rem;      transition: all 2s ease-in-out;  }   .hunter .c4 {      height: 8rem;      width: 8rem;      transition: all 2s ease-in-out;  }   .hunter .shape_group {      transition: height 2s ease-in-out;      height: 6rem;  }   .hunter .shape_group .shape {      transition: all 2s ease-in-out, border-bottom-color 0.75s ease-in 1.25s;  }   .hunter .shape_group .shape.s1 {      transform: rotate(0deg) scale(0.83) translate(0, 1.2rem);  }   .hunter .shape_group .shape.s2 {      transform: rotate(360deg) scale(0.83) translate(0, -3.6rem);  }   .hunter .shape_group .shape.s3 {      transform: rotate(360deg) scale(0.83) translate(0, -1.2rem);  }   .hunter .shape_group .shape.s4 {      border-bottom-color: #030303;      transform: rotate(0deg) scale(0.4) translate(0, 0);  }   .hunter .shape_group .shape.s5 {      border-bottom-color: #030303;      transform: rotate(360deg) scale(0.4) translate(0, -5rem);  }   .hunter .shape_group .shape.s6 {      border-bottom-color: #030303;      transform: rotate(360deg) scale(0.4) translate(0, 5rem);  }   .hunter .line_group {      transition: all 2s ease-in-out;  }   .hunter .line_group .line {      transition: all 2s ease-in-out;  }   .hunter .line_group.g1 {      height: 15rem;      width: 6rem;      transform: rotate(-270deg);  }   .hunter .line_group.g2 {      height: 15rem;      width: 5rem;      transform: rotate(-330deg);  }   .hunter .line_group.g2 .l1 {      left: 0%;  }   .hunter .line_group.g2 .l2 {      left: 20%;  }   .hunter .line_group.g2 .l3 {      left: 40%;      z-index: -1;  }   .hunter .line_group.g2 .l4 {      left: 60%;      z-index: -1;  }   .hunter .line_group.g3 {      height: 15rem;      width: 5rem;      transform: rotate(330deg);  }   .hunter .line_group.g3 .l1 {      left: 40%;  }   .hunter .line_group.g3 .l2 {      left: 60%;  }   .hunter .line_group.g3 .l3 {      left: 80%;  }   .hunter .line_group.g3 .l4 {      left: 100%;  }   .startup .c1 {      height: 10rem;      width: 10rem;      transition: all 0s ease-in-out;  }   .startup .c2 {      height: 9rem;      width: 9rem;      transition: all 0s ease-in-out;  }   .startup .c3 {      height: 9rem;      width: 9rem;      transition: all 0s ease-in-out;  }   .startup .c4 {      height: 8rem;      width: 8rem;      transition: all 0s ease-in-out;  }   .startup .shape_group {      transition: height 0s ease-in-out;  }   .startup .shape_group .shape {      transition: transform 0s ease-in-out, border-bottom-color 0s ease-in 0s;       border-bottom-color: #030303;      transform: rotate(180deg);  }   .startup .line_group {      transition: all 0s ease-in-out;  }   .startup .line_group .line {      transition: all 2s ease-in-out;  }   .startup .line_group.g1 {      height: 15rem;      width: 6rem;  }   .startup .line_group.g2 {      height: 15rem;      width: 7.75rem;      transform: rotate(-60deg);  }   .startup .line_group.g3 {      height: 15rem;      width: 7.75rem;      transform: rotate(60deg);  }  @media only screen and (max-width: 600px) { html { font-size: 16px; } }
       </style>
     </head>
     <body>
@@ -653,16 +226,36 @@ export function getPreload(url){
     </body></html>`
 }
 
-export function unauthenticatedPanel(){
-    return `<a href="https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections">Login thx</a>`;
+export function landingPage(){
+    return `
+    <head>
+        <title>Venerity</title>
+        <link rel="stylesheet" href="/resource/landing.css">
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+    </head>
+    <body>
+        <h1>Venerity</h1>
+        <a class="btn blurple" id="login-link" href="https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections">Login with Discord</a>
+    </body>`;
 }
 
 export function logout(){
     return `
-    <p>Logged out, redirecting...</p>
-    <script>
-    setTimeout(()=>{
-        window.location = "/panel";
-    },2000);
-    </script>`;
+    <head>
+        <title>Venerity</title>
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+        <style>
+            body {
+                background-color: #030303;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Logged out, redirecting...</p>
+        <script>
+        setTimeout(()=>{
+            window.location = "/panel";
+        },2000);
+        </script>
+    </body>`;
 }
