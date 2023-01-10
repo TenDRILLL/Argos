@@ -23,6 +23,7 @@ body {
    -ms-user-select: none;
    -o-user-select: none;
    user-select: none;
+   align-content: flex-start;
 }
 #completions {
    display: flex;
@@ -44,7 +45,9 @@ body {
    display: flex;
    flex-direction: column;
    font-family: "Open Sans",sans-serif,"Destiny Symbols";
-   margin: 0 15px
+   margin: 0 15px;
+   height: fit-content;
+   margin-bottom: 20px;
 }
 .characterBanner {
    background-size: cover;
