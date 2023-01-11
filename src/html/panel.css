@@ -15,6 +15,7 @@ body {
 #characters {
    display: flex;
    flex-direction: row;
+   flex-wrap: wrap;
    margin: 20px 5px;
    -webkit-user-select: none;
    -khtml-user-select: none;
@@ -22,6 +23,7 @@ body {
    -ms-user-select: none;
    -o-user-select: none;
    user-select: none;
+   align-content: flex-start;
 }
 #completions {
    display: flex;
@@ -43,7 +45,9 @@ body {
    display: flex;
    flex-direction: column;
    font-family: "Open Sans",sans-serif,"Destiny Symbols";
-   margin: 0 15px
+   margin: 0 15px;
+   height: fit-content;
+   margin-bottom: 20px;
 }
 .characterBanner {
    background-size: cover;
@@ -130,6 +134,7 @@ button {
 h1 {
    margin: 0;
    align-self: center;
+   white-space: nowrap;
 }
 th {
    border: solid 1px red;
