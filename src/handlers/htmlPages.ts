@@ -3,6 +3,7 @@ import { characterInventoryQuery, CharacterQuery } from "../props/characterQuery
 import { DBUser } from "../props/dbUser";
 import { RawManifestQuery } from "../props/manifest";
 import { crypt, sortActivities} from "./utils";
+import "dotenv/config";
 
 export function getPanelPage(d2client, ID, d, discordUser) {
     return new Promise(async (res,rej)=>{
@@ -150,7 +151,7 @@ export function choosePlatformhtml(platforms) {
         <body>
         <ul><h1>Choose a platform to use</h1><div class="container">`;
         platforms.forEach(x => {
-            const acc = crypt("malahayati",`${x.membershipType}/seraph/${x.membershipId}`);
+            const acc = crypt(process.env.argosRegisterPassword as string,`${x.membershipType}/seraph/${x.membershipId}`);
             endResult += `<div><a href="/register/${acc}">
                         <img src=${icons[x.membershipType]}>
                         <h2>${x.displayName}</h2>

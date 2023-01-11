@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-
+import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
 import {Client} from "discord-http-interactions";
 import {
@@ -103,7 +103,7 @@ dcclient.on("db",(req,res)=>{
     if(req.params.id === undefined) {
         res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0 0 0;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
     } else {
-        const dID = decrypt("zavala",req.params.id);
+        const dID = decrypt(process.env.argosIdPassword as string,req.params.id);
         if(d2client.DB.has(dID)){
             res.json(d2client.DB.get(dID));
         } else {
@@ -132,7 +132,7 @@ dcclient.on("oauth", (req,res)=>{
             GetDiscordOauthExchange(urlData.code).then(dcdata => {
                 d2client.DB.set(dcdata.user.id,dcdata.user,"discordUser");
                 d2client.DB.set(dcdata.user.id,dcdata.tokens,"discordTokens");
-                return res.cookie("conflux", crypt("zavala", dcdata.user.id)).redirect("/panel");
+                return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcdata.user.id)).redirect("/panel");
             }).catch(e => {
                 return res.send(e.message);
             });
@@ -150,8 +150,8 @@ dcclient.on("register",(req, res)=>{
     if(req.params.account === undefined || req.cookies["conflux"] === undefined){
         return res.send("You should not be here on your own.");
     }
-    const account = decrypt("malahayati",req.params.account).split("/seraph/");
-    const discordID = decrypt("zavala",req.cookies["conflux"]);
+    const account = decrypt(process.env.argosRegisterPassword as string,req.params.account).split("/seraph/");
+    const discordID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
     if(account.length !== 2) return res.send("You should not be here on your own.");
     //Account 0 = type
     //Account 1 = id
@@ -180,7 +180,7 @@ dcclient.on("panelPreload",(req,res)=>{
 dcclient.on("panel",(req,res)=>{
     let discID = "";
     if(req.cookies["conflux"]){
-        discID = decrypt("zavala",req.cookies["conflux"]);
+        discID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
     }
     if(d2client.DB.has(discID)){
         d2client.dbUserUpdater.updateStats(discID).then((data)=>{

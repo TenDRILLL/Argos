@@ -44,7 +44,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 discordTokens: dcdata.tokens,
                                 discordUser: dcdata.user
                             });
-                            res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
                             dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
                                 if(!member) return;
                                 //@ts-ignore
@@ -72,7 +72,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     discordTokens: dcdata.tokens,
                                     discordUser: dcdata.user
                                 });
-                                res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                                res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
                                 dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
                                     if(!member) return;
                                     //@ts-ignore
@@ -98,7 +98,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 discordUser: dcdata.user
                             });
                             const endResult = choosePlatformhtml(reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}))
-                            res.cookie("conflux",crypt("zavala",dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
+                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
                                 .send(endResult);
                         }
                     }).catch(e => console.log(e));
