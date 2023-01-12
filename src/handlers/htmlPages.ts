@@ -20,14 +20,20 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                 characterId: char.characterId}))
         })
         const characters: characterInventoryQuery[] = (await Promise.all(promises)).map(e => e.Response as characterInventoryQuery);
-        let ans = `
-<head>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/resource/panel.css">
-  <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
-  <title>Venerity</title>
-</head>
-<body>
+        let ans = `<!DOCTYPE html>
+        <html lang="en">
+    <head>
+        <meta content="Venerity panel" property="og:title" />
+        <meta content="https://api.venerity.xyz/api/panel" property="og:url" />
+        <meta content="https://cdn.discordapp.com/attachments/1045010061799460864/1062832377262526535/crotalogo.jpg" property="og:image" />
+        <meta content="#ae27ff" data-react-helmet="true" name="theme-color" />
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/resource/panel.css">
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+        <title>Venerity</title>
+    </head>
+    <body>
     <nav>
         <ul>
             <li class="dc">
@@ -131,7 +137,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         ans += `</table>`;
         ans += `</div>
     </div>
-    </body>`;
+    </body></html>`;
         res(ans);
     });
 }
@@ -142,7 +148,8 @@ export function choosePlatformhtml(platforms) {
                             "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
                             "","",
                             "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
-        let endResult = `
+        let endResult = `<!DOCTYPE html>
+        <html lang="en">
         <head>
             <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
             <title>Venerity</title>
@@ -157,14 +164,18 @@ export function choosePlatformhtml(platforms) {
                         <h2>${x.displayName}</h2>
                         </a></div>`
         });
-        endResult += "</div> </ul> </body>";
+        endResult += "</div> </ul> </body> </html>";
         return endResult;
 }
 
 export function getPreload(url){
     return `<!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+    <meta content="Venerity panel" property="og:title" />
+    <meta content="https://api.venerity.xyz/panel" property="og:url" />
+    <meta content="https://cdn.discordapp.com/attachments/1045010061799460864/1062832377262526535/crotalogo.jpg" property="og:image" />
+    <meta content="#ae27ff" data-react-helmet="true" name="theme-color" />
       <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
       <title>Loading...</title>
       <style>
@@ -229,7 +240,8 @@ export function getPreload(url){
 }
 
 export function landingPage(){
-    return `
+    return `<!DOCTYPE html>
+    <html lang="en">
     <head>
         <title>Venerity</title>
         <link rel="stylesheet" href="/resource/landing.css">
@@ -238,11 +250,12 @@ export function landingPage(){
     <body>
         <h1>Venerity</h1>
         <a class="btn blurple" id="login-link" href="https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections">Login with Discord</a>
-    </body>`;
+    </body></html>`;
 }
 
 export function logout(){
-    return `
+    return `<!DOCTYPE html>
+    <html lang="en">
     <head>
         <title>Venerity</title>
         <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
@@ -259,5 +272,5 @@ export function logout(){
             window.location = "/panel";
         },2000);
         </script>
-    </body>`;
+    </body></html>`;
 }
