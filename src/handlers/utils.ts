@@ -310,18 +310,24 @@ export function fetchPendingClanRequests(dcclient, d2client) {
     });
 }
 
-export function sortActivities(activities: ActivityObject): string[] {
+export function sortActivities(activities: ActivityObject): Map<string, string[]> {
     const sorted = Object.keys(activities).sort((a,b) => activities[b]-activities[a]);
-    const size = sorted.filter(a => activities[a] !== 0).length;
-    const ans: string[] = [];
+    const size = sorted.filter(a => activities[a] !== 0 && (!a.endsWith("Master") && !a.endsWith("Prestige"))).length;
+
+    const ans: Map<string, string[]> = new Map();
+    sorted.filter(b => !b.endsWith("Master") && !b.endsWith("Prestige")).forEach(e => {
+        ans[e] = [];
+    })
     let i = 0
-    while (ans.length !== size) {
-        ans.push(sorted[i]);
+    while (i !== size) {
+        ans[sorted[i]].push(activities[sorted[i]] as unknown as string)
         if (sorted.includes(`${sorted[i]}, Master`)) {
-            ans.push(`${sorted[i]}, Master`);
+            ans[sorted[i]].push(`Master`);
+            ans[sorted[i]].push(activities[`${sorted[i]}, Master`]);
         }
         if (sorted.includes(`${sorted[i]}, Prestige`)) {
-            ans.push(`${sorted[i]}, Prestige`);
+            ans[sorted[i]].push(`Prestige`);
+            ans[sorted[i]].push(activities[`${sorted[i]}, Prestige`]);
         }
         i += 1;
     }

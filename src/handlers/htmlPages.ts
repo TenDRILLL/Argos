@@ -102,39 +102,77 @@ export function getPanelPage(d2client, ID, d, discordUser) {
     </div>`});
         ans += "</div>";
         ans += `<div id="completions">`;
-        ans += `<table class="completionTable">
-    <thead><tr><th colspan="2">Raid completions</th></tr></thead>`;
-        sortActivities(DBData.raids).forEach(raid => {
-            if (DBData.raids[raid] !== 0 || raid === "Total") {
-                ans += `<tbody><tr>
-                <td class="raidName">${raid}</td>
-                <td class="raidAmount">${DBData.raids[raid]}</td>
-                </tr></tbody>`
+        ans += `<div class="completionDiv">`;
+        ans += `<div class="completionTitle">
+                     <h4><b><u>Raid completions</u></b></h4>
+                </div>`;
+        ans += `<div class="completionTotal">
+                     <b>Total: ${DBData.raids["Total"]}</b>
+                </div>
+                <div class="completionGrid">`
+        const raids = sortActivities(DBData.raids);
+        Object.keys(raids).forEach(raid=> {
+            if (DBData.raids[raid] !== 0 && raid !== "Total") {
+                ans += `<div>
+                            <b>${raid}</b>
+                            <div class="tooltipContainer">${raids[raid].length === 1 ? `${DBData.raids[raid]}` : `${DBData.raids[raid]}*`}
+                                ${ raids[raid].length === 1 ? "" :
+                                    `<div class="tooltiptext">
+                                        <p>Normal: ${raids[raid][0] - raids[raid][2]}</p>
+                                        <p>${raids[raid][1]}: ${raids[raid][2]}</p>
+                                    </div>`
+                                }
+                            </div>
+                        </div>`
             }
         });
-        ans += `</table>`;
-        ans += `<table class="completionTable">
-    <thead><tr><th colspan="2">Dungeon completions</th></tr></thead>`;
-    sortActivities(DBData.dungeons).forEach(dungeon => {
-            if (DBData.dungeons[dungeon] !== 0 || dungeon === "Total") {
-                ans += `<tbody><tr>
-            <td class="raidName">${dungeon}</td>
-            <td class="raidAmount">${DBData.dungeons[dungeon]}</td>
-            </tr></tbody>`
+        ans += "</div> </div>";
+        ans += `<div class="completionDiv">`;
+        ans += `<div class="completionTitle">
+                     <h4><b><u>Dungeon completions</u></b></h4>
+                </div>`;
+        ans += `<div class="completionTotal">
+                     <b>Total: ${DBData.dungeons["Total"]}</b>
+                </div>
+                <div class="completionGrid">`
+    const dungeons = sortActivities(DBData.dungeons);
+    Object.keys(dungeons).forEach(dungeon => {
+            if (DBData.dungeons[dungeon] !== 0 && dungeon !== "Total") {
+                ans += `<div>
+                        <b>${dungeon}</b>
+                        <div class="tooltipContainer">${dungeons[dungeon].length === 1 ? `${DBData.dungeons[dungeon]}` : `${DBData.dungeons[dungeon]}*`}
+                            ${ dungeons[dungeon].length === 1 ? "" :
+                                `<div class="tooltiptext">
+                                    <p>Normal: ${dungeons[dungeon][0] - dungeons[dungeon][2]}</p>
+                                    <p>${dungeons[dungeon][1]}: ${dungeons[dungeon][2]}</p>
+                        </div>`
+                    }
+                </div>
+            </div>`
             }
         });
-        ans += `</table>`
-        ans += `<table class="completionTable">
-    <thead><tr><th colspan="2">Grandmaster completions</th></tr></thead>`;
-    sortActivities(DBData.grandmasters).forEach(gm => {
-            if (DBData.grandmasters[gm] !== 0 || gm === "Total") {
-                ans += `<tbody><tr>
-                <td class="raidName">${gm}</td>
-                <td class="raidAmount">${DBData.grandmasters[gm]}</td>
-                </tr></tbody>`
+        ans += "</div> </div>";
+        ans += `<div class="completionDiv">`;
+        ans += `<div class="completionTitle">
+                     <h4><b><u>Grandmaster completions</u></b></h4>
+                </div>`;
+        ans += `<div class="completionTotal">
+                     <b>Total: ${DBData.grandmasters["Total"]}</b>
+                </div>
+                <div class="completionGrid">`
+    const gms = sortActivities(DBData.grandmasters);
+    Object.keys(gms).forEach(gm => {
+            if (DBData.grandmasters[gm] !== 0 && gm !== "Total") {
+                ans += `
+                        <div>
+                            <b>${gm}</b>
+                            <div class="tooltipContainer">${DBData.grandmasters[gm]}
+                            </div>
+                        </div>`
             }
         });
-        ans += `</table>`;
+        ans += `
+        </div> </div>`;
         ans += `</div>
     </div>
     </body></html>`;

@@ -57,8 +57,70 @@ body {
    width: 208px;
    height: 46px;
 }
-.completionTable {
-   margin: 2px;
+.completionDiv {
+   display: flex;
+   flex-direction: column;
+   margin: 0 20px;
+}
+.completionTitle {
+   display: flex;
+   flex-direction: row;
+   height: 30px;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+}
+.completionTotal {
+   display: flex;
+   flex-direction: row;
+   height: 30px;
+   justify-content: center;
+   align-items: center;
+}
+.completionTotal * {
+   margin-right: 5px;
+   margin-left: 5px;
+}
+.completionGrid {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   width: 200px;
+   height: fit-content;
+   justify-items: end;
+}
+.completionGrid div {
+   width: 100px;
+   height: 80px;
+   text-align: center;
+   display: flex;
+   flex-direction: column;
+}
+.completionGrid div:last-child {
+   grid-column-end: -1;
+}
+.completionGrid div .tooltipContainer:hover .tooltiptext {
+   visibility: visible;
+}
+.tooltiptext {
+   visibility: hidden;
+   background-color: #030303;
+   opacity: 0.8;
+   color: #fff;
+   margin-bottom: -80px;
+   border-radius: 6px;
+   right: 60px;
+   position: relative;
+   justify-content: center;
+   z-index: 1;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   -o-user-select: none;
+   user-select: none;
+   }
+.tooltiptext p {
+   margin: 5px;
 }
 .raidName {
    padding-top: 10px 30px 10px 30px;
