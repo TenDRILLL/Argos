@@ -128,7 +128,6 @@ ${activityObject[activity]} - ${activityIdentifiers.get(activity)["difficultName
             else {
                 rows[j % number]["value"] += `**${activity}**
 ${activityObject[activity]}
-
 `
                 }
             delete ordered[0];

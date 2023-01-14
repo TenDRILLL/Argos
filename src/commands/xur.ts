@@ -1,17 +1,16 @@
 import { getWeaponInfo } from "../handlers/utils";
 import { CharacterQuery } from "../props/characterQuery";
-import { entityQuery } from "../props/entityQuery";
 import {vendorQuery, vendorSaleComponent} from "../props/vendorQuery";
 import Command from "./Command";
 import {Embed} from "discord-http-interactions";
+import { entityQuery } from "../props/entityQuery";
 
-export default class Xur extends Command {
+export default class xur extends Command {
     constructor(){
         super("xur");
     }
 
     async cmdRun(interaction, d2client){
-        await interaction.defer();
         d2client.refreshToken(d2client.adminuserID).then(q => {
             d2client.apiRequest("getDestinyCharacters", {
                 membershipType: 3,

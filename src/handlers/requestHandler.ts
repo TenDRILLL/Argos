@@ -268,7 +268,7 @@ export class requestHandler {
                 this.apiRequest("getBungieProfile",{id}).then(profile => {
                     const reply = profile.Response as BungieProfile;
                     let membershipType;
-                    if(reply.steamDisplayName){membershipType = 3} else if(reply.xboxDisplayName){membershipType = 1} else if(reply.psnDisplayName){membershipType = 2} else if(reply.egsDisplayName){membershipType = 6} else {return;}
+                    if(reply.steamDisplayName){membershipType = 3} else if(reply.xboxDisplayName){membershipType = 1} else if(reply.psnDisplayName){membershipType = 2} else {return;}
                     this.apiRequest("getBungieLinkedProfiles",{membershipType, membershipId: id}).then(resp => {
                         const reply = resp.Response as LinkedProfileResponse;
                         const primary = reply.profiles.find(x => x.isCrossSavePrimary);
