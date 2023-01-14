@@ -11,6 +11,7 @@ export default class xur extends Command {
     }
 
     async cmdRun(interaction, d2client){
+        interaction.defer();
         d2client.refreshToken(d2client.adminuserID).then(q => {
             d2client.apiRequest("getDestinyCharacters", {
                 membershipType: 3,
@@ -34,7 +35,8 @@ export default class xur extends Command {
                     }).catch(e => {
                         console.log(`Xur isn't anywhere / something went wrong ${e}`)
                         interaction.editReply({
-                            content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him`,
+                            content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him
+${e}`,
                             ephemeral: true
                         }).catch(e => console.log(e));
                     });
