@@ -5,6 +5,7 @@ requests.set("getBungieProfile","/User/GetBungieNetUserById/id");
 requests.set("getBungieLinkedProfiles","/Destiny2/membershipType/Profile/membershipId/LinkedProfiles");
 requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMembershipId/Stats/");
 requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=1100");
+requests.set("getDestinyInventory", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/?components=200")
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
 requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/UniqueWeapons");
 requests.set("getEntity","/Destiny2/Manifest/DestinyInventoryItemDefinition/hashIdentifier/");

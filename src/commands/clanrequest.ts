@@ -36,7 +36,7 @@ export default class ClanRequest extends Command {
                         }).catch(e => {
                             interaction.reply({
                                 content: e.toString() ?? "Unknown error.",
-                                flags: 64
+                                ephemeral: true
                             });
                         });
                         break;
@@ -55,14 +55,14 @@ export default class ClanRequest extends Command {
                         }).catch(e => {
                             interaction.reply({
                                 content: e.toString() ?? "Unknown error.",
-                                flags: 64
+                                ephemeral: true
                             });
                         });
                         break;
                     default:
                         interaction.reply({
                             content: `${action} is not a valid action to perform.`,
-                            flags: 64
+                            ephemeral: true
                         });
                 }
             });
@@ -78,12 +78,12 @@ export default class ClanRequest extends Command {
         if(d.Response["ErrorCode"] === 1){
             interaction.reply({
                 content: "Accepted.",
-                flags: 64
+                ephemeral: true
             });
         } else {
             interaction.reply({
                 content: JSON.stringify(d),
-                flags: 64
+                ephemeral: true
             });
         }
         interaction.delete(interaction.message.id);

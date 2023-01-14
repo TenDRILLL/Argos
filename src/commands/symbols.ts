@@ -1,5 +1,6 @@
 import Command from "./Command";
 import symbol from "../enums/symbol";
+import {ActionRow, Button, ButtonStyle, Embed} from "discord-http-interactions";
 
 export default class Symbols extends Command {
     constructor(){
@@ -8,23 +9,45 @@ export default class Symbols extends Command {
 
     async cmdRun(interaction){
         const symbolObject = symbol[interaction.data.options[0].value];
+        const embed = new Embed()
+            .setColor(5064059)
+            .setImage(symbolObject.imageURL)
+            .setDescription(`${interaction.data.options[0].value} Symbols`)
+            .setFields([
+                {name: "Activate the symbols required to unlock the Deepsight", value: "Click the respective buttons below."}
+            ]);
 
-        const embed = {
-            color: 5064059,
-            image: {url: symbolObject.imageURL},
-            description: `${interaction.data.options[0].value} Symbols`,
-            fields: [{name: "Activate the symbols required to unlock the Deepsight", value: "Click the respective buttons below."}]
-        };
-
-        const symbolButtons: SymbolButton[] = [];
+        const symbolButtons: Button[] = [];
         for(let i = 1; i <= symbolObject.symbolCount; i++){
-            symbolButtons.push({type: 2, style: 2, custom_id: `symbols-${interaction.member.user.id}-${symbolObject.id}-${i}`, label: i.toString(), disabled: false});
+            symbolButtons.push(
+                new Button()
+                    .setStyle(ButtonStyle.Secondary)
+                    .setCustomId(`symbols-${interaction.member.user.id}-${symbolObject.id}-${i}`)
+                    .setLabel(i.toString())
+                    .setDisabled(false)
+            );
         }
 
-        const actionRows: SymbolActionRow[] = [];
-        while(symbolButtons.length > 0){actionRows.push({type: 1, components: symbolButtons.splice(0,3)})}
-        actionRows[actionRows.length-1].components = [...actionRows[actionRows.length-1].components, {custom_id: `symbols-${interaction.member.user.id}-${symbolObject.id}-confirm`, label: "Confirm", style: 1, type: 2, disabled: true}];
-        actionRows.push({type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${interaction.member.user.id}`, disabled: false}]});
+        const actionRows: ActionRow[] = [];
+        while(symbolButtons.length > 0) actionRows.push(
+            new ActionRow().setComponents(symbolButtons.splice(0,3))
+        );
+        actionRows[actionRows.length-1].addComponents([
+            new Button()
+                .setCustomId(`symbols-${interaction.member.user.id}-${symbolObject.id}-confirm`)
+                .setLabel("Confirm")
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true)
+        ]);
+        actionRows.push(
+            new ActionRow().setComponents([
+                new Button()
+                    .setLabel("Delete")
+                    .setStyle(ButtonStyle.Danger)
+                    .setCustomId(`delete-${interaction.member.user.id}`)
+                    .setDisabled(false)
+            ])
+        );
         interaction.reply({
             embeds: [embed],
             components: actionRows
@@ -32,7 +55,7 @@ export default class Symbols extends Command {
     }
 
     async btnRun(interaction) {
-        if (interaction.data.custom_id.split("-")[1] !== interaction.member.user.id) return interaction.reply({content: "Please don't touch the buttons of others.", flags: 64});
+        if (interaction.data.custom_id.split("-")[1] !== interaction.member.user.id) return interaction.reply({content: "Please don't touch the buttons of others.", ephemeral: true});
         await interaction.update();
         const symbolObject = symbol[interaction.data.custom_id.split("-")[2]];
         let selected = 0;
@@ -46,23 +69,22 @@ export default class Symbols extends Command {
             const num = parseInt(interaction.data.custom_id.split("-")[3]);
             const numTimes = Math.floor((num-1)/3);
             const button = components[numTimes].components[num-(numTimes*3)-1];
-            if(button.style === 2){
-                button.style = 1;
-                button.custom_id = `symbols-${interaction.member.user.id}-${symbolObject.id}-${num}-select`;
+            if(button.style === ButtonStyle.Secondary){
+                button.setStyle(ButtonStyle.Primary);
+                button.setCustomId(`symbols-${interaction.member.user.id}-${symbolObject.id}-${num}-select`);
                 selected++;
             } else {
-                button.style = 2;
-                button.custom_id = `symbols-${interaction.member.user.id}-${symbolObject.id}-${num}`;
+                button.setStyle(ButtonStyle.Secondary);
+                button.setCustomId(`symbols-${interaction.member.user.id}-${symbolObject.id}-${num}`);
                 selected--;
             }
             components[numTimes].components[num-(numTimes*3)-1] = button;
             components[components.length-2].components[components[components.length-2].components.length-1].disabled = selected !== symbolObject.required;
             components.forEach(actionrow => {
                 actionrow.components.forEach(button => {
-                    if(button.style === 2){
-                        button.disabled = selected === symbolObject.required;
+                    if(button.style === ButtonStyle.Secondary){
+                        button.setDisabled(selected === symbolObject.required);
                     }
-                    button.type = 2;
                 });
             });
             interaction.editReply({components: components});
@@ -71,7 +93,7 @@ export default class Symbols extends Command {
             let activityID = "";
             components.forEach(actionrow => {
                 actionrow.components.forEach(button => {
-                    if(button.style === 1){
+                    if(button.style === ButtonStyle.Primary){
                         if(activityID === "") activityID = button.custom_id.split("-")[2];
                         const num = button.custom_id.split("-")[3];
                         if(num !== "confirm") symbolIDs.push(num);
@@ -79,52 +101,33 @@ export default class Symbols extends Command {
                 });
             });
 
-            const embeds: SymbolEmbed[] = [];
+            const embeds: Embed[] = [];
             if(symbolIDs.length > 10) symbolIDs = symbolIDs.slice(0,9);
             symbolIDs.forEach(symbolNumber => {
-                embeds.push({
-                    title: `SYMBOL: ${symbolNumber}`,
-                    description: symbolObject.symbols[`${symbolNumber}`].location ?? "###LOCATION###",
-                    image: {
-                        url: symbolObject.symbols[`${symbolNumber}`].imageURL ?? "https://i.imgur.com/PygtZUa.png"
-                    }
-                });
+                embeds.push(
+                    new Embed()
+                        .setTitle(`SYMBOL: ${symbolNumber}`)
+                        .setDescription(symbolObject.symbols[`${symbolNumber}`].location ?? "###LOCATION###")
+                        .setImage(symbolObject.symbols[`${symbolNumber}`].imageURL ?? "https://i.imgur.com/PygtZUa.png")
+                );
             });
 
             interaction.editReply({
-                components: [{type: 1, components: [{type: 2, label: "Delete", style: 4, custom_id: `delete-${interaction.member.user.id}`, disabled: false}]}],
+                components: [new ActionRow().setComponents([
+                    new Button()
+                        .setLabel("Delete")
+                        .setStyle(ButtonStyle.Danger)
+                        .setCustomId(`delete-${interaction.member.user.id}`)
+                        .setDisabled(false)
+                ])],
                 embeds
             })
         }
     }
 
-
     async acRun(interaction){
         const value = interaction.data.options[0].value;
         const reply = Object.keys(symbol).filter(choice => choice.toLowerCase().startsWith(value.toLowerCase()));
-        interaction.autocomplete({
-            choices: reply.map(x => ({name: x, value: x}))
-        });
-    }
-}
-
-class SymbolButton {
-    type: number;
-    style: number;
-    custom_id: string;
-    label: string;
-    disabled: boolean;
-}
-
-class SymbolActionRow {
-    type: number;
-    components: SymbolButton[];
-}
-
-class SymbolEmbed {
-    title: string;
-    description: string;
-    image: {
-        url: string;
+        interaction.autocomplete(reply.map(x => ({name: x, value: x})));
     }
 }

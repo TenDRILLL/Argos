@@ -248,3 +248,59 @@ export class CharacterStatWithPGA {
         displayValue: string;
     };
 }
+
+export class characterInventoryQuery {
+    inventory: {
+        data: {
+            items: Object[];
+        }
+        privacy: number;
+    };
+    character: {
+        data: {
+            membershipId: string;
+            msPlayedThisSession: string;
+            minutesPlayedTotal: string;
+            light: number;
+            stats: statObject;
+            raceHash: number;
+            genderHash: number;
+            classHash: number;
+            raceType: number;
+            classType: number;
+            genderTembershipType: number;
+            characterId: string;
+            dateLastPlayed: string;
+            minuteype: number;
+            emblemPath: string;
+            emblemBackgroundPath: string;
+            emblemHash: number;
+            emblemColor: Object[];
+            levelProgression: Object[];
+            baseCharacterLevel: number;
+            percentToNextLevel: number;
+            titleRecordHash: number;
+        }
+        privacy: number;
+    };
+    equipment: Object;
+    uninstancedItemComponents: number[];
+}
+
+export class statObject {
+    [key: string]: number;
+}
+
+export class invetoryItem {
+    itemHash: number;
+    itemInstanceId: string;
+    quantity: number;
+    bindStatus: number;
+    location: number;
+    bucketHash: number;
+    transferStatus: number;
+    lockable: boolean;
+    state: number;
+    dismantlePermission: number;
+    isWrapper: boolean;
+}

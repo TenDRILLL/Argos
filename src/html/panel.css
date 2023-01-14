@@ -1,0 +1,245 @@
+body {
+   background-color:#030303;
+   height: 100vh;
+   margin: 0;
+   color: white;
+   background-image: linear-gradient(rgba(3,3,3,0.3), rgba(3,3,3,1.0)), url("https://i.imgur.com/X4RGYBg.jpeg");
+   background-repeat: no-repeat;
+   background-attachment: fixed;
+   background-size: cover;
+}
+#heading {
+   display: flex;
+   justify-content: center;
+}
+#characters {
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   margin: 20px 5px;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   -o-user-select: none;
+   user-select: none;
+   align-content: flex-start;
+}
+#completions {
+   display: flex;
+   flex-direction: row;
+   margin: 20px 10px;
+   margin-left: auto;
+}
+#content {
+   display: flex;
+   flex-direction: row;
+}
+#dc-avatar {
+   display: inline;
+   width: 35px;
+   height: 35px;
+   border-radius: 50%;
+}
+.singleCharacter {
+   display: flex;
+   flex-direction: column;
+   font-family: "Open Sans",sans-serif,"Destiny Symbols";
+   margin: 0 15px;
+   height: fit-content;
+   margin-bottom: 20px;
+}
+.characterBanner {
+   background-size: cover;
+   background-repeat: no-repeat;
+   display: flex;
+   flex-direction: row;
+   width: 208px;
+   height: 46px;
+}
+.completionDiv {
+   display: flex;
+   flex-direction: column;
+   margin: 0 20px;
+}
+.completionTitle {
+   display: flex;
+   flex-direction: row;
+   height: 30px;
+   justify-content: center;
+   align-items: center;
+   text-align: center;
+}
+.completionTotal {
+   display: flex;
+   flex-direction: row;
+   height: 30px;
+   justify-content: center;
+   align-items: center;
+}
+.completionTotal * {
+   margin-right: 5px;
+   margin-left: 5px;
+}
+.completionGrid {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   width: 200px;
+   height: fit-content;
+   justify-items: end;
+}
+.completionGrid div {
+   width: 100px;
+   height: 80px;
+   text-align: center;
+   display: flex;
+   flex-direction: column;
+   font-size: 12px;
+}
+.completionGrid div:last-child {
+   grid-column-end: -1;
+}
+.tooltipContainer {
+   height: fit-content !important;
+   width: fit-content !important;
+}
+.completionGrid div .tooltipContainer:hover .tooltiptext {
+   visibility: visible;
+}
+.tooltiptext {
+   visibility: hidden;
+   background-color: #030303;
+   opacity: 0.8;
+   color: #fff;
+   margin-bottom: -80px;
+   border-radius: 6px;
+   right: -60px;
+   top: -10px;
+   position: relative;
+   justify-content: center;
+   z-index: 1;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   -o-user-select: none;
+   user-select: none;
+   }
+.tooltiptext:hover {
+   display: none;
+}
+.tooltiptext p {
+   margin: 5px;
+}
+.raidName {
+   padding-top: 10px 30px 10px 30px;
+   max-height: 40px;
+}
+.raidAmount {
+   padding: 10px 20px 10px 20px;
+}
+.className {
+   font-size: 20px;
+   flex: 1;
+}
+.lightLevel {
+   align-content: flex-end;
+   color: yellow;
+   margin-right: 5px;
+   font-size: 18px ;
+}
+.nameAndLightContainer {
+   align-items: center;
+   display: flex;
+   flex-flow: row nowrap;
+}
+.titleName {
+   flex: 1;
+   overflow: hidden;
+   font-size: 12px;
+   font-style: italic;
+   color: yellow;
+   line-height: 10px;
+   margin-left: 3px;
+   margin-top: -3px;
+}
+.characterStats {
+   display: flex;
+   flex-direction: column;
+}
+.statRow {
+   display: flex;
+   flex-direction: row;
+   margin-top: 5px;
+}
+.statRow div {
+   margin: 0;
+   font-size: 11px;
+   display: flex;
+   flex-direction: row;
+   margin: 0 2px;
+   align-items: center;
+}
+.statRow img {
+   height: 14px;
+   width: 14px;
+}
+.dc img {
+   align-self: center;
+   margin-right: 10px;
+}
+.dc p {
+   align-self: center;
+   font-size: 16px;
+}
+button {
+   background-color: #152238;
+   width: 90px;
+   font-size: 18px;
+   font-family: tahoma;
+   border-radius: 7px;
+   border: solid 1px gray;
+   align-self: center;
+}
+h1 {
+   margin: 0;
+   align-self: center;
+   white-space: nowrap;
+}
+th {
+   border: solid 1px red;
+   height: 30px;
+   text-align: center;
+}
+tbody {
+   max-height: 40px;
+}
+table {
+   display: block;
+}
+nav {
+   text-align: center;
+   padding: 0;
+   background-color: #152238;
+   margin: 0;
+   overflow: hidden;
+   opacity: 0.8;
+}
+nav ul {
+   margin: 0;
+   padding: 0;
+   display: flex;
+   flex-direction: row;
+   height: 45px;
+}
+nav ul li {
+   position: relative;
+   width: 33%;
+   list-style-type: none;
+   margin: 0;
+   display: flex;
+   justify-content: center;
+}
+nav ul li p {
+   margin: 0;
+}

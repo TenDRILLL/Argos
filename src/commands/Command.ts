@@ -1,5 +1,5 @@
-import {Interaction} from "../handlers/discordHandler";
 import {requestHandler} from "../handlers/requestHandler";
+import {InteractionType} from "discord-http-interactions";
 
 export default abstract class Command {
     private readonly name: string;
@@ -10,13 +10,13 @@ export default abstract class Command {
 
     getName(): string { return this.name; }
 
-    run(interaction: Interaction, d2client: requestHandler){
-        if(interaction.type === 2){
+    run(interaction, d2client: requestHandler){
+        if(interaction.type === InteractionType.ApplicationCommand){
             this.cmdRun(interaction, d2client);
-        } else if(interaction.type === 3){
+        } else if(interaction.type === InteractionType.MessageComponent){
             this.btnRun(interaction, d2client);
-        } else if(interaction.type === 4){
-            this.acRun(interaction);
+        } else if(interaction.type === InteractionType.ApplicationCommandAutocomplete){
+            this.acRun(interaction, d2client);
         }
     }
 
@@ -28,7 +28,7 @@ export default abstract class Command {
         console.log(`${this.name} btnRun ran, but wasn't overridden.`);
     }
 
-    acRun(interaction){
+    acRun(interaction, d2client){
         console.log(`${this.name} acRun ran, but wasn't overridden.`);
     }
 }

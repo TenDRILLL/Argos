@@ -1,7 +1,14 @@
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v10');
+const {Client} = require("discord-http-interactions");
 require("dotenv").config({path: "./build/.env"});
 
+<<<<<<< HEAD
+const client = new Client({
+        token: process.env.discordToken,
+        publicKey: process.env.discordKey,
+        port: 11542,
+        endpoint: "/api/interactions"
+});
+=======
 const commands = [
     {
         name: "register",
@@ -85,16 +92,11 @@ const commands = [
         ]
     }
 ];
+>>>>>>> f85058125bc51fa650af66b48041684072d23731
 
-const rest = new REST({ version: '10' }).setToken(process.env.discordToken);
-
-/*rest.put(`/applications/${process.env.discordId}/role-connections/metadata`, {body: [{
+client.rest.put(`/applications/${process.env.discordId}/role-connections/metadata`, {body: [{
         type: 7,
         key: "registered",
         name: "Connected to Argos",
         description: "The user has registered to Argos, the Planetary Core."
-}]}).then(x=>console.log(x)).catch(e=>console.log(e));*/
-
-rest.put(Routes.applicationCommands(process.env.discordId), { body: commands })
-    .then(() => console.log('Successfully registered application commands.'))
-    .catch(console.error);
+}]}).then(x=>console.log(x)).catch(e=>console.log(e));

@@ -1,6 +1,5 @@
 import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
-import {discordHandler} from "./handlers/discordHandler";
 import { activityIdentifiers } from "./enums/activityIdentifiers";
 import { activityIdentifierObject } from "./props/activityIdentifierObject";
 import {fetchPendingClanRequests, getWeaponInfo, updateActivityIdentifierDB} from "./handlers/utils";
@@ -9,9 +8,15 @@ import { entityQuery } from "./props/entityQuery";
 import { vendorQuery, vendorSaleComponent } from "./props/vendorQuery";
 import {BungieProfile} from "./props/bungieProfile";
 import enmap from "enmap";
+import {Client} from "discord-http-interactions";
 
 const d2client = new requestHandler();
-const dcclient = new discordHandler();
+const dcclient = new Client({
+    token: process.env.discordToken as string,
+    publicKey: process.env.discordKey as string,
+    port: 11542,
+    endpoint: "/api/interactions"
+});
 
 function instantiateActivityDatabase() {
     const iterator = activityIdentifiers.keys()
