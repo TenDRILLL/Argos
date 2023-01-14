@@ -311,23 +311,22 @@ export function fetchPendingClanRequests(dcclient, d2client) {
 }
 
 export function sortActivities(activities: ActivityObject): Map<string, string[]> {
-    const sorted = Object.keys(activities).sort((a,b) => activities[b]-activities[a]);
-    const size = sorted.filter(a => activities[a] !== 0 && (!a.endsWith("Master") && !a.endsWith("Prestige"))).length;
-
+    const keys = Object.keys(activities);
+    const sorted = Object.keys(activities).sort((a,b) => activities[b]-activities[a]).filter(a => !a.endsWith("Master") && !a.endsWith("Prestige") && !a.endsWith("Heroic"))
+    const size = sorted.filter(a => activities[a] !== 0 && (!a.endsWith("Master") && !a.endsWith("Prestige") && !a.endsWith("Prestige"))).length;
     const ans: Map<string, string[]> = new Map();
-    sorted.filter(b => !b.endsWith("Master") && !b.endsWith("Prestige")).forEach(e => {
-        ans[e] = [];
-    })
     let i = 0
     while (i !== size) {
+        if (ans[sorted[i]] == undefined) ans[sorted[i]] = [];
         ans[sorted[i]].push(activities[sorted[i]] as unknown as string)
-        if (sorted.includes(`${sorted[i]}, Master`)) {
-            ans[sorted[i]].push(`Master`);
-            ans[sorted[i]].push(activities[`${sorted[i]}, Master`]);
+        if (keys.includes(`${sorted[i]}, Master`)) {
+            ans[sorted[i]].push(`Master`, activities[`${sorted[i]}, Master`]);
         }
-        if (sorted.includes(`${sorted[i]}, Prestige`)) {
-            ans[sorted[i]].push(`Prestige`);
-            ans[sorted[i]].push(activities[`${sorted[i]}, Prestige`]);
+        else if (keys.includes(`${sorted[i]}, Heroic`)) {
+            ans[sorted[i]].push(`Heroic`, activities[`${sorted[i]}, Heroic`]);
+        }
+        else if (keys.includes(`${sorted[i]}, Prestige`)) {
+            ans[sorted[i]].push(`Prestige`, activities[`${sorted[i]}, Prestige`]);
         }
         i += 1;
     }

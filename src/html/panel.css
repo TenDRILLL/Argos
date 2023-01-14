@@ -94,9 +94,14 @@ body {
    text-align: center;
    display: flex;
    flex-direction: column;
+   font-size: 12px;
 }
 .completionGrid div:last-child {
    grid-column-end: -1;
+}
+.tooltipContainer {
+   height: fit-content !important;
+   width: fit-content !important;
 }
 .completionGrid div .tooltipContainer:hover .tooltiptext {
    visibility: visible;
@@ -108,7 +113,8 @@ body {
    color: #fff;
    margin-bottom: -80px;
    border-radius: 6px;
-   right: 60px;
+   right: -60px;
+   top: -10px;
    position: relative;
    justify-content: center;
    z-index: 1;
@@ -119,6 +125,9 @@ body {
    -o-user-select: none;
    user-select: none;
    }
+.tooltiptext:hover {
+   display: none;
+}
 .tooltiptext p {
    margin: 5px;
 }
@@ -143,7 +152,6 @@ body {
    align-items: center;
    display: flex;
    flex-flow: row nowrap;
-   margin: 3px
 }
 .titleName {
    flex: 1;

@@ -116,7 +116,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                 ans += `<div>
                             <b>${raid}</b>
                             <div class="tooltipContainer">${raids[raid].length === 1 ? `${DBData.raids[raid]}` : `${DBData.raids[raid]}*`}
-                                ${ raids[raid].length === 1 ? "" :
+                                ${ raids[raid].length === 1 ? `<div></div>` :
                                     `<div class="tooltiptext">
                                         <p>Normal: ${raids[raid][0] - raids[raid][2]}</p>
                                         <p>${raids[raid][1]}: ${raids[raid][2]}</p>
@@ -141,7 +141,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                 ans += `<div>
                         <b>${dungeon}</b>
                         <div class="tooltipContainer">${dungeons[dungeon].length === 1 ? `${DBData.dungeons[dungeon]}` : `${DBData.dungeons[dungeon]}*`}
-                            ${ dungeons[dungeon].length === 1 ? "" :
+                            ${ dungeons[dungeon].length === 1 ? `<div></div>` :
                                 `<div class="tooltiptext">
                                     <p>Normal: ${dungeons[dungeon][0] - dungeons[dungeon][2]}</p>
                                     <p>${dungeons[dungeon][1]}: ${dungeons[dungeon][2]}</p>
@@ -167,6 +167,7 @@ export function getPanelPage(d2client, ID, d, discordUser) {
                         <div>
                             <b>${gm}</b>
                             <div class="tooltipContainer">${DBData.grandmasters[gm]}
+                                <div></div>
                             </div>
                         </div>`
             }
