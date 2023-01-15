@@ -199,7 +199,7 @@ dcclient.on("panel",(req,res)=>{
             });
         });
     } else {
-        res.redirect("/");
+        res.redirect("/"); //TODO: Instruct user to register, as they have no account.
     }
 });
 
