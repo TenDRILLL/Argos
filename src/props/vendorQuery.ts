@@ -4,14 +4,28 @@ export class vendorQuery {
         privacy: number;
         disabled: boolean;
     }
-    categories: Object;
+    categories: {
+        data: vendorCategories[];
+        privacy: number;
+        disabled: boolean;
+    }
     sales: {
         data: vendorSaleComponent[];
         privary; number;
         disabled; boolean;
     };
-    itemComponents: Object;
+    itemComponents: {
+        instances: {
+            data: [string: Object][];
+            privacy: number;
+        }
+    }
     currencyLookups: Object;
+}
+
+export class vendorCategories {
+    displayCategoryIndex: number;
+    itemIndexes: number[];
 }
 
 export class vendorComponent {
