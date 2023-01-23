@@ -192,9 +192,7 @@ export function updateStatRolesUser(dcclient,d2client,id){
                         raids: dbUser.raids.Total,
                         dungeons: dbUser.dungeons.Total,
                         gms: dbUser.grandmasters.Total
-                    }},{headers: {"Authorization": discordAccessToken, "Content-Type": "application/json"}}).then(d => {
-                    console.log(d.data);
-                }).catch(e => console.log(e));
+                    }},{headers: {"Authorization": discordAccessToken, "Content-Type": "application/json"}}).catch(e => console.log(e));
         }).catch(e => {});//Member not on the server.
     });
 }
