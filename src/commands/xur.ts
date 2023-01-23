@@ -35,8 +35,7 @@ export default class xur extends Command {
                     }).catch(e => {
                         console.log(`Xur isn't anywhere / something went wrong ${e}`)
                         interaction.editReply({
-                            content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him
-${e}`,
+                            content: `Xur doesn't seem to be on any planet, or perhaps something went wrong in searching for him`,
                             ephemeral: true
                         }).catch(e => console.log(e));
                     });
@@ -62,7 +61,7 @@ ${e}`,
         })
     };
 
-    generateFields(exotics,number): {name: string, value: string, inline?: boolean}[] {
+    generateFields(exotics: entityQuery[], number: number): {name: string, value: string, inline?: boolean}[] {
         const classTypes = new Map([
             [3, ""],
             [1, "Hunter "],

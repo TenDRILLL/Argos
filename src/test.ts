@@ -8,7 +8,10 @@ import { entityQuery } from "./props/entityQuery";
 import { vendorQuery, vendorSaleComponent } from "./props/vendorQuery";
 import {BungieProfile} from "./props/bungieProfile";
 import enmap from "enmap";
-import {Client} from "discord-http-interactions";
+import {Client, Embed, Emoji} from "discord-http-interactions";
+import { RawManifestQuery } from "./props/manifest";
+import { activityHistory, PostGameCarnageReport } from "./props/activity";
+import { WeaponSlot } from "./enums/weaponSlot";
 
 const d2client = new requestHandler();
 const dcclient = new Client({
@@ -68,36 +71,114 @@ function instantiateActivityDatabase() {
     console.log("Activity DB done.");
 }
 
-
-function generateEmbed(components: vendorSaleComponent[], d2client) {
-    const weapondata = Promise.all(
-        components.map(async e => {
-            return await getWeaponInfo(d2client, e.itemHash);
-        })
-    )
-    return [{
-        "title": "Xûr is on {planet} at {location}",
-        "color": 0xAE27FF,
-        "description": "He is currently selling the following exotics",
-        "fiels": []
-    }]
-}
-
-function getXurLocations() {
-    d2client.refreshToken(d2client.adminuserID).then(q => {
-        d2client.apiRequest("getDestinyCharacters", {
-            membershipType: 3,
-            destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId}).then(t => {
-                const resp = t.Response as CharacterQuery;
-                d2client.apiRequest("getVendorInformation", {
-                    membershipType: 3,
-                    destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId,
-                    characterId: resp.characters[0].characterId.toString(),
-                    vendorHash: "2190858386" /*xur id*/},
-                    {"Authorization": `Bearer ${q.tokens.accessToken}`}
-                ).then(d => {
-                    console.log(d);
-                })
-        });
+d2client.refreshToken(d2client.adminuserID).then(q => {
+    d2client.apiRequest("getDestinyCharacters", {
+        membershipType: 3,
+        destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId}).then(t => {
+            const resp = t.Response as CharacterQuery;
+            // d2client.apiRequest("getActivityHistory", {
+            //     membershipType: 3,
+            //     destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId,
+            //     characterId: resp.characters.filter(character => !character.deleted)[0].characterId
+            // }, {
+            //     mode: 4,
+            //     page: 1
+            // }).then(e => {
+            //     const resp = e.Response as activityHistory;
+            //     //console.log(resp.activities[0].values)
+            //     const id = e.Response["activities"][0]["activityDetails"]["instanceId"]
+            //     d2client.apiRequest("getPostGameCarnageReport", {activityId: id}).then(e => { const resp2 = e.Response as PostGameCarnageReport; })
+            // })
+            // .catch(e => console.log(e))
+            d2client.apiRequest("getVendorInformation", {
+                membershipType: 3,
+                destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId,
+                characterId: resp.characters.filter(character => !character.deleted)[0].characterId,
+                vendorHash: "2190858386" /*xur id*/},
+                {"Authorization": `Bearer ${q.tokens.accessToken}`}
+            ).then(async d => {
+                const info = d.Response as vendorQuery;
+                const location = info.vendor.data.vendorLocationIndex;
+                await generateEmbed(info.sales.data, d2client, location).then(embed => { dcclient.newMessage("1045010061799460864", {embeds: [embed]}   )})
+            }).catch(e => {
+                console.log(`Xur isn't anywhere / something went wrong ${e}`)
+            });
     })
+}).catch(() => console.log("Admin user not in DB"));
+
+function generateEmbed(components: vendorSaleComponent[], d2client, locationIndex) {
+    const promises: Promise<entityQuery>[] = [];
+    Object.keys(components).forEach(key => {
+        promises.push(new Promise((res)=>{
+            getWeaponInfo(d2client, components[key].itemHash).then(d => {
+                res(d);
+                })
+            })
+        )})
+    return Promise.all(promises).then(async data => {
+        const xurLocations = ["Hangar, The Tower", "Winding Cove, EDZ", "Watcher’s Grave, Nessus"];
+        return new Embed()
+            .setTitle(`Xûr is at ${xurLocations[locationIndex]}`)
+            .setColor(0xAE27FF)
+            .setDescription("He is currently selling the following exotics")
+            .setFields(await generateFields(data.filter(entity => entity.inventory.tierTypeName === "Exotic" && !["Exotic Engram","Xenology"].includes(entity.displayProperties.name)),3))
+    })
+};
+
+async function generateFields(exotics: entityQuery[], number: number): Promise<{ name: string; value: string; inline?: boolean; }[]> {
+    const manifest = await d2client.apiRequest("getManifests",{})
+    let path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyPlugSetDefinition"];
+    const socketTypes = await d2client.rawRequest(`https://www.bungie.net${path}`)
+    path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];
+    const InventoryItemDefinition = await d2client.rawRequest(`https://www.bungie.net${path}`)
+    const classTypes = new Map([
+        [3, ""],
+        [1, "Hunter "],
+        [0, "Titan "],
+        [2, "Warlock "]
+    ])
+    let rows: {name: string, value: string, inline?: boolean}[] = [];
+    for (let i = 0; i < number; i++) {
+        rows.push({"name": "\u200B", "value": "", "inline": true})
+    }
+    exotics.forEach((exotic, i) => {
+        let iconNames;
+        if (WeaponSlot.weapons.includes(exotic.equippingBlock.equipmentSlotTypeHash)) {
+            const icons: any = []
+            exotic.sockets.socketCategories[0].socketIndexes.forEach(e => {
+                const plugSetHash = exotic.sockets.socketEntries[e]["reusablePlugSetHash"] ??  exotic.sockets.socketEntries[e]["randomizedPlugSetHash"];
+                socketTypes[plugSetHash]["reusablePlugItems"].forEach(e => {
+                    icons.push(InventoryItemDefinition[e["plugItemHash"]].displayProperties)
+                });
+            });
+            exotic.sockets.socketCategories[1].socketIndexes.forEach(e => {
+                const plugSetHash = exotic.sockets.socketEntries[e]["reusablePlugSetHash"] ??  exotic.sockets.socketEntries[e]["randomizedPlugSetHash"];
+                socketTypes[plugSetHash]["reusablePlugItems"].forEach(e => {
+                    if (!(InventoryItemDefinition[e["plugItemHash"]].displayProperties.name.includes("Tracker"))) {
+                        icons.push(InventoryItemDefinition[e["plugItemHash"]].displayProperties)
+                    }
+                });
+            });
+            const promises: Promise<string>[] = [];
+            icons.forEach(e => {
+                promises.push(new Promise(async (res) => {
+                    const emoji = await dcclient.findEmoji("990974785674674187", e.name.replaceAll(/[^0-9A-z ]/g, "").split(" ").join("_"));
+                    if (emoji === null) {
+                        console.log(e.name.split(" ").join("_"));
+                        const t = await dcclient.createEmoji("990974785674674187", {name: e.name.replaceAll(/[^0-9A-z ]/g, "").split(" ").join("_"), url: `https://bungie.net${e.icon}`})
+                        res(t.toString())
+                    }
+                    else {
+                        res(emoji.toString())
+                    }
+                }))
+            })
+            const iconNames =  await Promise.all(promises)
+        }
+        rows[i % number]["value"] += `**${exotic.displayProperties.name}**
+${i < exotics.length-number ? `${classTypes.get(exotic.classType)} ${exotic.itemTypeDisplayName}\n\u200b` : `${classTypes.get(exotic.classType)} ${exotic.itemTypeDisplayName}`}
+${iconNames === undefined ? "" : iconNames.join(" ")}
+`
+            })
+    return rows;
 }

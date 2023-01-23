@@ -29,7 +29,7 @@ export class entityQuery{
     quality: Object[];
     acquireRewardSiteHash: number;
     acquireUnlockHash: number;
-    sockets: Object[];
+    sockets: socket;
     talentGrid: Object[];
     investmentStats: Object[];
     perks: [];
@@ -56,6 +56,29 @@ export class entityQuery{
     index: number;
     redacted: boolean;
     blacklisted: boolean;
+}
+
+export class socket {
+    detail: string;
+    socketEntries: socketEntry[];
+    intrinsicSockets: intrinsicSocket[];
+    socketCategories: socketCategory[];
+}
+
+export class socketEntry {
+    socketCategoryHash: number;
+    socketIndexes: number[];
+}
+
+export class intrinsicSocket {
+    plugItemHash: number;
+    socketTypeHash: number;
+    defaultVisible: boolean;
+}
+
+export class socketCategory {
+    socketCategoryHash: number;
+    socketIndexes: number[];
 }
 
 export class inventory {

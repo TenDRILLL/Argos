@@ -39,7 +39,3 @@ export class vendorSaleComponent {
     overrideNextRefreshDate: string;
     apiPurchasable: boolean;
 }
-
-export class vendorInformation {
-    
-}
