@@ -1,19 +1,18 @@
 import {statRoles} from "../enums/statRoles";
-import "dotenv/config";
-import axios from "axios";
 import { entityQuery } from "../props/entityQuery";
 import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
-import { ActivityObject, DBUser, partialDBUser } from "../props/dbUser";
+import { ActivityObject } from "../props/dbUser";
 import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
 import { URLSearchParams } from "url";
 import { choosePlatformhtml } from "./htmlPages";
 import { ActionRow, Button, ButtonStyle, Embed } from "discord-http-interactions";
+import axios from "axios";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
-    GetDiscordOauthExchange(dccode).then(dcdata => {
+    d2client.discordTokens.discordOauthExchange(dccode).then(dcuser => {
         const data = new URLSearchParams();
         data.append("grant_type","authorization_code");
         data.append("code", d2code);
@@ -30,7 +29,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                         const reply2 = resp.Response as LinkedProfileResponse;
                         const primary = reply2.profiles.find(x => x.isCrossSavePrimary);
                         if(primary){
-                            d2client.DB.set(dcdata.user.id,{
+                            d2client.DB.set(dcuser.id,{
                                 bungieId: id,
                                 destinyId: primary.membershipId,
                                 destinyName: reply.uniqueName,
@@ -41,11 +40,10 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     refreshToken: x.refresh_token,
                                     refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                 },
-                                discordTokens: dcdata.tokens,
-                                discordUser: dcdata.user
+                                discordUser: dcuser
                             });
-                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
-                            dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
+                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                            dcclient.getMember(statRoles.guildID,dcuser.id).then(member => {
                                 if(!member) return;
                                 //@ts-ignore
                                 if(member.roles.includes(statRoles.registeredID)) return;
@@ -54,11 +52,11 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 //@ts-ignore
                                 dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
                             });
-                            updateStatRolesUser(dcclient,d2client,dcdata.user.id);
+                            updateStatRolesUser(dcclient,d2client,dcuser.id);
                             return;
                         } else {
                             if(reply2.profiles.length === 1){
-                                d2client.DB.set(dcdata.user.id,{
+                                d2client.DB.set(dcuser.id,{
                                     bungieId: id,
                                     destinyId: reply2.profiles[0].membershipId,
                                     destinyName: reply.uniqueName,
@@ -69,11 +67,10 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                         refreshToken: x.refresh_token,
                                         refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                     },
-                                    discordTokens: dcdata.tokens,
-                                    discordUser: dcdata.user
+                                    discordUser: dcuser
                                 });
-                                res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
-                                dcclient.getMember(statRoles.guildID,dcdata.user.id).then(member => {
+                                res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                                dcclient.getMember(statRoles.guildID,dcuser.id).then(member => {
                                     if(!member) return;
                                     //@ts-ignore
                                     if(member.roles.includes(statRoles.registeredID)) return;
@@ -82,10 +79,10 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     //@ts-ignore
                                     dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
                                 });
-                                updateStatRolesUser(dcclient,d2client,dcdata.user.id);
+                                updateStatRolesUser(dcclient,d2client,dcuser.id);
                                 return;
                             }
-                            d2client.DB.set(dcdata.user.id,{
+                            d2client.DB.set(dcuser.id,{
                                 bungieId: id,
                                 destinyName: reply.uniqueName,
                                 tokens: {
@@ -94,11 +91,10 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     refreshToken: x.refresh_token,
                                     refreshExpiry: Date.now() + (x.refresh_expires_in*1000)
                                 },
-                                discordTokens: dcdata.tokens,
-                                discordUser: dcdata.user
+                                discordUser: dcuser
                             });
                             const endResult = choosePlatformhtml(reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}))
-                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcdata.user.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
+                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
                                 .send(endResult);
                         }
                     }).catch(e => console.log(e));
@@ -108,66 +104,6 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
             }
         }).catch(e => res.send(`Error fetching Bungie Tokens: ${e.message}`));
     }).catch(e => res.send(`Error fetching Discord Data: ${e.message}`));
-}
-
-export function refreshDiscordToken(d2client,dbUserID): Promise<DBUser> {
-    return new Promise((res, rej) => {
-        let dbUser = d2client.DB.get(dbUserID);
-        if(dbUser === undefined || dbUser.discordTokens === undefined) return rej("No tokens!");
-        const data = new URLSearchParams();
-        data.append("client_id",process.env.discordId as string);
-        data.append("client_secret",process.env.discordSecret as string);
-        data.append("grant_type","refresh_token");
-        data.append("refresh_token",dbUser.discordTokens.refreshToken);
-        axios.post("https://discord.com/api/oauth2/token",data,{headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then(d => {
-            console.log(`${dbUserID} discord-token-refreshed.`);
-            let dcdata = d.data;
-            dbUser.discordTokens = {
-                accessToken: dcdata.access_token,
-                accessExpiry: Date.now() + (dcdata.expires_in*1000),
-                refreshToken: dcdata.refresh_token,
-                scope: dcdata.scope,
-                tokenType: dcdata.token_type
-            };
-            d2client.DB.set(dbUserID,dbUser);
-            res(dbUser);
-        }).catch(e => {rej(e.message);});
-    });
-}
-
-export function GetDiscordOauthExchange(code): Promise<dcdata>{
-    return new Promise((res,rej)=>{
-        const data = new URLSearchParams();
-        data.append("client_id",process.env.discordId as string);
-        data.append("client_secret",process.env.discordSecret as string);
-        data.append("grant_type","authorization_code");
-        data.append("code",code);
-        data.append("redirect_uri","https://api.venerity.xyz/oauth");
-        axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}}).then(x => {
-            axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${x.data.token_type} ${x.data.access_token}`}}).then(y => {
-                res({tokens: {
-                        accessToken: x.data.access_token,
-                        accessExpiry: Date.now() + (x.data.expires_in*1000),
-                        refreshToken: x.data.refresh_token,
-                        scope: x.data.scope,
-                        tokenType: x.data.token_type
-                    }, user: y.data});
-            }).catch(e => {console.log("Discord user information failed."); rej(e)});
-        }).catch(e => {console.log("Discord token failed."); rej(e)});
-    });
-}
-
-export function GetDiscordInformation(d2client,id):Promise<dcuser>{
-    return new Promise(async (res,rej)=>{
-        if(!d2client.DB.has(id)) rej(`No user in DB with id : ${id}`);
-        let dbuser = d2client.DB.get(id);
-        if(dbuser.discordTokens.accessExpiry - Date.now() < 1){
-            dbuser = await refreshDiscordToken(d2client,id);
-        }
-        axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${dbuser.discordTokens.tokenType} ${dbuser.discordTokens.accessToken}`}}).then(y => {
-            res(y.data);
-        }).catch(e => {rej(e)});
-    });
 }
 
 export async function updateStatRoles(dcclient,d2client){
@@ -185,20 +121,13 @@ export async function updateStatRoles(dcclient,d2client){
 
 export function updateStatRolesUser(dcclient,d2client,id){
     d2client.dbUserUpdater.updateStats(id).then(async (dbUser) => {
-        let discordTokens = {};
-        if(dbUser.discordTokens){
-            if(dbUser.discordTokens.accessExpiry - Date.now() < 1){
-                await refreshDiscordToken(d2client, id).then(d => {
-                    discordTokens = d.discordTokens;
-                }).catch(e => {
-                    console.log(`Refreshing Discord token failed: ${e}`);
-                });
-            }
-        }
         if (!dbUser) {
             console.log(`NO DB USER FOR - ${id}`);
             return;
         }
+        const discordAccessToken = await d2client.discordTokens.getToken(id)
+            .catch(e => console.log(e));
+        if(!discordAccessToken) return console.log(`${id} has no token, please ask them to re-register.`);
         let tempRaidObj = {};
         statRoles.raidNames.forEach(e => {
             tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
@@ -226,12 +155,11 @@ export function updateStatRolesUser(dcclient,d2client,id){
             }
         });
         j = tempArr.length;
+        let clanMember = false;
         await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
             const resp = d.Response as BungieGroupQuery;
             if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
-                tempArr[j] = statRoles.guildMember;
-            } else {
-                tempArr[j] = statRoles.justVisiting;
+                clanMember = true;
             }
         }).catch(e => console.log(4));
         dcclient.getMember(statRoles.guildID,id).then(async member => {
@@ -254,6 +182,19 @@ export function updateStatRolesUser(dcclient,d2client,id){
             if(!(data.roles.length === roles.length && data.roles.every((role, i) => roles[i] === role))){
                 dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
             }
+            axios.put(`https://discord.com/api/v10/users/@me/applications/${process.env.discordId}/role-connection`,
+                {
+                    platform_name: "Destiny 2",
+                    platform_username: d2name,
+                    metadata: {
+                        clanmember: clanMember ? 1 : 0,
+                        visitor: clanMember ? 0 : 1,
+                        raids: dbUser.raids.Total,
+                        dungeons: dbUser.dungeons.Total,
+                        gms: dbUser.grandmasters.Total
+                    }},{headers: {"Authorization": discordAccessToken, "Content-Type": "application/json"}}).then(d => {
+                    console.log(d.data);
+                }).catch(e => console.log(e));
         }).catch(e => {});//Member not on the server.
     });
 }
@@ -452,30 +393,3 @@ const decrypt = (salt, encoded) => {
 };
 
 export {crypt, decrypt};
-
-export class dcdata {
-    tokens: {
-        accessToken: string;
-        accessExpiry: number;
-        refreshToken: string;
-        scope: string;
-        tokenType: string;
-    };
-    user: dcuser;
-}
-
-export class dcuser {
-    id: string;
-    username: string;
-    avatar: string;
-    avatar_decoration: string;
-    discriminator: string;
-    public_flags: number;
-    flags: number;
-    banner: string;
-    banner_color: string;
-    accent_color: number;
-    locale: string;
-    mfa_enabled: boolean;
-    premium_type: number;
-}

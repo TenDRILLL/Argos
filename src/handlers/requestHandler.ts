@@ -10,6 +10,7 @@ import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
 import {statRoles} from "../enums/statRoles";
 import {DBUser} from "../props/dbUser";
+import DiscordTokens from "./discordTokens";
 
 export class requestHandler {
     private apiKey: string;
@@ -20,6 +21,7 @@ export class requestHandler {
     public entityDB;
     public activityIdentifierDB;
     public adminuserID: string;
+    public discordTokens: DiscordTokens;
 
     constructor(){
         this.apiKey = process.env.apikey as string;
@@ -30,6 +32,7 @@ export class requestHandler {
         this.entityDB = new enmap({name: "entities"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
         this.adminuserID = process.env.apiadminuserID as string;
+        this.discordTokens = new DiscordTokens();
     }
 
     async rawRequest(url): Promise<JSON>{

@@ -9,9 +9,7 @@ import {
     updateStatRoles,
     decrypt,
     updateStatRolesUser,
-    GetDiscordInformation,
-    crypt,
-    GetDiscordOauthExchange
+    crypt
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
@@ -25,7 +23,6 @@ const dcclient = new Client({
     publicKey: process.env.discordKey as string,
     port: 11542,
     endpoint: "/api/interactions",
-    linkedRolesEndpoint: "/api/linkedroles",
     additionalEndpoints: [
         {
             name: "site",
@@ -71,9 +68,9 @@ const dcclient = new Client({
     ]
 });
 
-dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,bodyParser.urlencoded({ extended: false }));
-dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,bodyParser.json());
-dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,cookieParser());
+dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.urlencoded({ extended: false }));
+dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.json());
+dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,cookieParser());
 
 dcclient.on("interaction", interaction => {
     if(commands === undefined) return; //This shouldn't really happen, but there's a slight possibility when the bot is starting.
@@ -89,10 +86,6 @@ dcclient.on("interaction", interaction => {
     } else {
         interaction.reply({content: "Not implemented yet."}).catch(e => console.log(e)); //This catches in case a command is missing, to avoid the request not being handled.
     }
-});
-
-dcclient.on("linkedRoles", data =>{ //Will be used to check how discord sends the data and appearantly will be the thing we update the roles with?!
-    console.log(data);
 });
 
 dcclient.on("site",(req,res)=>{
@@ -129,10 +122,9 @@ dcclient.on("oauth", (req,res)=>{
         if(urlData.error && urlData.error_description){
             return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
         } else if(urlData.state === undefined) {
-            GetDiscordOauthExchange(urlData.code).then(dcdata => {
-                d2client.DB.set(dcdata.user.id,dcdata.user,"discordUser");
-                d2client.DB.set(dcdata.user.id,dcdata.tokens,"discordTokens");
-                return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcdata.user.id)).redirect("/panel");
+            d2client.discordTokens.discordOauthExchange(urlData.code).then(dcuser => {
+                d2client.DB.set(dcuser.id,dcuser,"discordUser");
+                return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcuser.id)).redirect("/panel");
             }).catch(e => {
                 return res.send(e.message);
             });
@@ -184,7 +176,7 @@ dcclient.on("panel",(req,res)=>{
     }
     if(d2client.DB.has(discID)){
         d2client.dbUserUpdater.updateStats(discID).then((data)=>{
-            GetDiscordInformation(d2client,discID).then(dcuser => {
+            d2client.discordTokens.getDiscordInformation(discID).then(dcuser => {
                 getPanelPage(d2client, discID, data, dcuser).then(resp => {
                     res.send(resp);
                 }).catch(e => {
