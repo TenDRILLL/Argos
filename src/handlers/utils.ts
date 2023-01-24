@@ -1,6 +1,6 @@
 import {statRoles} from "../enums/statRoles";
 import { entityQuery } from "../props/entityQuery";
-import { ManifestActivity, ManifestQuery, RawManifestQuery } from "../props/manifest";
+import { ManifestActivity, ManifestQuery, RawEntityQuery, RawManifestQuery } from "../props/manifest";
 import { activityIdentifierObject } from "../props/activityIdentifierObject";
 import { BungieGroupQuery, PendingClanmembersQuery } from "../props/bungieGroupQuery";
 import { ActivityObject } from "../props/dbUser";
@@ -11,7 +11,7 @@ import { choosePlatformhtml } from "./htmlPages";
 import { ActionRow, Button, ButtonStyle, Embed, Emoji } from "discord-http-interactions";
 import axios from "axios";
 import { CharacterQuery } from "../props/characterQuery";
-import { vendorQuery } from "../props/vendorQuery";
+import { socketComponents, vendorQuery } from "../props/vendorQuery";
 import { WeaponSlot } from "../enums/weaponSlot";
 import { dcuser } from "./discordTokens";
 
@@ -385,10 +385,10 @@ export async function getXurEmbed(d2client, dcclient) {
                     ).then(async d => {
                         const info = d.Response as vendorQuery;
                         const location = info.vendor.data.vendorLocationIndex;
-                        const data = info.categories.data["categories"][0]["itemIndexes"].concat(info.categories.data["categories"][1]["itemIndexes"]).filter(e => e != 0).map(index => {
+                        const data = info.categories.data.categories[0].itemIndexes.concat(info.categories.data.categories[1].itemIndexes).filter(e => e != 0).map(index => {
                             return {
                                 itemHash: info.sales.data[index].itemHash,
-                                sockets: info.itemComponents["sockets"]["data"][index]["sockets"]
+                                sockets: info.itemComponents.sockets.data[index].sockets
                             }                    
                         })
                         await generateEmbed(data , d2client, location).then(embed => { res(embed) })
@@ -399,7 +399,7 @@ export async function getXurEmbed(d2client, dcclient) {
     }).catch(() => console.log("Admin user not in DB"));
 })
     
-    function generateEmbed(components: {itemHash: number, sockets: string[]}[], d2client, locationIndex) {
+    function generateEmbed(components: {itemHash: number, sockets: socketComponents}[], d2client, locationIndex) {
         const promises: Promise<entityQuery>[] = [];
         components.forEach(item => {
             promises.push(new Promise((res)=>{
@@ -418,13 +418,11 @@ export async function getXurEmbed(d2client, dcclient) {
         })
     };
     
-    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: string[]}[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
+    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: socketComponents}[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
         return new Promise(async (res)=>{
             const manifest = await d2client.apiRequest("getManifests",{});
-            let path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyPlugSetDefinition"];
-            const socketTypes = await d2client.rawRequest(`https://www.bungie.net${path}`);
-            path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];
-            const InventoryItemDefinition = await d2client.rawRequest(`https://www.bungie.net${path}`);
+            const path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];
+            const InventoryItemDefinition = await d2client.rawRequest(`https://www.bungie.net${path}`) as RawEntityQuery;
             const classTypes: Map<number, string> = new Map([
                 [3, ""],
                 [1, "<:hunter2:1067375164012101642>"],
@@ -440,17 +438,17 @@ export async function getXurEmbed(d2client, dcclient) {
                     icons.push(exotic.displayProperties)
                     if((WeaponSlot.weapons.includes(exotic.equippingBlock.equipmentSlotTypeHash))){
                         exotic.sockets.socketCategories[0].socketIndexes.forEach(e => {
-                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e]["plugHash"]
+                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e].plugHash
                             const perk = InventoryItemDefinition[perkHash]
-                            if (!(perk["displayProperties"]["name"].includes("Tracker"))) {
-                                icons.push(perk["displayProperties"])
+                            if (!(perk.displayProperties.name.includes("Tracker"))) {
+                                icons.push(perk.displayProperties)
                             }
                         });
                         exotic.sockets.socketCategories[1].socketIndexes.forEach(e => {
-                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e]["plugHash"]
+                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e].plugHash
                             const perk = InventoryItemDefinition[perkHash]
-                            if (!(perk["displayProperties"]["name"].includes("Tracker"))) {
-                                icons.push(perk["displayProperties"])
+                            if (!(perk.displayProperties.name.includes("Tracker"))) {
+                                icons.push(perk.displayProperties)
                             }
                         });
                     }

@@ -5,7 +5,9 @@ export class vendorQuery {
         disabled: boolean;
     }
     categories: {
-        data: vendorCategories[];
+        data: {
+            categories: vendorCategories[]
+        };
         privacy: number;
         disabled: boolean;
     }
@@ -19,8 +21,25 @@ export class vendorQuery {
             data: [string: Object][];
             privacy: number;
         }
+        sockets: {
+            data: itemComponentSocket[];
+            
+            privacy: number;
+            disabled: boolean;
+        }
     }
     currencyLookups: Object;
+}
+
+export class itemComponentSocket {
+    sockets: socketComponents;
+}
+
+export class socketComponents {
+    plugHash: number;
+        isEnabled: boolean;
+        isVisible: boolean;
+        enableFailIndexes: number[];
 }
 
 export class vendorCategories {
