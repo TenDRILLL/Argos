@@ -8,8 +8,12 @@ import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
 import { URLSearchParams } from "url";
 import { choosePlatformhtml } from "./htmlPages";
-import { ActionRow, Button, ButtonStyle, Embed } from "discord-http-interactions";
+import { ActionRow, Button, ButtonStyle, Embed, Emoji } from "discord-http-interactions";
 import axios from "axios";
+import { CharacterQuery } from "../props/characterQuery";
+import { vendorQuery } from "../props/vendorQuery";
+import { WeaponSlot } from "../enums/weaponSlot";
+import { dcuser } from "./discordTokens";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
     d2client.discordTokens.discordOauthExchange(dccode).then(dcuser => {
@@ -363,6 +367,122 @@ export function updateActivityIdentifierDB(d2client) {
             })
         });    
     }).catch(e => console.log(e));
+}
+
+export async function getXurEmbed(d2client, dcclient) {
+    return new Promise((res) => {
+        d2client.refreshToken(d2client.adminuserID).then(q => {
+            d2client.apiRequest("getDestinyCharacters", {
+                membershipType: 3,
+                destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId}).then(t => {
+                    const resp = t.Response as CharacterQuery;
+                    d2client.apiRequest("getVendorInformation", {
+                        membershipType: 3,
+                        destinyMembershipId: d2client.DB.get(d2client.adminuserID).destinyId,
+                        characterId: resp.characters.filter(character => !character.deleted)[0].characterId,
+                        vendorHash: "2190858386" /*xur id*/},
+                        {"Authorization": `Bearer ${q.tokens.accessToken}`}
+                    ).then(async d => {
+                        const info = d.Response as vendorQuery;
+                        const location = info.vendor.data.vendorLocationIndex;
+                        const data = info.categories.data["categories"][0]["itemIndexes"].concat(info.categories.data["categories"][1]["itemIndexes"]).filter(e => e != 0).map(index => {
+                            return {
+                                itemHash: info.sales.data[index].itemHash,
+                                sockets: info.itemComponents["sockets"]["data"][index]["sockets"]
+                            }                    
+                        })
+                        await generateEmbed(data , d2client, location).then(embed => { res(embed) })
+                    }).catch(e => {
+                        console.log(`Xur isn't anywhere / something went wrong ${e}`)
+                    });
+            })
+    }).catch(() => console.log("Admin user not in DB"));
+})
+    
+    function generateEmbed(components: {itemHash: number, sockets: string[]}[], d2client, locationIndex) {
+        const promises: Promise<entityQuery>[] = [];
+        components.forEach(item => {
+            promises.push(new Promise((res)=>{
+                getWeaponInfo(d2client, item.itemHash).then(d => {
+                    res(d);
+                    })
+                })
+            )})
+        return Promise.all(promises).then(async data => {
+            const xurLocations = ["Hangar, The Tower", "Winding Cove, EDZ", "Watcher’s Grave, Nessus"];
+            return new Embed()
+                .setTitle(`Xûr is at ${xurLocations[locationIndex]}`)
+                .setColor(0xAE27FF)
+                .setDescription("He is currently selling the following exotics")
+                .setFields(await generateFields(data,components,3, dcclient))
+        })
+    };
+    
+    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: string[]}[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
+        return new Promise(async (res)=>{
+            const manifest = await d2client.apiRequest("getManifests",{});
+            let path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyPlugSetDefinition"];
+            const socketTypes = await d2client.rawRequest(`https://www.bungie.net${path}`);
+            path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];
+            const InventoryItemDefinition = await d2client.rawRequest(`https://www.bungie.net${path}`);
+            const classTypes: Map<number, string> = new Map([
+                [3, ""],
+                [1, "<:hunter2:1067375164012101642>"],
+                [0, "<:titan2:1067375189421203486>"],
+                [2, "<:warlock2:1067375209985880074>"]
+            ]);
+            let rows: {name: string, value: string, inline?: boolean}[] = [];
+            const exoticPromises: Promise<{name: string, value: string, inline?: boolean}>[] = [];
+            exotics.forEach((exotic, i) => {
+                exoticPromises.push(new Promise(async (res) => {
+                    const icons: any = []
+                    let val = {"name": exotic.displayProperties.name, "value": `${classTypes.get(exotic.classType)} ${exotic.itemTypeDisplayName}` , "inline": true}
+                    icons.push(exotic.displayProperties)
+                    if((WeaponSlot.weapons.includes(exotic.equippingBlock.equipmentSlotTypeHash))){
+                        exotic.sockets.socketCategories[0].socketIndexes.forEach(e => {
+                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e]["plugHash"]
+                            const perk = InventoryItemDefinition[perkHash]
+                            if (!(perk["displayProperties"]["name"].includes("Tracker"))) {
+                                icons.push(perk["displayProperties"])
+                            }
+                        });
+                        exotic.sockets.socketCategories[1].socketIndexes.forEach(e => {
+                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e]["plugHash"]
+                            const perk = InventoryItemDefinition[perkHash]
+                            if (!(perk["displayProperties"]["name"].includes("Tracker"))) {
+                                icons.push(perk["displayProperties"])
+                            }
+                        });
+                    }
+                    let iconNames: string[] = [];
+                    for(let i = 0; i < icons.length; i++){
+                        const emoji = await dcclient.findEmoji("990974785674674187", icons[i].name.replaceAll(/[^0-9A-z ]/g, "").split(" ").join("_"));
+                        if (emoji === null) {
+                            const t: Emoji = await dcclient.createEmoji("990974785674674187", {name: icons[i].name.replaceAll(/[^0-9A-z ]/g, "").split(" ").join("_"), url: `https://bungie.net${icons[i].icon}`})
+                            if(t){
+                                iconNames.push(t.toString());
+                            }
+                        } else {
+                            iconNames.push(emoji.toString());
+                        }
+                    }
+                    val.name = `${iconNames[0].toString()} ${val.name}`
+                    iconNames.shift();
+                    val.value += `
+    ${iconNames.join(" ")}`;
+                    val.value += `\n\u200b`
+                    res(val);
+                }));
+            });
+            Promise.all(exoticPromises).then(data => {
+                data.forEach((row,i)=>{
+                    rows.push(row)
+                });
+                rows.sort((a,b) => a.value.length - b.value.length)
+                res(rows);
+            })
+        });
+    }
 }
 
 const crypt = (salt, text) => {
