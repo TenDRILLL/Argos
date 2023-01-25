@@ -58,6 +58,22 @@ export class entityQuery{
     blacklisted: boolean;
 }
 
+export class entityStats {
+    disablePrimaryStatDisplay: boolean;
+    statGroupHash: number;
+    stats: {
+        [key: number]: {
+            statHash: number;
+            value: number;
+            minimum: number;
+            maximum: number;
+            displayMaximum: number | null;
+        }
+    }
+    hasDisplayableStats: boolean;
+    primaryBaseStatHash: number;
+}
+
 export class socket {
     detail: string;
     socketEntries: socketEntry[];

@@ -13,7 +13,6 @@ import axios from "axios";
 import { CharacterQuery } from "../props/characterQuery";
 import { socketComponents, vendorQuery } from "../props/vendorQuery";
 import { WeaponSlot } from "../enums/weaponSlot";
-import { dcuser } from "./discordTokens";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
     d2client.discordTokens.discordOauthExchange(dccode).then(dcuser => {
@@ -369,8 +368,8 @@ export function updateActivityIdentifierDB(d2client) {
     }).catch(e => console.log(e));
 }
 
-export async function getXurEmbed(d2client, dcclient) {
-    return new Promise((res) => {
+export function getXurEmbed(d2client, dcclient) {
+    return new Promise((res, rej) => {
         d2client.refreshToken(d2client.adminuserID).then(q => {
             d2client.apiRequest("getDestinyCharacters", {
                 membershipType: 3,
@@ -394,8 +393,9 @@ export async function getXurEmbed(d2client, dcclient) {
                         await generateEmbed(data , d2client, location).then(embed => { res(embed) })
                     }).catch(e => {
                         console.log(`Xur isn't anywhere / something went wrong ${e}`)
+                        rej("Xur isn't on any planet.")
                     });
-            })
+            }).catch(e => rej(e))
     }).catch(() => console.log("Admin user not in DB"));
 })
     
