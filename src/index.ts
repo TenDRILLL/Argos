@@ -2,7 +2,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
-import {Client, Emoji} from "discord-http-interactions";
+import {ApplicationCommandOptionType, Client, Emoji} from "discord-http-interactions";
 import {
     fetchPendingClanRequests,
     newRegistration,
@@ -302,7 +302,7 @@ function updateCmds(){
             options: [
                 {
                     name: "name",
-                    type: 3,
+                    type: ApplicationCommandOptionType.String,
                     description: "Name of the leaderboard.",
                     required: true,
                     autocomplete: true
@@ -314,7 +314,7 @@ function updateCmds(){
             options: [
                 {
                     name: "activity",
-                    type: 3,
+                    type: ApplicationCommandOptionType.String,
                     description: "Please select the activity from the list below.",
                     required: true,
                     autocomplete: true
@@ -325,51 +325,76 @@ function updateCmds(){
             description: "Get Destiny 2 statistics of yourself or the requested user.",
             options: [
                 {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "summary",
                     description: "Requested user's general statistics Argos monitors.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "raids",
                     description: "Requested user's raid completions per raid.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "dungeons",
                     description: "Requested user's dungeon completions per dungeon.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "grandmasters",
                     description: "Requested user's Grandmaster Nightfall completions per Grandmaster Nightfall.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
+                        }
+                    ]
+                }
+            ]
+        }, {
+            name: "lfg",
+            description: "Access LFG commands.",
+            options: [
+                {
+                    name: "create",
+                    description: "Create an LFG.",
+                    type: ApplicationCommandOptionType.SubCommand,
+                    options: [
+                        {
+                            name: "type",
+                            description: "Type of an activity to create an LFG for.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
+                        }, {
+                            name: "activity",
+                            description: "The activity to create an LFG for.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
                         }
                     ]
                 }
