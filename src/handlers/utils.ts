@@ -368,7 +368,8 @@ export function updateActivityIdentifierDB(d2client) {
     }).catch(e => console.log(e));
 }
 
-export function getXurEmbed(d2client, dcclient) {
+export function getXurEmbed(d2client, dcclient): Promise<Embed> {
+    const statHashes = ['2996146975', '392767087', '1943323491', '1735777505', '144602215', '4244567218']
     return new Promise((res, rej) => {
         d2client.refreshToken(d2client.adminuserID).then(q => {
             d2client.apiRequest("getDestinyCharacters", {
@@ -387,8 +388,9 @@ export function getXurEmbed(d2client, dcclient) {
                         const data = info.categories.data.categories[0].itemIndexes.concat(info.categories.data.categories[1].itemIndexes).filter(e => e != 0).map(index => {
                             return {
                                 itemHash: info.sales.data[index].itemHash,
-                                sockets: info.itemComponents.sockets.data[index].sockets
-                            }                    
+                                sockets: info.itemComponents.sockets.data[index].sockets,
+                                stats: statHashes.map(e => info.itemComponents.stats.data[index].stats[e]?.value)
+                            };                  
                         })
                         await generateEmbed(data , d2client, location).then(embed => { res(embed) })
                     }).catch(e => {
@@ -399,7 +401,7 @@ export function getXurEmbed(d2client, dcclient) {
     }).catch(() => console.log("Admin user not in DB"));
 })
     
-    function generateEmbed(components: {itemHash: number, sockets: socketComponents}[], d2client, locationIndex) {
+    function generateEmbed(components: {itemHash: number, sockets: socketComponents, stats: number[]}[], d2client, locationIndex) {
         const promises: Promise<entityQuery>[] = [];
         components.forEach(item => {
             promises.push(new Promise((res)=>{
@@ -418,7 +420,7 @@ export function getXurEmbed(d2client, dcclient) {
         })
     };
     
-    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: socketComponents}[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
+    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: socketComponents, stats: number[] }[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
         return new Promise(async (res)=>{
             const manifest = await d2client.apiRequest("getManifests",{});
             const path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];
@@ -429,29 +431,47 @@ export function getXurEmbed(d2client, dcclient) {
                 [0, "<:titan2:1067375189421203486>"],
                 [2, "<:warlock2:1067375209985880074>"]
             ]);
+            const statEmojies = [
+                "<:mobility:1068928862538440784>",
+                "<:resilience:1068928804170514594>",
+                "<:recovery:1068928541183455292>",
+                "<:discipline:1068928610699841716>",
+                "<:intellect:1068928723908313131>",
+                "<:strength:1068928763884228728>"
+            ]
             let rows: {name: string, value: string, inline?: boolean}[] = [];
             const exoticPromises: Promise<{name: string, value: string, inline?: boolean}>[] = [];
             exotics.forEach((exotic, i) => {
+                const component = components.filter(e => e.itemHash === exotic.hash)[0];
                 exoticPromises.push(new Promise(async (res) => {
                     const icons: any = []
                     let val = {"name": exotic.displayProperties.name, "value": `${classTypes.get(exotic.classType)} ${exotic.itemTypeDisplayName}` , "inline": true}
                     icons.push(exotic.displayProperties)
                     if((WeaponSlot.weapons.includes(exotic.equippingBlock.equipmentSlotTypeHash))){
                         exotic.sockets.socketCategories[0].socketIndexes.forEach(e => {
-                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e].plugHash
+                            const perkHash = component.sockets[e].plugHash
                             const perk = InventoryItemDefinition[perkHash]
                             if (!(perk.displayProperties.name.includes("Tracker"))) {
                                 icons.push(perk.displayProperties)
                             }
                         });
                         exotic.sockets.socketCategories[1].socketIndexes.forEach(e => {
-                            const perkHash = components.filter(e => e.itemHash === exotic.hash)[0].sockets[e].plugHash
+                            const perkHash = component.sockets[e].plugHash
                             const perk = InventoryItemDefinition[perkHash]
                             if (!(perk.displayProperties.name.includes("Tracker"))) {
                                 icons.push(perk.displayProperties)
                             }
                         });
                     }
+                    else {
+                        val.value += "\n";
+                        component.stats.forEach((e, i) => {
+                            val.value += `${statEmojies[i]} ${e.toString().padEnd(3," ")}`;
+                            if (i == 2) val.value += "\n";
+                        })
+                        val.value += `
+Total: ${component.stats.reduce((a, b) => a+b)}`
+                    }    
                     let iconNames: string[] = [];
                     for(let i = 0; i < icons.length; i++){
                         const emoji = await dcclient.findEmoji("990974785674674187", icons[i].name.replaceAll(/[^0-9A-z ]/g, "").split(" ").join("_"));
@@ -468,15 +488,15 @@ export function getXurEmbed(d2client, dcclient) {
                     iconNames.shift();
                     val.value += `
     ${iconNames.join(" ")}`;
-                    val.value += `\n\u200b`
                     res(val);
                 }));
             });
             Promise.all(exoticPromises).then(data => {
                 data.forEach((row,i)=>{
-                    rows.push(row)
+                    rows.push(row);
                 });
                 rows.sort((a,b) => a.value.length - b.value.length)
+                rows = rows.map((e,i) => { if (i < 3) {e.value += "\n\u200b";} return e; })
                 res(rows);
             })
         });

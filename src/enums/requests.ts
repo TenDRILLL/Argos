@@ -16,7 +16,7 @@ requests.set("getPendingClanInvites", "/GroupV2/groupId/Members/Pending/");
 requests.set("approveClanMember","/GroupV2/groupId/Members/ApproveList/");
 requests.set("denyClanMember","/GroupV2/groupId/Members/DenyList/");
 requests.set("getVendorSales", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=402");
-requests.set("getVendorInformation", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=300,305,310,400,401,402");
+requests.set("getVendorInformation", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/Vendors/vendorHash/?components=300,304,305,310,400,401,402");
 requests.set("getActivityHistory", "/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/Activities/")
 requests.set("getPostGameCarnageReport", "/Destiny2/Stats/PostGameCarnageReport/activityId/")
 requests.set("getItem", "/Destiny2/membershipType/Profile/destinyMembershipId/Item/itemInstanceId/?components=300,301,302,303,304,305,306,307,308,309,310")

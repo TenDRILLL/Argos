@@ -74,8 +74,6 @@ function instantiateActivityDatabase() {
     console.log("Activity DB done.");
 }
 
-getXurEmbed(d2client,dcclient).then(e => console.log(e));
-
 /*
 *********************
 *  Metadata Object  *

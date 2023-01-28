@@ -27,6 +27,19 @@ export class vendorQuery {
             privacy: number;
             disabled: boolean;
         }
+        stats: {
+            data: {
+                [key: string]: {
+                    stats: {
+                        [key: string]: {
+                            statHash: number;
+                            value: number;
+                        }
+                    }
+                }
+            }
+            privacy: number;
+        }
     }
     currencyLookups: Object;
 }

@@ -13,7 +13,7 @@ export class entityQuery{
     displaySource: string;
     action: Object[];
     inventory: inventory;
-    stats: Object[];
+    stats: entityStats;
     equippingBlock: {
         uniqueLabel: string;
         uniqueLabelHash: number;
