@@ -18,7 +18,7 @@
     "body-parser": "^1.20.1",
     "cookie-parser": "^1.4.6",
     "copyfiles": "^2.4.1",
-    "discord-http-interactions": "^1.4.8",
+    "discord-http-interactions": "^1.5.1",
     "dotenv": "^16.0.3",
     "enmap": "^5.9.2",
     "node-cron": "^3.0.2",
