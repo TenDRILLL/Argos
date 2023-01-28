@@ -172,13 +172,6 @@ export function updateStatRolesUser(dcclient,d2client,id){
             const d2name = await d2client.getBungieTag(dbUser.bungieId);
             if(!dbUser.destinyName || dbUser.destinyName !== d2name) dbUser.destinyName = d2name;
             d2client.DB.set(id,dbUser);
-            if(member.nick){
-                if(!member.nick.endsWith(d2name)){
-                    data.nick = d2name;
-                }
-            } else {
-                data.nick = d2name;
-            }
             const roles = member.roles.sort();
             data.roles = roles.filter(x => !statRoles.allIDs.includes(x));
             data.roles = [...data.roles, ...tempArr].sort();
@@ -418,7 +411,7 @@ export function getXurEmbed(d2client, dcclient): Promise<Embed> {
                 .setDescription("He is currently selling the following exotics")
                 .setFields(await generateFields(data,components,3, dcclient))
         })
-    };
+    }
     
     function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: socketComponents, stats: number[] }[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
         return new Promise(async (res)=>{
