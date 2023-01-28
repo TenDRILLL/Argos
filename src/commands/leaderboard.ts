@@ -31,10 +31,8 @@ export default class Leaderboard extends Command {
             default:
                 return interaction.reply({content: "Leaderboard not implemented."});
         }
-        const ignore = ["handledApplications"];
         const dbKeys: string[] = Array.from(d2client.DB.keys());
         dbKeys.forEach(key => {
-            if(ignore.includes(key)) return;
             const user = d2client.DB.get(key) as DBUser;
             if(user[stat[0].toString()][stat[1].toString()] !== undefined && user[stat[0].toString()][stat[1].toString()] !== 0){
                 all.push({name: user.destinyName, stat: user[stat[0].toString()][stat[1].toString()], discordID: key});

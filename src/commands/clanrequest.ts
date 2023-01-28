@@ -70,10 +70,10 @@ export default class ClanRequest extends Command {
     }
 
     deleteData(interaction, d2client, id, d){
-        const apps = d2client.DB.get("handledApplications") ?? [];
+        const apps = d2client.miscDB.get("handledApplications") ?? [];
         if(apps.includes(id)){
             apps.splice(apps.indexOf(id),1);
-            d2client.DB.set("handledApplications");
+            d2client.miscDB.set("handledApplications");
         }
         if(d.Response["ErrorCode"] === 1){
             interaction.reply({

@@ -19,6 +19,7 @@ export class requestHandler {
     public dbUserUpdater: DBUserUpdater;
     public DB;
     public entityDB;
+    public miscDB;
     public activityIdentifierDB;
     public adminuserID: string;
     public discordTokens: DiscordTokens;
@@ -28,6 +29,7 @@ export class requestHandler {
         this.secret = process.env.apisecret as string;
         this.clientID = "37090";
         this.DB = new enmap({name:"users"});
+        this.miscDB = new enmap({name:"misc"})
         this.dbUserUpdater = new DBUserUpdater(this);
         this.entityDB = new enmap({name: "entities"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});

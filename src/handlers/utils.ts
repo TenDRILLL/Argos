@@ -114,9 +114,7 @@ export async function updateStatRoles(dcclient,d2client){
     for (let i = 0; i < memberIds.length; i += 10) {
         await sleep(i);
         const ids: string[] = memberIds.slice(i, i + 10);
-        const ignore = ["handledApplications"];
         ids.forEach(id => {
-            if(ignore.includes(id)) return;
             updateStatRolesUser(dcclient,d2client,id);
         });
     }
@@ -198,7 +196,7 @@ export function fetchPendingClanRequests(dcclient, d2client) {
         d2client.apiRequest("getPendingClanInvites",{groupId: "3506545"}, {"Authorization": `Bearer ${d.tokens.accessToken}`}).then(d => {
             const resp = d.Response as PendingClanmembersQuery;
             const emojis = {1: "<:Xbox:1045358581316321280>", 2: "<:PlayStation:1057027325809672192>", 3: "<:Steam:1045354053087006800>", 6: "<:EpicGames:1048534129500770365>"};
-            const handled = d2client.DB.get("handledApplications") ?? [];
+            const handled = d2client.miscDB.get("handledApplications") ?? [];
             resp.results.forEach(async req => {
                 if (!handled.includes(req.destinyUserInfo.membershipId)) {
                     const data = await d2client.dbUserUpdater.getPartialUserStats(
@@ -237,7 +235,7 @@ export function fetchPendingClanRequests(dcclient, d2client) {
                         components: actionRows
                     }).then(() => {
                         handled.push(req.destinyUserInfo.membershipId);
-                        d2client.DB.set("handledApplications", handled);
+                        d2client.miscDB.set("handledApplications", handled);
                     });
                 }
             })

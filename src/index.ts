@@ -220,6 +220,7 @@ dcclient.on("ready", async ()=>{
         console.log("Checking clan requests.");
         fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
+    // run getXurEmbed(d2client, dcclient)
 });
 
 dcclient.login();
