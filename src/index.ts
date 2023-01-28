@@ -2,19 +2,20 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
-import {Client} from "discord-http-interactions";
+import {Client, Emoji} from "discord-http-interactions";
 import {
     fetchPendingClanRequests,
     newRegistration,
     updateStatRoles,
     decrypt,
     updateStatRolesUser,
-    crypt
+    crypt, getXurEmbed
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import {getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
+import * as cron from "node-cron";
 
 let commands;
 const d2client = new requestHandler();
@@ -220,8 +221,65 @@ dcclient.on("ready", async ()=>{
         console.log("Checking clan requests.");
         fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
-    // run getXurEmbed(d2client, dcclient)
+    //XUR Embed timers while Argos running.
+    const createXur = cron.schedule("0 17 * * 5", ()=>{
+        generateXurEmbed();
+    }, {timezone: "etc/UTC"});
+    const deleteXur = cron.schedule("0 17 * * 2", ()=>{
+        deleteXurEmbed();
+    }, {timezone: "etc/UTC"});
+    createXur.start();
+    deleteXur.start();
+    //XUR Embed checking on Argos startup.
+    const now = new Date();
+    //0 = Sun
+    if(now.getDay() !== 3 || now.getDay() !== 4){
+        //Day is Fri-Tue
+        if(now.getDay() === 2){
+            //Tue
+            if(now.getUTCHours() >= 17){
+                deleteXurEmbed();
+            } else {
+                generateXurEmbed();
+            }
+        } else if(now.getDay() === 5){
+            //Fri
+            if(now.getUTCHours() < 17){
+                deleteXurEmbed();
+            } else {
+                generateXurEmbed();
+            }
+        } else {
+            generateXurEmbed();
+        }
+    } else {
+        deleteXurEmbed();
+    }
 });
+
+function deleteXurEmbed(){
+    if(d2client.miscDB.has("xurEmbed")){
+        console.log(`Deleting XUR embed and emojies: ${new Date().toISOString()}`);
+        d2client.miscDB.delete("xurEmbed");
+        dcclient.getEmoji("990974785674674187").then((emojies) => {
+            return !(emojies instanceof Emoji) ? emojies.forEach(emoji => {
+                dcclient.removeEmoji("990974785674674187", emoji.id);
+            }) : dcclient.removeEmoji("990974785674674187", emojies.id);
+        });
+    }
+}
+
+function generateXurEmbed(){
+    if(!(d2client.miscDB.has("xurEmbed"))){
+        console.log(`Generating XUR embed: ${new Date().toISOString()}`);
+        getXurEmbed(d2client, dcclient).then(x => {
+            console.log("XUR embed saved.");
+            d2client.miscDB.set("xurEmbed",x);
+        });
+    } else {
+        console.log("XUR embed exists.");
+    }
+}
 
 dcclient.login();
 
