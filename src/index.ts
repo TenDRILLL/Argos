@@ -69,6 +69,10 @@ const dcclient = new Client({
             name: "getError",
             method: "GET",
             endpoint: "/error"
+        }, {
+            name: "undefined",
+            method: "GET",
+            endpoint: "*"
         }
     ]
 });
@@ -181,6 +185,14 @@ dcclient.on("oauth", (req,res)=>{
         const bungieCode = urlData.state;
         newRegistration(dcclient, d2client, discordCode, bungieCode, res);
     }
+});
+
+dcclient.on("undefined", (req,res)=>{
+    return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
 });
 
 dcclient.on("register",(req, res)=>{
