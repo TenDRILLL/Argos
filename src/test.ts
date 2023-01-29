@@ -74,6 +74,7 @@ function instantiateActivityDatabase() {
     console.log("Activity DB done.");
 }
 
+
 /*
 *********************
 *  Metadata Object  *

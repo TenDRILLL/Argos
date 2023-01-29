@@ -314,7 +314,10 @@ export function logout(){
     </body></html>`;
 }
 
-export function getErrorPage(errorDetails: string[]) {
+export function getErrorPage(errorDetails: string[], button: string) {
+    const links = {
+        Register: "http://register.venerity.xyz"
+    }
     let res = `<!DOCTYPE html>
     <head>
         <title>Error</title>
@@ -344,14 +347,24 @@ export function getErrorPage(errorDetails: string[]) {
         res += `
 <p>${e}</p>`
     })
-    res += "<p></p>"
     res += `
                     </div>
                 </div> 
             </div>
         </div>
-    </div>
-    
+    </div>`
+    res += `
+    <div class="buttonContainer">
+    <button onclick="window.location.href='${links[button] ?? "/"}';">
+        Enter
+    </button>
+    <h4 onclick="window.location.href='${links[button] ?? "/"}';">
+        ${button ?? "Retry"}
+    </h4>
+    </div>` 
+
+    res += `
     </body>
     </html>    `
+    return res;
 }

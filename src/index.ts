@@ -13,7 +13,7 @@ import {
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
-import {getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
+import {getErrorPage, getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
 import * as cron from "node-cron";
 
@@ -65,6 +65,10 @@ const dcclient = new Client({
             name: "resource",
             method: "GET",
             endpoint: "/resource/:resourceName"
+        }, {
+            name: "getError",
+            method: "GET",
+            endpoint: "/error"
         }
     ]
 });
@@ -192,9 +196,17 @@ dcclient.on("panel",(req,res)=>{
             });
         });
     } else {
-        res.redirect("/"); //TODO: Instruct user to register, as they have no account.
+        res.redirect(`/error?message=
+        We aren't sure how you ended up here, but you need to register to access the panel.
+        \\n
+        Error code: Weasel
+        &button=Register`);
     }
 });
+
+dcclient.on("getError",(req,res)=>{
+    res.send(getErrorPage(req.query.message.split("\\n"), req.query.button))
+})
 
 dcclient.on("logout",(req,res)=>{
     res.clearCookie("conflux").send(logout());

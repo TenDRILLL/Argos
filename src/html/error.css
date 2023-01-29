@@ -2,11 +2,11 @@ html {
     width: 100%;
     height: 100%;
     background-color: #040404;
-    color: white;
+    color: #FFFFFFE0;
     font-family: sans-serif;
  }
  
- .borderContainer {
+.borderContainer {
     display: flex;
     flex: 50%;
     justify-content: end;
@@ -15,7 +15,7 @@ html {
     background-color: #15151540;
  }
  
- .border {
+.border {
     position: relative;
     transform: rotate(45deg);
     top: 30px;
@@ -26,7 +26,7 @@ html {
     margin: 0;
     border: 1px solid red;
  }
- .border:before {
+.border:before {
     content: " ";
     position: absolute;
     z-index: -1;
@@ -37,7 +37,7 @@ html {
     border: 2px solid #8B0000;
   }
  
- .straight {
+.straight {
     height: 50px;
     width: 15px;
     border: 1px solid red;
@@ -46,7 +46,7 @@ html {
     background-color: red;
  }
  
- .dot {
+.dot {
     width: 15px;
     height: 15px;
     margin-top: -4px;
@@ -55,7 +55,7 @@ html {
     background-color: red;
  }
  
- .circleShadow {
+.circleShadow {
     position: relative;
     width: 55px;
     height: 55px;
@@ -67,7 +67,7 @@ html {
  }
  
  
- .container {
+.container {
     position: relative;
     top: 30vh;
     width: 110vw;
@@ -80,20 +80,20 @@ html {
     display: flex;
  }
  
- .ErrorContainer1 {
+.ErrorContainer1 {
     display: flex;
     flex-direction: row;
     width: 80vw;
     justify-content: left;
  }
  
- .ErrorContainer2 {
+.ErrorContainer2 {
     display: flex;
     flex-direction: column;
     width: 100vw;
  }
  
- .ErrorMessage {
+.ErrorMessage {
     position: relative;
     height: 70px;
     background-color: #8B000080;
@@ -101,7 +101,7 @@ html {
     align-items: center;
  }
  
- .ErrorContents {
+.ErrorContents {
     position: relative;
     height: 130px;
     width: 100vw;
@@ -109,33 +109,62 @@ html {
     background-color: #070707D0;
  }
  
- .ErrorContents2 {
+.ErrorContents2 {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
  }
  
- .extraShadow1 {
+.extraShadow1 {
     position: relative;
     background-color: #07070740;
     width: 10vw;
     left: 10px;
  }
  
- .extraShadow2 {
+.extraShadow2 {
     background-color: #12121240;
     position: relative;
     width: 40vw;
     left: 10px;
  }
  
- p {
+.buttonContainer {
+    position: relative;
+    top: 30vh;
+    padding-left: 30vw;
+    width: 80vw;
+    height: 40px;
+    left: -10px;
+    background-color: #060606;
+    display: flex;
+    flex-direction: row;
+    align-self: flex-end;
+    align-items: center;
+    justify-content: start;
+ }
+ 
+button {
+    margin-left: 20px;
+    width: 40px;
+    height: 25px;
+    display: flex;
+    margin-right: 5px;
+    justify-content: center;
+    text-align: center;
+    background-color: #060606;
+    border: 2px solid #E8E8E8;
+    border-radius: 5px;
+    color: #FFFFFFE0;
+ }
+ 
+p {
     margin: 0;
     margin-left: 30px;
     padding-top: 5px;
  }
  
- h1 {
+h1 {
     letter-spacing: 10px;
     margin-left: 20px;
     opacity: 1;
