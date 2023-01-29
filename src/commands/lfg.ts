@@ -37,6 +37,7 @@ Once you have it, click the button to proceed with the creation.
     }
 
     async btnRun(interaction, d2client){
+        if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience."});
         const cmd = interaction.customId.split("-")[1];
         if(cmd === "create"){
             interaction.client.deleteWebhookMessage(interaction.applicationId, interaction.token, interaction.message.id).catch(e => {return true});
@@ -80,10 +81,74 @@ Once you have it, click the button to proceed with the creation.
             );
         } else if(cmd === "join"){
             // Join the LFG.
+            const lfgid = interaction.customId.split("-")[2];
+            const lfgemb = new Embed(interaction.message.embeds[0]);
+            const guardians = lfgemb.fields![3];
+            const queue = lfgemb.fields![4];
+            let lfgData = d2client.lfgDB.get(lfgid);
+            if(!lfgData) return interaction.reply({content: "No LFG found with the ID provided, please notify Administration.", ephemeral: true});
+            const userID = interaction.member.user.id;
+            if(lfgData.guardians.includes(userID) || lfgData.queue.includes(userID)) return interaction.reply({content: "You're already in this LFG.", ephemeral: true});
+            await interaction.deferUpdate();
+            const buttons = interaction.message.components[0].components.map(x => new Button(x));
+            if(lfgData.guardians.length === parseInt(lfgData.maxSize)){
+                lfgData.queue.push(userID);
+                queue.value = lfgData.queue.map(x => d2client.DB.get(x).destinyName).join(", ");
+                if(lfgData.guardians.length === lfgData.maxSize){
+                    buttons[0].setLabel("Join in Queue");
+                    buttons[0].setStyle(ButtonStyle.Primary);
+                }
+            } else {
+                lfgData.guardians.push(userID);
+                guardians.name = `**Guardians Joined: ${lfgData.guardians.length}/${lfgData.maxSize}**`;
+                guardians.value = lfgData.guardians.map(x => d2client.DB.get(x).destinyName).join(", ");
+                if(lfgData.guardians.length === lfgData.maxSize){
+                    buttons[0].setLabel("Join in Queue");
+                    buttons[0].setStyle(ButtonStyle.Primary);
+                }
+            }
+            d2client.lfgDB.set(lfgData.id,lfgData);
+            interaction.client.editWebhookMessage(interaction.applicationId,interaction.token,{
+                embeds: [lfgemb],
+                components: [new ActionRow().setComponents(buttons)]
+            },lfgid);
         } else if(cmd === "leave"){
             // Leave the LFG.
+            const lfgid = interaction.customId.split("-")[2];
+            const lfgemb = new Embed(interaction.message.embeds[0]);
+            const guardians = lfgemb.fields![3];
+            const queue = lfgemb.fields![4];
+            let lfgData = d2client.lfgDB.get(lfgid);
+            if(!lfgData) return interaction.reply({content: "No LFG found with the ID provided, please notify Administration.", ephemeral: true});
+            const userID = interaction.member.user.id;
+            if(!(lfgData.guardians.includes(userID)) && !(lfgData.queue.includes(userID))) return interaction.reply({content: "You're not in this LFG.", ephemeral: true});
+            await interaction.deferUpdate();
+            const buttons = interaction.message.components[0].components.map(x => new Button(x));
+            if(lfgData.queue.includes(userID)){
+                lfgData.queue.splice(lfgData.queue.indexOf(userID),1);
+                queue.value = lfgData.queue.length === 0 ? "None." : lfgData.queue.map(x => d2client.DB.get(x).destinyName).join(", ");
+            } else {
+                lfgData.guardians.splice(lfgData.guardians.indexOf(userID),1);
+                if(lfgData.queue.length > 0){
+                    lfgData.guardians.push(lfgData.queue.pop());
+                    queue.value = lfgData.queue.map(x => d2client.DB.get(x).destinyName).join(", ");
+                } else {
+                    buttons[0].setLabel("Join")
+                    buttons[0].setStyle(ButtonStyle.Success);
+                }
+                guardians.name = `**Guardians Joined: ${lfgData.guardians.length}/${lfgData.maxSize}**`;
+                guardians.value = lfgData.guardians.length === 0 ? "None." : lfgData.guardians.map(x => d2client.DB.get(x).destinyName).join(", ");
+            }
+            d2client.lfgDB.set(lfgData.id,lfgData);
+            interaction.client.editWebhookMessage(interaction.applicationId,interaction.token,{
+                embeds: [lfgemb],
+                components: [new ActionRow().setComponents(buttons)]
+            },lfgid);
         } else if(cmd === "edit"){
             // Edit the LFG.
+            interaction.reply({
+                content: interaction.customId
+            });
         }
     }
 
@@ -102,28 +167,38 @@ Once you have it, click the button to proceed with the creation.
                 {name: "**Queue:**", value: "None.", inline: true}
             ]);
         interaction.reply({
-            embeds: [embed],
-            components: [
-                new ActionRow()
-                    .setComponents([
-                        new Button()
-                            .setLabel(size === 1 ? "Join in Queue" : "Join")
-                            .setStyle(size === 1 ? ButtonStyle.Primary : ButtonStyle.Success)
-                            .setCustomId(`lfg-join-id`),
-                        new Button()
-                            .setLabel("Leave")
-                            .setStyle(ButtonStyle.Danger)
-                            .setCustomId(`lfg-leave-id`),
-                        new Button()
-                            .setLabel("Edit")
-                            .setStyle(ButtonStyle.Secondary)
-                            .setCustomId(`lfg-edit-id-userid`)
-                    ])
-            ],
-            ephemeral: true
+            embeds: [embed]
+        }).then(ic => {
+            let id = ic.message.id;
+            ic.editReply({
+                components: [
+                    new ActionRow()
+                        .setComponents([
+                            new Button()
+                                .setLabel(size === 1 ? "Join in Queue" : "Join")
+                                .setStyle(size === 1 ? ButtonStyle.Primary : ButtonStyle.Success)
+                                .setCustomId(`lfg-join-${id}`),
+                            new Button()
+                                .setLabel("Leave")
+                                .setStyle(ButtonStyle.Danger)
+                                .setCustomId(`lfg-leave-${id}`),
+                            new Button()
+                                .setLabel("Edit")
+                                .setStyle(ButtonStyle.Secondary)
+                                .setCustomId(`lfg-edit-${id}-${ic.member.user.id}`)
+                        ])
+                ]
+            });
+            d2client.lfgDB.set(id,{
+                id,
+                activity: interaction.customId.split("-")[1],
+                time,
+                maxSize: size,
+                creator: interaction.member.user.id,
+                guardians: [interaction.member.user.id],
+                queue: []
+            });
         });
-        // Edit the message, with components after sending, include id in custom_id.
-        // Add the LFG to the DB.
     }
 
     async acRun(interaction, d2client){

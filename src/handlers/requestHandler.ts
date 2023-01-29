@@ -21,6 +21,7 @@ export class requestHandler {
     public entityDB;
     public miscDB;
     public activityIdentifierDB;
+    public lfgDB;
     public adminuserID: string;
     public discordTokens: DiscordTokens;
 
@@ -33,6 +34,7 @@ export class requestHandler {
         this.dbUserUpdater = new DBUserUpdater(this);
         this.entityDB = new enmap({name: "entities"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
+        this.lfgDB = new enmap({name: "lfg"});
         this.adminuserID = process.env.apiadminuserID as string;
         this.discordTokens = new DiscordTokens();
     }
