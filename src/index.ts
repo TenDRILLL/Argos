@@ -273,7 +273,7 @@ dcclient.on("resource",(req, res)=>{
         res.sendFile(`${__dirname}/html/${req.params.resourceName}`);
     } else {
         return res.redirect(`/error?message=
-        ${req.params.resourceName} does not exist.
+        Resource ${req.params.resourceName} does not exist.
                             
         \\n
         For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Atheon`);
