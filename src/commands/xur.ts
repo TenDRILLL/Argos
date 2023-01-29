@@ -1,9 +1,4 @@
-import { getWeaponInfo } from "../handlers/utils";
-import { CharacterQuery } from "../props/characterQuery";
-import {vendorQuery, vendorSaleComponent} from "../props/vendorQuery";
 import Command from "./Command";
-import {Embed} from "discord-http-interactions";
-import { entityQuery } from "../props/entityQuery";
 
 export default class xur extends Command {
     constructor(){
