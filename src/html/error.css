@@ -5,6 +5,10 @@ html {
     color: #FFFFFFE0;
     font-family: sans-serif;
  }
+
+body {
+    overflow: hidden;
+}
  
 .borderContainer {
     display: flex;
