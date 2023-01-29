@@ -85,7 +85,7 @@ Once you have it, click the button to proceed with the creation.
             const lfgemb = new Embed(interaction.message.embeds[0]);
             const guardians = lfgemb.fields![3];
             const queue = lfgemb.fields![4];
-            let lfgData = d2client.lfgDB.get(lfgid);
+            let lfgData = d2client.lfgmanager.getLFG(lfgid);
             if(!lfgData) return interaction.reply({content: "No LFG found with the ID provided, please notify Administration.", ephemeral: true});
             const userID = interaction.member.user.id;
             if(lfgData.guardians.includes(userID) || lfgData.queue.includes(userID)) return interaction.reply({content: "You're already in this LFG.", ephemeral: true});
@@ -107,7 +107,7 @@ Once you have it, click the button to proceed with the creation.
                     buttons[0].setStyle(ButtonStyle.Primary);
                 }
             }
-            d2client.lfgDB.set(lfgData.id,lfgData);
+            d2client.lfgmanager.saveLFG(lfgData);
             interaction.client.editWebhookMessage(interaction.applicationId,interaction.token,{
                 embeds: [lfgemb],
                 components: [new ActionRow().setComponents(buttons)]
@@ -118,7 +118,7 @@ Once you have it, click the button to proceed with the creation.
             const lfgemb = new Embed(interaction.message.embeds[0]);
             const guardians = lfgemb.fields![3];
             const queue = lfgemb.fields![4];
-            let lfgData = d2client.lfgDB.get(lfgid);
+            let lfgData = d2client.lfgmanager.getLFG(lfgid);
             if(!lfgData) return interaction.reply({content: "No LFG found with the ID provided, please notify Administration.", ephemeral: true});
             const userID = interaction.member.user.id;
             if(!(lfgData.guardians.includes(userID)) && !(lfgData.queue.includes(userID))) return interaction.reply({content: "You're not in this LFG.", ephemeral: true});
@@ -139,15 +139,15 @@ Once you have it, click the button to proceed with the creation.
                 guardians.name = `**Guardians Joined: ${lfgData.guardians.length}/${lfgData.maxSize}**`;
                 guardians.value = lfgData.guardians.length === 0 ? "None." : lfgData.guardians.map(x => d2client.DB.get(x).destinyName).join(", ");
             }
-            d2client.lfgDB.set(lfgData.id,lfgData);
+            d2client.lfgmanager.saveLFG(lfgData);
             interaction.client.editWebhookMessage(interaction.applicationId,interaction.token,{
                 embeds: [lfgemb],
                 components: [new ActionRow().setComponents(buttons)]
             },lfgid);
         } else if(cmd === "edit"){
-            // Edit the LFG.
             interaction.reply({
-                content: interaction.customId
+                content: "Editing is not supported yet.",
+                ephemeral: true
             });
         }
     }
@@ -186,10 +186,11 @@ Once you have it, click the button to proceed with the creation.
                                 .setLabel("Edit")
                                 .setStyle(ButtonStyle.Secondary)
                                 .setCustomId(`lfg-edit-${id}-${ic.member.user.id}`)
+                                .setDisabled(true)
                         ])
                 ]
             });
-            d2client.lfgDB.set(id,{
+            d2client.lfgmanager.saveLFG({
                 id,
                 activity: interaction.customId.split("-")[1],
                 time,

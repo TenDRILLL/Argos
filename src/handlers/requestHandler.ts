@@ -11,6 +11,7 @@ import {DBUserUpdater} from "./dbUserUpdater";
 import {statRoles} from "../enums/statRoles";
 import {DBUser} from "../props/dbUser";
 import DiscordTokens from "./discordTokens";
+import LFGManager from "./lfgManager";
 
 export class requestHandler {
     private apiKey: string;
@@ -21,11 +22,11 @@ export class requestHandler {
     public entityDB;
     public miscDB;
     public activityIdentifierDB;
-    public lfgDB;
+    public lfgmanager;
     public adminuserID: string;
     public discordTokens: DiscordTokens;
 
-    constructor(){
+    constructor(dcclient){
         this.apiKey = process.env.apikey as string;
         this.secret = process.env.apisecret as string;
         this.clientID = "37090";
@@ -34,7 +35,7 @@ export class requestHandler {
         this.dbUserUpdater = new DBUserUpdater(this);
         this.entityDB = new enmap({name: "entities"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
-        this.lfgDB = new enmap({name: "lfg"});
+        this.lfgmanager = new LFGManager(this,dcclient);
         this.adminuserID = process.env.apiadminuserID as string;
         this.discordTokens = new DiscordTokens();
     }

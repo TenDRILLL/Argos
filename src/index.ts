@@ -18,7 +18,6 @@ import {readdirSync} from "fs";
 import * as cron from "node-cron";
 
 let commands;
-const d2client = new requestHandler();
 const dcclient = new Client({
     token: process.env.discordToken as string,
     publicKey: process.env.discordKey as string,
@@ -76,6 +75,7 @@ const dcclient = new Client({
         }
     ]
 });
+const d2client = new requestHandler(dcclient);
 
 dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.urlencoded({ extended: false }));
 dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.json());
