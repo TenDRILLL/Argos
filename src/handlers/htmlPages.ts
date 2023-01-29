@@ -313,3 +313,45 @@ export function logout(){
         </script>
     </body></html>`;
 }
+
+export function getErrorPage(errorDetails: string[]) {
+    let res = `<!DOCTYPE html>
+    <head>
+        <title>Error</title>
+        <link rel="stylesheet" href="/resource/error.css">
+    </head>
+    <html>
+    <body>
+    
+    <div class="container">
+        <div class="extraShadow1"></div>
+        <div class="extraShadow2"></div>
+        <div class="borderContainer">
+            <div class="border">
+                <div class="straight"></div>
+                <div class="dot"></div>
+                <div class="circleShadow"></div>
+            </div>
+        </div>
+        <div class="ErrorContainer1">
+            <div class="ErrorContainer2">
+                <div class="ErrorMessage">
+                    <h1>ERROR</h1>
+                </div>
+                <div class="ErrorContents">
+                    <div class="ErrorContents2">`
+    errorDetails.forEach(e => {
+        res += `
+<p>${e}</p>`
+    })
+    res += "<p></p>"
+    res += `
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+    
+    </body>
+    </html>    `
+}
