@@ -7,6 +7,7 @@ export default class Delete extends Command {
 
     async btnRun(interaction){
         if(interaction.data.custom_id.split("-")[1] === interaction.member.user.id){
+            await interaction.deferUpdate();
             interaction.delete().catch(e => console.log(e));
         } else {
             return interaction.reply({

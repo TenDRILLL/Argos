@@ -32,12 +32,16 @@ export default class ClanRequest extends Command {
                                 message: "Accepted."
                             }
                         ).then(d2 => {
-                            this.deleteData(interaction,d2client,destinyMembershipId,d2);
+                            this.deleteData(interaction,d2client,destinyMembershipId,d2,"approved");
                         }).catch(e => {
-                            interaction.reply({
-                                content: e.toString() ?? "Unknown error.",
-                                ephemeral: true
-                            });
+                            if(e["Response"] !== undefined){
+                                this.deleteData(interaction,d2client,destinyMembershipId,e,"approved");
+                            } else {
+                                interaction.reply({
+                                    content: e.toString() ?? "Unknown error.",
+                                    ephemeral: true
+                                });
+                            }
                         });
                         break;
                     case "deny":
@@ -51,12 +55,16 @@ export default class ClanRequest extends Command {
                                 message: "Denied."
                             }
                         ).then(d2 => {
-                            this.deleteData(interaction,d2client,destinyMembershipId,d2);
+                            this.deleteData(interaction,d2client,destinyMembershipId,d2,"rejected");
                         }).catch(e => {
-                            interaction.reply({
-                                content: e.toString() ?? "Unknown error.",
-                                ephemeral: true
-                            });
+                            if(e["Response"] !== undefined){
+                                this.deleteData(interaction,d2client,destinyMembershipId,e,"rejected");
+                            } else {
+                                interaction.reply({
+                                    content: e.toString() ?? "Unknown error.",
+                                    ephemeral: true
+                                });
+                            }
                         });
                         break;
                     default:
@@ -69,17 +77,17 @@ export default class ClanRequest extends Command {
         });
     }
 
-    deleteData(interaction, d2client, id, d){
+    deleteData(interaction, d2client, id, d, action){
         const apps = d2client.miscDB.get("handledApplications") ?? [];
-        if(apps.includes(id)){
-            apps.splice(apps.indexOf(id),1);
-            d2client.miscDB.set("handledApplications");
-        }
         if(d.Response["ErrorCode"] === 1){
             interaction.reply({
-                content: "Accepted.",
+                content: `Application ${action}.`,
                 ephemeral: true
             });
+            if(apps.includes(id)){
+                apps.splice(apps.indexOf(id),1);
+                d2client.miscDB.set("handledApplications");
+            }
         } else {
             interaction.reply({
                 content: JSON.stringify(d),

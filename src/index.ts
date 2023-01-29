@@ -2,19 +2,20 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
-import {Client} from "discord-http-interactions";
+import {ApplicationCommandOptionType, Client, Emoji} from "discord-http-interactions";
 import {
     fetchPendingClanRequests,
     newRegistration,
     updateStatRoles,
     decrypt,
     updateStatRolesUser,
-    crypt
+    crypt, getXurEmbed
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import {getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
+import * as cron from "node-cron";
 
 let commands;
 const d2client = new requestHandler();
@@ -220,8 +221,65 @@ dcclient.on("ready", async ()=>{
         console.log("Checking clan requests.");
         fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
-    // run getXurEmbed(d2client, dcclient)
+    //XUR Embed timers while Argos running.
+    const createXur = cron.schedule("0 17 * * 5", ()=>{
+        generateXurEmbed();
+    }, {timezone: "etc/UTC"});
+    const deleteXur = cron.schedule("0 17 * * 2", ()=>{
+        deleteXurEmbed();
+    }, {timezone: "etc/UTC"});
+    createXur.start();
+    deleteXur.start();
+    //XUR Embed checking on Argos startup.
+    const now = new Date();
+    //0 = Sun
+    if(now.getDay() !== 3 || now.getDay() !== 4){
+        //Day is Fri-Tue
+        if(now.getDay() === 2){
+            //Tue
+            if(now.getUTCHours() >= 17){
+                deleteXurEmbed();
+            } else {
+                generateXurEmbed();
+            }
+        } else if(now.getDay() === 5){
+            //Fri
+            if(now.getUTCHours() < 17){
+                deleteXurEmbed();
+            } else {
+                generateXurEmbed();
+            }
+        } else {
+            generateXurEmbed();
+        }
+    } else {
+        deleteXurEmbed();
+    }
 });
+
+function deleteXurEmbed(){
+    if(d2client.miscDB.has("xurEmbed")){
+        console.log(`Deleting XUR embed and emojies: ${new Date().toISOString()}`);
+        d2client.miscDB.delete("xurEmbed");
+        dcclient.getEmoji("990974785674674187").then((emojies) => {
+            return !(emojies instanceof Emoji) ? emojies.forEach(emoji => {
+                dcclient.removeEmoji("990974785674674187", emoji.id);
+            }) : dcclient.removeEmoji("990974785674674187", emojies.id);
+        });
+    }
+}
+
+function generateXurEmbed(){
+    if(!(d2client.miscDB.has("xurEmbed"))){
+        console.log(`Generating XUR embed: ${new Date().toISOString()}`);
+        getXurEmbed(d2client, dcclient).then(x => {
+            console.log("XUR embed saved.");
+            d2client.miscDB.set("xurEmbed",x);
+        });
+    } else {
+        console.log("XUR embed exists.");
+    }
+}
 
 dcclient.login();
 
@@ -244,7 +302,7 @@ function updateCmds(){
             options: [
                 {
                     name: "name",
-                    type: 3,
+                    type: ApplicationCommandOptionType.String,
                     description: "Name of the leaderboard.",
                     required: true,
                     autocomplete: true
@@ -256,7 +314,7 @@ function updateCmds(){
             options: [
                 {
                     name: "activity",
-                    type: 3,
+                    type: ApplicationCommandOptionType.String,
                     description: "Please select the activity from the list below.",
                     required: true,
                     autocomplete: true
@@ -267,51 +325,76 @@ function updateCmds(){
             description: "Get Destiny 2 statistics of yourself or the requested user.",
             options: [
                 {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "summary",
                     description: "Requested user's general statistics Argos monitors.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "raids",
                     description: "Requested user's raid completions per raid.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "dungeons",
                     description: "Requested user's dungeon completions per dungeon.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "grandmasters",
                     description: "Requested user's Grandmaster Nightfall completions per Grandmaster Nightfall.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
+                        }
+                    ]
+                }
+            ]
+        }, {
+            name: "lfg",
+            description: "Access LFG commands.",
+            options: [
+                {
+                    name: "create",
+                    description: "Create an LFG.",
+                    type: ApplicationCommandOptionType.SubCommand,
+                    options: [
+                        {
+                            name: "type",
+                            description: "Type of an activity to create an LFG for.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
+                        }, {
+                            name: "activity",
+                            description: "The activity to create an LFG for.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
                         }
                     ]
                 }
