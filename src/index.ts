@@ -111,7 +111,11 @@ dcclient.on("db",(req,res)=>{
 });
 
 dcclient.on("authorization", (req, res) => {
-    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.send("ERROR: No registration code found.");
+    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.redirect(`/error?message=
+            Destiny 2 oAuth2 Code Error. Please try again.
+                                        
+            \\n
+            For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Shrieker`);
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
 });
 
@@ -120,21 +124,42 @@ dcclient.on("oauthPreload",(req,res)=>{
 });
 
 dcclient.on("oauth", (req,res)=>{
-    if(req.url.split("?").length < 2){return res.send("You should not be here on your own.");}
+    if(req.url.split("?").length < 2){
+        return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+    }
     let urlData: {code: string | undefined, state: string | undefined, error: string | undefined, error_description: string | undefined} = {code: undefined, state: undefined, error: undefined, error_description: undefined};
     req.url.split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
     if(urlData.code === undefined || urlData.state === undefined){
         if(urlData.error && urlData.error_description){
-            return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
+            console.log(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
+            return res.redirect(`/error?message=
+                Faulty Discord oAuth Token Exchange. Please try again.
+                            
+                \\n
+                For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Splicer`);
         } else if(urlData.state === undefined) {
             d2client.discordTokens.discordOauthExchange(urlData.code).then(dcuser => {
                 d2client.DB.set(dcuser.id,dcuser,"discordUser");
                 return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcuser.id)).redirect("/panel");
             }).catch(e => {
-                return res.send(e.message);
+                console.log(e);
+                return res.redirect(`/error?message=
+                Faulty Discord oAuth Token Exchange. Please try again.
+                            
+                \\n
+                For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Splicer
+                &button=register`);
             });
         } else {
-            return res.send("You should not be here on your own.");
+            return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
         }
     } else {
         const discordCode = urlData.code;
@@ -145,14 +170,26 @@ dcclient.on("oauth", (req,res)=>{
 
 dcclient.on("register",(req, res)=>{
     if(req.params.account === undefined || req.cookies["conflux"] === undefined){
-        return res.send("You should not be here on your own.");
+        return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
     }
     const account = decrypt(process.env.argosRegisterPassword as string,req.params.account).split("/seraph/");
     const discordID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
-    if(account.length !== 2) return res.send("You should not be here on your own.");
+    if(account.length !== 2) return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
     //Account 0 = type
     //Account 1 = id
-    if(!d2client.DB.has(discordID)) return res.send("You shouldn't be here on your own.");
+    if(!d2client.DB.has(discordID)) return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
     let dbUser = d2client.DB.get(discordID);
     dbUser["destinyId"] = account[1];
     dbUser["membershipType"] = account[0];
@@ -185,21 +222,32 @@ dcclient.on("panel",(req,res)=>{
                 getPanelPage(d2client, discID, data, dcuser).then(resp => {
                     res.send(resp);
                 }).catch(e => {
-                    res.send(e);
+                    console.log(e);
+                    res.redirect(`/error?message=
+                    Panel could not be loaded.
+                            
+                    \\n
+                    For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Servitor`);
                 });
             }).catch(e => {
                 getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
                     res.send(resp);
                 }).catch(e => {
-                    res.send(e);
+                    console.log(e);
+                    res.redirect(`/error?message=
+                    Panel could not be loaded.
+                            
+                    \\n
+                    For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Servitor`);
                 });
             });
         });
     } else {
         res.redirect(`/error?message=
-        We aren't sure how you ended up here, but you need to register to access the panel.
+        Could not find user registration, please make sure you have registered to Argos.
+        
         \\n
-        Error code: Weasel
+        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Oracle
         &button=Register`);
     }
 });
@@ -214,13 +262,21 @@ dcclient.on("logout",(req,res)=>{
 
 dcclient.on("resource",(req, res)=>{
     if(req.params.resourceName === undefined){
-        return res.send("You should not be here on your own.");
+        return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
     }
     const resources = readdirSync("./html");
     if(resources.includes(req.params.resourceName)){
         res.sendFile(`${__dirname}/html/${req.params.resourceName}`);
     } else {
-        res.status(404).send(`${req.params.resourceName} resource doesn't exist.`);
+        return res.redirect(`/error?message=
+        ${req.params.resourceName} does not exist.
+                            
+        \\n
+        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Atheon`);
     }
 });
 
