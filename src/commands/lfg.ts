@@ -122,6 +122,8 @@ Once you have it, click the button to proceed with the creation.
             ],
             ephemeral: true
         });
+        // Edit the message, with components after sending, include id in custom_id.
+        // Add the LFG to the DB.
     }
 
     async acRun(interaction, d2client){
@@ -140,16 +142,18 @@ Once you have it, click the button to proceed with the creation.
                 switch(option.options[0].value){
                     case "Raid":
                         activities = [];
+                        let sunsetRaids = ["Leviathan", "Leviathan, Eater of Worlds", "Leviathan, Spire of Stars", "Scourge of the Past", "Crown of Sorrow"];
                         for (let [key, data] of d2client.activityIdentifierDB) {
-                            if(data.type === 0){
+                            if(data.type === 0 && !(sunsetRaids.includes(key))){
                                 activities.push(key);
                             }
                         }
                         break;
                     case "Dungeon":
                         activities = [];
+                        let sunsetDungeons = ["The Whisper", "Zero Hour", "Harbinger", "Presage"];
                         for (let [key, data] of d2client.activityIdentifierDB) {
-                            if(data.type === 1){
+                            if(data.type === 1 && !(sunsetDungeons.includes(key))){
                                 activities.push(key);
                             }
                         }
