@@ -99,23 +99,38 @@ dcclient.on("site",(req,res)=>{
 
 dcclient.on("db",(req,res)=>{
     if(req.params.id === undefined) {
-        res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0 0 0;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
+        return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     } else {
         const dID = decrypt(process.env.argosIdPassword as string,req.params.id);
         if(d2client.DB.has(dID)){
             res.json(d2client.DB.get(dID));
         } else {
-            res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0 0 0;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
+            return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
         }
     }
 });
 
 dcclient.on("authorization", (req, res) => {
+    if(req.url.split("?").length < 2){
+        return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
+    }
     if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.redirect(`/error?message=
             Destiny 2 oAuth2 Code Error. Please try again.
                                         
             \\n
-            For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Shrieker`);
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
 });
 
@@ -129,7 +144,7 @@ dcclient.on("oauth", (req,res)=>{
             Turn back now... Darkness is too strong in here.
                                         
             \\n
-            For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     let urlData: {code: string | undefined, state: string | undefined, error: string | undefined, error_description: string | undefined} = {code: undefined, state: undefined, error: undefined, error_description: undefined};
     req.url.split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
@@ -140,7 +155,7 @@ dcclient.on("oauth", (req,res)=>{
                 Faulty Discord oAuth Token Exchange. Please try again.
                             
                 \\n
-                For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Splicer`);
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Splicer`);
         } else if(urlData.state === undefined) {
             d2client.discordTokens.discordOauthExchange(urlData.code).then(dcuser => {
                 d2client.DB.set(dcuser.id,dcuser,"discordUser");
@@ -151,7 +166,7 @@ dcclient.on("oauth", (req,res)=>{
                 Faulty Discord oAuth Token Exchange. Please try again.
                             
                 \\n
-                For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Splicer
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Splicer
                 &button=register`);
             });
         } else {
@@ -159,7 +174,7 @@ dcclient.on("oauth", (req,res)=>{
             Turn back now... Darkness is too strong in here.
                                         
             \\n
-            For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
         }
     } else {
         const discordCode = urlData.code;
@@ -174,7 +189,7 @@ dcclient.on("register",(req, res)=>{
         Turn back now... Darkness is too strong in here.
                             
         \\n
-        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     const account = decrypt(process.env.argosRegisterPassword as string,req.params.account).split("/seraph/");
     const discordID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
@@ -182,14 +197,14 @@ dcclient.on("register",(req, res)=>{
         Turn back now... Darkness is too strong in here.
                             
         \\n
-        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     //Account 0 = type
     //Account 1 = id
     if(!d2client.DB.has(discordID)) return res.redirect(`/error?message=
         Turn back now... Darkness is too strong in here.
                             
         \\n
-        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     let dbUser = d2client.DB.get(discordID);
     dbUser["destinyId"] = account[1];
     dbUser["membershipType"] = account[0];
@@ -227,7 +242,7 @@ dcclient.on("panel",(req,res)=>{
                     Panel could not be loaded.
                             
                     \\n
-                    For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Servitor`);
+                    For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
                 });
             }).catch(e => {
                 getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
@@ -238,7 +253,7 @@ dcclient.on("panel",(req,res)=>{
                     Panel could not be loaded.
                             
                     \\n
-                    For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Servitor`);
+                    For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
                 });
             });
         });
@@ -247,7 +262,7 @@ dcclient.on("panel",(req,res)=>{
         Could not find user registration, please make sure you have registered to Argos.
         
         \\n
-        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Oracle
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Oracle
         &button=Register`);
     }
 });
@@ -266,7 +281,7 @@ dcclient.on("resource",(req, res)=>{
         Turn back now... Darkness is too strong in here.
                             
         \\n
-        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: OOB`);
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     const resources = readdirSync("./html");
     if(resources.includes(req.params.resourceName)){
@@ -276,7 +291,7 @@ dcclient.on("resource",(req, res)=>{
         Resource ${req.params.resourceName} does not exist.
                             
         \\n
-        For possible solutions, visit discord.venerity.xyz and ask for help with the error code: Atheon`);
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Atheon`);
     }
 });
 
