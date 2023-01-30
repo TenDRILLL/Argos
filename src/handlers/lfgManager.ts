@@ -20,8 +20,10 @@ export default class LFGManager {
     deleteLFG(id: string){
         this.lfgDB.delete(id);
         if(this.timers.has(id)){
+            //TODO: Implement post delete timer.
             this.timers.delete(id);
         }
+        this.dcclient.deleteMessage(id.split("&")[0],id.split("&")[1]).catch(()=>{return true;});
     }
 
     saveLFG(post: LFG){
@@ -35,6 +37,10 @@ export default class LFGManager {
         this.saveLFG(post);
         this.timers.delete(post.id);
         this.createTimer(post);
+        this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
+            //TODO: Edit embed according to the post data.
+        }).catch(()=>{return true;});
+        //TODO: Edit the LFG Embed in here.
     }
 
     createTimers(){
@@ -44,12 +50,16 @@ export default class LFGManager {
     }
 
     createTimer(post){
+        //TODO: Implement post delete timer.
         if(parseInt(post.time)*1000 - Date.now() < 0){
             this.deleteLFG(post.id);
         } else {
             const timer = setTimeout(()=>{
                 this.timers.delete(post.id);
                 let postus = this.lfgDB.get(post.id);
+                this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
+                    //TODO: Edit embed here to tag guardians.
+                }).catch(()=>{return true;});
                 postus.guardians.forEach(guardianId => {
                     this.dcclient.getDMChannel(guardianId).then(dmc => {
                         this.dcclient.newMessage(dmc["id"],{

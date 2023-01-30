@@ -40,7 +40,7 @@ Once you have it, click the button to proceed with the creation.
         if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience."});
         const cmd = interaction.customId.split("-")[1];
         if(cmd === "create"){
-            interaction.client.deleteWebhookMessage(interaction.applicationId, interaction.token, interaction.message.id).catch(e => {return true});
+            interaction.client.deleteWebhookMessage(interaction.applicationId, interaction.token, interaction.message.id).catch(() => {return true});
             interaction.modal(
                 new Modal()
                     .setTitle("LFG Creation")
@@ -111,7 +111,7 @@ Once you have it, click the button to proceed with the creation.
             interaction.client.editWebhookMessage(interaction.applicationId,interaction.token,{
                 embeds: [lfgemb],
                 components: [new ActionRow().setComponents(buttons)]
-            },lfgid);
+            },lfgid.split("&")[1]);
         } else if(cmd === "leave"){
             // Leave the LFG.
             const lfgid = interaction.customId.split("-")[2];
@@ -143,7 +143,7 @@ Once you have it, click the button to proceed with the creation.
             interaction.client.editWebhookMessage(interaction.applicationId,interaction.token,{
                 embeds: [lfgemb],
                 components: [new ActionRow().setComponents(buttons)]
-            },lfgid);
+            },lfgid.split("&")[1]);
         } else if(cmd === "edit"){
             interaction.reply({
                 content: "Editing is not supported yet.",
@@ -169,7 +169,7 @@ Once you have it, click the button to proceed with the creation.
         interaction.reply({
             embeds: [embed]
         }).then(ic => {
-            let id = ic.message.id;
+            const id = `${ic.channelId}&${ic.message.id}`;
             ic.editReply({
                 components: [
                     new ActionRow()
