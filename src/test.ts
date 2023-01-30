@@ -17,13 +17,14 @@ import { WeaponSlot } from "./enums/weaponSlot";
 import axios from "axios";
 import { stringify } from "querystring";
 
-const d2client = new requestHandler();
 const dcclient = new Client({
     token: process.env.discordToken as string,
     publicKey: process.env.discordKey as string,
     port: 11542,
     endpoint: "/api/interactions"
 });
+const d2client = new requestHandler(dcclient);
+
 function instantiateActivityDatabase() {
     const iterator = activityIdentifiers.keys()
     d2client.activityIdentifierDB.deleteAll();

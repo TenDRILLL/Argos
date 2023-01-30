@@ -392,7 +392,7 @@ export function getXurEmbed(d2client, dcclient): Promise<Embed> {
     }).catch(() => console.log("Admin user not in DB"));
 })
     
-    function generateEmbed(components: {itemHash: number, sockets: socketComponents, stats: number[]}[], d2client, locationIndex) {
+    function generateEmbed(components: {itemHash: number, sockets: socketComponents[], stats: number[]}[], d2client, locationIndex) {
         const promises: Promise<entityQuery>[] = [];
         components.forEach(item => {
             promises.push(new Promise((res)=>{
@@ -411,7 +411,7 @@ export function getXurEmbed(d2client, dcclient): Promise<Embed> {
         })
     }
     
-    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: socketComponents, stats: number[] }[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
+    function generateFields(exotics: entityQuery[], components: {itemHash: number, sockets: socketComponents[], stats: number[] }[] , number: number, dcclient): Promise<{ name: string; value: string; inline?: boolean; }[]> {
         return new Promise(async (res)=>{
             const manifest = await d2client.apiRequest("getManifests",{});
             const path = manifest.Response["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];

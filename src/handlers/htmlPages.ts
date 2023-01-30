@@ -308,7 +308,7 @@ export function logout(){
         <p>Logged out, redirecting...</p>
         <script>
         setTimeout(()=>{
-            window.location = "/panel";
+            window.location = "/";
         },2000);
         </script>
     </body></html>`;
