@@ -22,7 +22,7 @@ export class vendorQuery {
             privacy: number;
         }
         sockets: {
-            data: itemComponentSocket[];
+            data: itemComponentSocket;
             
             privacy: number;
             disabled: boolean;
@@ -45,14 +45,14 @@ export class vendorQuery {
 }
 
 export class itemComponentSocket {
-    sockets: socketComponents;
+    sockets: socketComponents[];
 }
 
 export class socketComponents {
     plugHash: number;
-        isEnabled: boolean;
-        isVisible: boolean;
-        enableFailIndexes: number[];
+    isEnabled: boolean;
+    isVisible: boolean;
+    enableFailIndexes: number[];
 }
 
 export class vendorCategories {
