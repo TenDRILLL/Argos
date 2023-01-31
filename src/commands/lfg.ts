@@ -33,6 +33,8 @@ Once you have it, click the button to proceed with the creation.
                 ],
                 ephemeral: true
             });
+        } else if(interaction.data.options[0].name === "timezone"){
+            //TODO: Allow user to define their timezone, use autocomplete to supply options.
         } // Handle other commands here.
     }
 
@@ -57,7 +59,7 @@ Once you have it, click the button to proceed with the creation.
                                     .setMaxLength(1)
                                     .setPlaceholder("6")
                             ]),
-                        new ActionRow()
+                        new ActionRow() //TODO: Implement natural inputting of time, convert it later to UNIX with user defined timezone, use Finnish for default.
                             .setComponents([
                                 new TextInput()
                                     .setCustomId("lfg-time")
@@ -145,6 +147,9 @@ Once you have it, click the button to proceed with the creation.
                 components: [new ActionRow().setComponents(buttons)]
             },lfgid.split("&")[1]);
         } else if(cmd === "edit"){
+            // Edit the LFG.
+            //TODO: Display a selection menu to display edits or delete.
+            //d2client.lfgmanager.editLFG(id, embed);
             interaction.reply({
                 content: "Editing is not supported yet.",
                 ephemeral: true
@@ -186,7 +191,6 @@ Once you have it, click the button to proceed with the creation.
                                 .setLabel("Edit")
                                 .setStyle(ButtonStyle.Secondary)
                                 .setCustomId(`lfg-edit-${id}-${ic.member.user.id}`)
-                                .setDisabled(true)
                         ])
                 ]
             });

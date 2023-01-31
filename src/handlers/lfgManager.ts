@@ -1,10 +1,11 @@
 import enmap from "enmap";
+import {Embed} from "discord-http-interactions";
 
 export default class LFGManager {
     private lfgDB;
     private d2client;
     private dcclient;
-    private timers = new Map();
+    private timers: Map<string,LFGTimers> = new Map();
 
     constructor(d2client, dcclient) {
         this.lfgDB = new enmap({name: "lfg"});
@@ -19,28 +20,48 @@ export default class LFGManager {
 
     deleteLFG(id: string){
         this.lfgDB.delete(id);
+        this.deleteTimer(id);
+        this.dcclient.deleteMessage(id.split("&")[0],id.split("&")[1]).catch(()=>{return true;});
+    }
+
+    deleteTimer(id: string){
         if(this.timers.has(id)){
-            //TODO: Implement post delete timer.
+            const cancel = this.timers.get(id);
+            clearTimeout(cancel!.notifytimer);
+            clearTimeout(cancel!.deletetimer);
             this.timers.delete(id);
         }
-        this.dcclient.deleteMessage(id.split("&")[0],id.split("&")[1]).catch(()=>{return true;});
     }
 
     saveLFG(post: LFG){
         this.lfgDB.set(post.id,post);
         if(!(this.timers.has(post.id))){
             this.createTimer(post);
+        } else {
+            let check = this.timers.get(post.id);
+            if(check!.time !== post.time){
+                this.deleteTimer(post.id);
+                this.createTimer(post);
+            }
         }
     }
 
-    editLFG(post){
+    editLFG(post,embed){
         this.saveLFG(post);
-        this.timers.delete(post.id);
-        this.createTimer(post);
+        const editedEmbed = new Embed(embed);
+        if(!(editedEmbed.fields)) return;
+        editedEmbed.fields[0].value = post.activity;
+        editedEmbed.fields[1].value = `<t:${post.time}:F>
+<t:${post.time}:R>`;
+        editedEmbed.fields[2].value = post.desc;
+        editedEmbed.fields[3].name = `**Guardians Joined: ${post.guardians.length}/${post.maxSize}**`;
+        if(post.guardians.length > post.maxSize){
+            //TODO: Take the trailing end of guardians, put first in queue.
+        }
         this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
-            //TODO: Edit embed according to the post data.
+            content: "",
+            embeds: [embed]
         }).catch(()=>{return true;});
-        //TODO: Edit the LFG Embed in here.
     }
 
     createTimers(){
@@ -50,26 +71,32 @@ export default class LFGManager {
     }
 
     createTimer(post){
-        //TODO: Implement post delete timer.
         if(parseInt(post.time)*1000 - Date.now() < 0){
             this.deleteLFG(post.id);
         } else {
-            const timer = setTimeout(()=>{
-                this.timers.delete(post.id);
+            const notifytimer = setTimeout(()=>{
                 let postus = this.lfgDB.get(post.id);
                 this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
-                    //TODO: Edit embed here to tag guardians.
+                    content: `It's almost time for ${post.activity} fireteam! Get ready:
+${postus.guardians.map(x => "<@" + x + ">").join(", ")}`
                 }).catch(()=>{return true;});
                 postus.guardians.forEach(guardianId => {
                     this.dcclient.getDMChannel(guardianId).then(dmc => {
                         this.dcclient.newMessage(dmc["id"],{
                             content: `Get ready for ${postus.activity} in <t:${post.time}:R> with
 ${postus.guardians.map(x => "<@" + x + ">").join("\n")}`
-                        });
-                    });
+                        }).catch(()=>{return true;});
+                    }).catch(()=>{return true;}); //These catches exist for if a member doesn't allow DMs, don't want bot to crash due to that.
                 });
             }, parseInt(post.time)*1000 - Date.now() - (1000*60*10));
-            this.timers.set(post.id,timer);
+            const deletetimer = setTimeout(()=>{
+                this.deleteLFG(post.id);
+            }, parseInt(post.time)*1000 - Date.now() + (1000*60*5));
+            this.timers.set(post.id,{
+                time: post.time,
+                notifytimer,
+                deletetimer
+            });
         }
     }
 }
@@ -82,4 +109,10 @@ class LFG {
     creator: string;
     guardians: string[];
     queue: string[];
+}
+
+class LFGTimers {
+    time: string;
+    notifytimer: ReturnType<typeof setTimeout>;
+    deletetimer: ReturnType<typeof setTimeout>;
 }
