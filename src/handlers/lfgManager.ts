@@ -75,18 +75,22 @@ export default class LFGManager {
             this.deleteLFG(post.id);
         } else {
             const notifytimer = setTimeout(()=>{
-                let postus = this.lfgDB.get(post.id);
-                this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
-                    content: `It's almost time for ${post.activity} fireteam! Get ready:
+                this.dcclient.getMessage(post.id.split("&")[0], post.id.split("&")[1]).then(()=>{ //If message doesn't exist, we can assume LFG is deleted.
+                    let postus = this.lfgDB.get(post.id);
+                    this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
+                        content: `It's almost time for ${post.activity} fireteam! Get ready:
 ${postus.guardians.map(x => "<@" + x + ">").join(", ")}`
-                }).catch(()=>{return true;});
-                postus.guardians.forEach(guardianId => {
-                    this.dcclient.getDMChannel(guardianId).then(dmc => {
-                        this.dcclient.newMessage(dmc["id"],{
-                            content: `Get ready for ${postus.activity} in <t:${post.time}:R> with
+                    }).catch(()=>{return true;});
+                    postus.guardians.forEach(guardianId => {
+                        this.dcclient.getDMChannel(guardianId).then(dmc => {
+                            this.dcclient.newMessage(dmc["id"],{
+                                content: `Get ready for ${postus.activity} in <t:${post.time}:R> with
 ${postus.guardians.map(x => "<@" + x + ">").join("\n")}`
-                        }).catch(()=>{return true;});
-                    }).catch(()=>{return true;}); //These catches exist for if a member doesn't allow DMs, don't want bot to crash due to that.
+                            }).catch(()=>{return true;});
+                        }).catch(()=>{return true;}); //These catches exist for if a member doesn't allow DMs, don't want bot to crash due to that.
+                    });
+                }).catch(()=>{
+                    this.deleteLFG(post.id);
                 });
             }, parseInt(post.time)*1000 - Date.now() - (1000*60*10));
             const deletetimer = setTimeout(()=>{
