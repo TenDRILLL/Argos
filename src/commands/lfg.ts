@@ -137,6 +137,7 @@ Once you have it, click the button to proceed with the creation.
                 } else {
                     buttons[0].setLabel("Join")
                     buttons[0].setStyle(ButtonStyle.Success);
+                    queue.value = "None.";
                 }
                 guardians.name = `**Guardians Joined: ${lfgData.guardians.length}/${lfgData.maxSize}**`;
                 guardians.value = lfgData.guardians.length === 0 ? "None." : lfgData.guardians.map(x => d2client.DB.get(x).destinyName).join(", ");
