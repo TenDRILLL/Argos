@@ -103,10 +103,23 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                     }).catch(e => console.log(e));
                 }).catch(e => console.log(e));
             } else {
-                console.log("Registration failed, please generate a new code.");
+                res.redirect(`/error?message=
+                Destiny 2 oAuth2 Code Error. Please try again.
+                                        
+                \\n
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
             }
-        }).catch(e => res.send(`Error fetching Bungie Tokens: ${e.message}`));
-    }).catch(e => res.send(`Error fetching Discord Data: ${e.message}`));
+        }).catch(e => res.redirect(`/error?message=
+            Destiny 2 oAuth2 Code Error. Please try again.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`));
+    }).catch(e => res.redirect(`/error?message=
+                Faulty Discord oAuth Token Exchange. Please try again.
+                            
+                \\n
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Splicer
+                &button=register`));
 }
 
 export async function updateStatRoles(dcclient,d2client){
