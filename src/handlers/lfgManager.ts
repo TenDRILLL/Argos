@@ -46,7 +46,7 @@ export default class LFGManager {
         }
     }
 
-    editLFG(post,embed){
+    editLFG(post: LFG, embed){
         this.saveLFG(post);
         const editedEmbed = new Embed(embed);
         if(!(editedEmbed.fields)) return;
@@ -54,13 +54,23 @@ export default class LFGManager {
         editedEmbed.fields[1].value = `<t:${post.time}:F>
 <t:${post.time}:R>`;
         editedEmbed.fields[2].value = post.desc;
-        editedEmbed.fields[3].name = `**Guardians Joined: ${post.guardians.length}/${post.maxSize}**`;
-        if(post.guardians.length > post.maxSize){
-            //TODO: Take the trailing end of guardians, put first in queue.
+        if(post.guardians.length !== parseInt(post.maxSize)) {
+            if(post.guardians.length > parseInt(post.maxSize)){
+                for (let i = post.guardians.length; i > parseInt(post.maxSize); i--) {
+                    const removed = post.guardians.pop();
+                    if (removed) post.queue.unshift(removed);
+                }
+            } else {
+                for (let i = post.guardians.length; i < parseInt(post.maxSize); i++) {
+                    const removed = post.queue.shift();
+                    if (removed) post.guardians.push(removed);
+                }
+            }
         }
+        editedEmbed.fields[3].name = `**Guardians Joined: ${post.guardians.length}/${post.maxSize}**`;
         this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
             content: "",
-            embeds: [embed]
+            embeds: [editedEmbed]
         }).catch(()=>{return true;});
     }
 
@@ -113,6 +123,7 @@ class LFG {
     creator: string;
     guardians: string[];
     queue: string[];
+    desc: string;
 }
 
 class LFGTimers {
