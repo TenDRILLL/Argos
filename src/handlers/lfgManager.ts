@@ -16,16 +16,19 @@ export default class LFGManager {
     }
 
     getLFG(id: string): LFG | undefined {
+        console.log(`Getting LFG: ${id}`);
         return this.lfgDB.get(id);
     }
 
     deleteLFG(id: string){
+        console.log(`Deleting LFG: ${id}`);
         this.lfgDB.delete(id);
         this.deleteTimer(id);
         this.dcclient.deleteMessage(id.split("&")[0],id.split("&")[1]).catch(()=>{return true;});
     }
 
     deleteTimer(id: string){
+        console.log(`Deleting timers for: ${id}`);
         if(this.timers.has(id)){
             const cancel = this.timers.get(id);
             clearTimeout(cancel!.notifytimer);
@@ -35,6 +38,7 @@ export default class LFGManager {
     }
 
     saveLFG(post: LFG){
+        console.log(`Saving LFG: ${post.id}`);
         this.lfgDB.set(post.id,post);
         if(!(this.timers.has(post.id))){
             this.createTimer(post);
@@ -66,44 +70,46 @@ export default class LFGManager {
     }
 
     createTimers(){
-        this.deleteLFG("1069670725583130735");
         Array.from(this.lfgDB.keys()).forEach(key => {
             this.createTimer(this.lfgDB.get(key));
         });
     }
 
     createTimer(post){
-        if(parseInt(post.time)*1000 - Date.now() < 0){
-            this.deleteLFG(post.id);
-        } else {
-            const notifytimer = setTimeoutAt(()=>{
-                this.dcclient.getMessage(post.id.split("&")[0], post.id.split("&")[1]).then(()=>{ //If message doesn't exist, we can assume LFG is deleted.
-                    let postus = this.lfgDB.get(post.id);
-                    this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
-                        content: `It's almost time for ${post.activity} fireteam! Get ready:
-${postus.guardians.map(x => "<@" + x + ">").join(", ")}`
-                    }).catch(()=>{return true;});
-                    postus.guardians.forEach(guardianId => {
-                        this.dcclient.getDMChannel(guardianId).then(dmc => {
-                            this.dcclient.newMessage(dmc["id"],{
-                                content: `Get ready for ${postus.activity} in <t:${post.time}:R> with
-${postus.guardians.map(x => "<@" + x + ">").join("\n")}`
-                            }).catch(()=>{return true;});
-                        }).catch(()=>{return true;}); //These catches exist for if a member doesn't allow DMs, don't want bot to crash due to that.
-                    });
-                }).catch(()=>{
-                    this.deleteLFG(post.id);
-                });
-            }, parseInt(post.time)*1000 - (1000*60*10));
-            const deletetimer = setTimeoutAt(()=>{
+        console.log(`createTimer: ${post.id}`);
+        this.dcclient.getMessage(post.id.split("&")[0], post.id.split("&")[1]).then(()=>{
+            if(parseInt(post.time)*1000 - Date.now() < 0){
                 this.deleteLFG(post.id);
-            }, parseInt(post.time)*1000 + (1000*60*5));
-            this.timers.set(post.id,{
-                time: post.time,
-                notifytimer,
-                deletetimer
-            });
-        }
+            } else {
+                const notifytimer = setTimeoutAt(()=>{
+                    this.dcclient.getMessage(post.id.split("&")[0], post.id.split("&")[1]).then(()=>{ //If message doesn't exist, we can assume LFG is deleted.
+                        let postus = this.lfgDB.get(post.id);
+                        this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
+                            content: `It's almost time for ${post.activity} fireteam! Get ready:
+${postus.guardians.map(x => "<@" + x + ">").join(", ")}`
+                        }).catch(()=>{return true;});
+                        postus.guardians.forEach(guardianId => {
+                            this.dcclient.getDMChannel(guardianId).then(dmc => {
+                                this.dcclient.newMessage(dmc["id"],{
+                                    content: `Get ready for ${postus.activity} in <t:${post.time}:R> with
+${postus.guardians.map(x => "<@" + x + ">").join("\n")}`
+                                }).catch(()=>{return true;});
+                            }).catch(()=>{return true;}); //These catches exist for if a member doesn't allow DMs, don't want bot to crash due to that.
+                        });
+                    }).catch(()=>{
+                        this.deleteLFG(post.id);
+                    });
+                }, parseInt(post.time)*1000 - (1000*60*10));
+                const deletetimer = setTimeoutAt(()=>{
+                    this.deleteLFG(post.id);
+                }, parseInt(post.time)*1000 + (1000*60*5));
+                this.timers.set(post.id,{
+                    time: post.time,
+                    notifytimer,
+                    deletetimer
+                });
+            }
+        }).catch((()=>this.deleteLFG(post.id)));
     }
 }
 
