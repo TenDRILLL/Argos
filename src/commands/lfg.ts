@@ -128,6 +128,7 @@ Once you have it, click the button to proceed with the creation.
             const buttons = interaction.message.components[0].components.map(x => new Button(x));
             if(lfgData.queue.includes(userID)){
                 lfgData.queue.splice(lfgData.queue.indexOf(userID),1);
+                console.log(`Queue value: "${lfgData.queue}"`);
                 queue.value = lfgData.queue.length === 0 ? "None." : lfgData.queue.map(x => d2client.DB.get(x).destinyName).join(", ");
             } else {
                 lfgData.guardians.splice(lfgData.guardians.indexOf(userID),1);

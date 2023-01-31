@@ -1,5 +1,6 @@
 import enmap from "enmap";
 import {Embed} from "discord-http-interactions";
+import {setTimeoutAt} from "safe-timers";
 
 export default class LFGManager {
     private lfgDB;
@@ -65,6 +66,7 @@ export default class LFGManager {
     }
 
     createTimers(){
+        this.deleteLFG("1069670725583130735");
         Array.from(this.lfgDB.keys()).forEach(key => {
             this.createTimer(this.lfgDB.get(key));
         });
@@ -74,7 +76,7 @@ export default class LFGManager {
         if(parseInt(post.time)*1000 - Date.now() < 0){
             this.deleteLFG(post.id);
         } else {
-            const notifytimer = setTimeout(()=>{
+            const notifytimer = setTimeoutAt(()=>{
                 this.dcclient.getMessage(post.id.split("&")[0], post.id.split("&")[1]).then(()=>{ //If message doesn't exist, we can assume LFG is deleted.
                     let postus = this.lfgDB.get(post.id);
                     this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
@@ -92,10 +94,10 @@ ${postus.guardians.map(x => "<@" + x + ">").join("\n")}`
                 }).catch(()=>{
                     this.deleteLFG(post.id);
                 });
-            }, parseInt(post.time)*1000 - Date.now() - (1000*60*10));
-            const deletetimer = setTimeout(()=>{
+            }, parseInt(post.time)*1000 - (1000*60*10));
+            const deletetimer = setTimeoutAt(()=>{
                 this.deleteLFG(post.id);
-            }, parseInt(post.time)*1000 - Date.now() + (1000*60*5));
+            }, parseInt(post.time)*1000 + (1000*60*5));
             this.timers.set(post.id,{
                 time: post.time,
                 notifytimer,
@@ -117,6 +119,6 @@ class LFG {
 
 class LFGTimers {
     time: string;
-    notifytimer: ReturnType<typeof setTimeout>;
-    deletetimer: ReturnType<typeof setTimeout>;
+    notifytimer: ReturnType<typeof setTimeoutAt>;
+    deletetimer: ReturnType<typeof setTimeoutAt>;
 }

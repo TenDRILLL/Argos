@@ -22,6 +22,7 @@
     "dotenv": "^16.0.3",
     "enmap": "^5.9.2",
     "node-cron": "^3.0.2",
+    "safe-timers": "^1.1.0",
     "ssh2-sftp-client": "^9.0.4",
     "typescript": "^4.9.3"
   }
