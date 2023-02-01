@@ -1,6 +1,7 @@
 import Command from "./Command";
 import {ActionRow, Button, ButtonStyle, ChannelSelectMenu, Embed, Emoji, MentionableSelectMenu, Modal, RoleSelectMenu, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
 import { SelectMenuOption } from "discord-http-interactions/built/structures/SelectMenuOption";
+import { SelectMenuComponent } from "discord-http-interactions/built/structures/SelectMenuComponent";
 
 export default class LFG extends Command {
     constructor(){
@@ -57,7 +58,7 @@ Once you have it, click the button to proceed with the creation.
                                     .setStyle(TextInputStyle.Short)
                                     .setRequired(true)
                                     .setMinLength(1)
-                                    .setMaxLength(1)
+                                    .setMaxLength(2)
                                     .setPlaceholder("6")
                             ]),
                         new ActionRow() //TODO: Implement natural inputting of time, convert it later to UNIX with user defined timezone, use Finnish for default.
@@ -153,7 +154,8 @@ Once you have it, click the button to proceed with the creation.
             if (interaction.member.user.id === creatorId || interaction.member.permissions.has("MANAGE_MESSAGES")){ //created or has permissions to delete
                 // interaction.reply({
                 //     components: [
-                //         new StringSelectMenu()
+                //         new SelectMenuComponent()
+                //             .setType(SelectMenuType.Text)
                 //             .setOptions([
                 //                 new SelectMenuOption()
                 //                     .setLabel("Delete")
@@ -190,13 +192,11 @@ Once you have it, click the button to proceed with the creation.
                     content: "You can't edit a post that isn't yours.", ephemeral: true
                 })
             }
-            // Edit the LFG.
-            //TODO: Display a selection menu to display edits or delete.
-            //d2client.lfgmanager.editLFG(id, embed);
         } else if (cmd === "delete") {
+            interaction.deferUpdate();
             const lfgid = interaction.customId.split("-")[2];
             d2client.lfgmanager.deleteLFG(lfgid);
-            interaction.deferUpdate();
+            interaction.delete();
         } else if (cmd === "edit") {
             const lfgid = interaction.customId.split("-")[2];
             const oldLFG = d2client.lfgmanager.getLFG(lfgid);
@@ -211,10 +211,10 @@ Once you have it, click the button to proceed with the creation.
                                     .setCustomId("lfg-size")
                                     .setLabel("Size of the fireteam")
                                     .setStyle(TextInputStyle.Short)
-                                    .setValue(oldLFG.maxSize ?? 0)
+                                    .setValue(oldLFG.maxSize ?? 6)
                                     .setRequired(true)
                                     .setMinLength(1)
-                                    .setMaxLength(1)
+                                    .setMaxLength(2)
                                     .setPlaceholder("6")
                             ]),
                         new ActionRow() //TODO: Implement natural inputting of time, convert it later to UNIX with user defined timezone, use Finnish for default.
@@ -223,7 +223,7 @@ Once you have it, click the button to proceed with the creation.
                                     .setCustomId("lfg-time")
                                     .setLabel("Timestamp when to start")
                                     .setStyle(TextInputStyle.Short)
-                                    .setValue(oldLFG.time ?? Date.now.toString())
+                                    .setValue(oldLFG.time ?? "")
                                     .setRequired(true)
                                     .setMinLength(10)
                                     .setMaxLength(10)
@@ -241,6 +241,7 @@ Once you have it, click the button to proceed with the creation.
                             ])
                     ])
             );
+            interaction.delete();
         }
     }
 
@@ -259,10 +260,10 @@ Once you have it, click the button to proceed with the creation.
                 {name: "**Queue:**", value: "None.", inline: true}
             ]);
         if (interaction.customId.split("-")[2] === "edit") {
+            interaction.deferUpdate();
             const oldLFG = d2client.lfgmanager.getLFG(interaction.customId.split("-")[1]);
             oldLFG.time = time; oldLFG.maxSize = size; oldLFG.desc = desc;
             d2client.lfgmanager.editLFG(oldLFG, embed);
-            interaction.deferUpdate();
             return;
         }
         interaction.reply({
