@@ -1,9 +1,6 @@
 import Command from "./Command";
-import {ActionRow, Button, ButtonStyle, Embed, Emoji, Modal, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
-import { InteractionReplyData } from "discord-http-interactions/built/structures/InteractionReplyDataType";
-import { SelectMenuComponent } from "discord-http-interactions/built/structures/SelectMenuComponent";
+import {ActionRow, Button, ButtonStyle, ChannelSelectMenu, Embed, Emoji, MentionableSelectMenu, Modal, RoleSelectMenu, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
 import { SelectMenuOption } from "discord-http-interactions/built/structures/SelectMenuOption";
-import LFGManager from "../handlers/lfgManager";
 
 export default class LFG extends Command {
     constructor(){
@@ -154,20 +151,36 @@ Once you have it, click the button to proceed with the creation.
         } else if(cmd === "editOptions"){
             const creatorId = interaction.customId.split("-")[3]
             if (interaction.member.user.id === creatorId || interaction.member.permissions.has("MANAGE_MESSAGES")){ //created or has permissions to delete
+                // interaction.reply({
+                //     components: [
+                //         new StringSelectMenu()
+                //             .setOptions([
+                //                 new SelectMenuOption()
+                //                     .setLabel("Delete")
+                //                     //.setEmoji(new Emoji())
+                //                     .setDescription("Delete the lfg post")
+                //                     .setValue(`lfg-delete-${interaction.customId}`)
+                //                 ,
+                //                 new SelectMenuOption()
+                //                     .setLabel("Edit")
+                //                     .setDescription("Edit lfg")
+                //                     .setValue(`lfg-edit-${interaction.customId}`)
+                //             ])
+                //     ], ephemeral: true
+                // })
                 interaction.reply({
                     components: [
-                        new StringSelectMenu()
-                            .setOptions([
-                                new SelectMenuOption()
+                        new ActionRow()
+                            .addComponents([
+                                new Button()
+                                    .setCustomId(`lfg-delete-${interaction.customId.split("-")[2]}`)
                                     .setLabel("Delete")
-                                    //.setEmoji(new Emoji())
-                                    .setDescription("Delete the lfg post")
-                                    .setValue(`lfg-delete-${interaction.customId}`)
+                                    .setStyle(ButtonStyle.Danger)
                                 ,
-                                new SelectMenuOption()
+                                new Button()
+                                    .setCustomId(`lfg-edit-${interaction.customId.split("-")[2]}`)
                                     .setLabel("Edit")
-                                    .setDescription("Edit lfg")
-                                    .setValue(`lfg-edit-${interaction.customId}`)
+                                    .setStyle(ButtonStyle.Primary)
                             ])
                     ], ephemeral: true
                 })
@@ -183,6 +196,7 @@ Once you have it, click the button to proceed with the creation.
         } else if (cmd === "delete") {
             const lfgid = interaction.customId.split("-")[2];
             d2client.lfgmanager.deleteLFG(lfgid);
+            interaction.deferUpdate();
         } else if (cmd === "edit") {
             const lfgid = interaction.customId.split("-")[2];
             const oldLFG = d2client.lfgmanager.getLFG(lfgid);
@@ -246,7 +260,10 @@ Once you have it, click the button to proceed with the creation.
             ]);
         if (interaction.customId.split("-")[2] === "edit") {
             const oldLFG = d2client.lfgmanager.getLFG(interaction.customId.split("-")[1]);
-            return d2client.lfgmanager.editLFG(oldLFG, embed);
+            oldLFG.time = time; oldLFG.maxSize = size; oldLFG.desc = desc;
+            d2client.lfgmanager.editLFG(oldLFG, embed);
+            interaction.deferUpdate();
+            return;
         }
         interaction.reply({
             embeds: [embed]
@@ -278,7 +295,8 @@ Once you have it, click the button to proceed with the creation.
                 maxSize: size,
                 creator: interaction.member.user.id,
                 guardians: [interaction.member.user.id],
-                queue: []
+                queue: [],
+                desc: desc
             });
         });
     }

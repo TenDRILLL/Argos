@@ -59,6 +59,7 @@ export default class LFGManager {
         editedEmbed.fields[1].value = `<t:${post.time}:F>
 <t:${post.time}:R>`;
         editedEmbed.fields[2].value = post.desc;
+        console.log(editedEmbed)
         if(post.guardians.length !== parseInt(post.maxSize)) {
             if(post.guardians.length > parseInt(post.maxSize)){
                 for (let i = post.guardians.length; i > parseInt(post.maxSize); i--) {
