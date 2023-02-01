@@ -2,6 +2,8 @@ import Command from "./Command";
 import {ActionRow, Button, ButtonStyle, ChannelSelectMenu, Embed, Emoji, MentionableSelectMenu, Modal, RoleSelectMenu, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
 import { SelectMenuOption } from "discord-http-interactions/built/structures/SelectMenuOption";
 import { SelectMenuComponent } from "discord-http-interactions/built/structures/SelectMenuComponent";
+import spacetime from "spacetime";
+import {timezones} from "../handlers/utils";
 
 export default class LFG extends Command {
     constructor(){
@@ -12,17 +14,14 @@ export default class LFG extends Command {
         if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience."});
         if(interaction.data.options[0].name === "create"){
             const activity = interaction.data.options[0].options[1].value;
+            let dbUser = d2client.DB.get(interaction.member.user.id);
+            if(dbUser.timezone === undefined) dbUser.timezone = "Europe/Helsinki"; d2client.DB.set(interaction.member.user.id, "Europe/Helsinki", "timezone");
             interaction.reply({
                 embeds: [
                     new Embed()
                         .setTitle("LFG Creation")
-                        .setDescription(`Before you create an LFG, please go generate a timestamp to use for the LFG starting time.
-                        
-[You can get one from this link](https://www.unixtimestamp.com/)
-
-Use your own local time, the site should convert it to the correct one automatically.
-Once you have it, click the button to proceed with the creation.
-*(This will be replaced with a Date Picker once Discord finally releases them.)*`)
+                        .setDescription(`Hi! You'll be notified to set your timezone here later! (Only once)
+                        Your timezone is: ${dbUser.timezone}`)
                 ],
                 components: [
                     new ActionRow()
@@ -36,7 +35,8 @@ Once you have it, click the button to proceed with the creation.
                 ephemeral: true
             });
         } else if(interaction.data.options[0].name === "timezone"){
-            //TODO: Allow user to define their timezone, use autocomplete to supply options.
+            d2client.DB.set(interaction.member.user.id,interaction.data.options[0].options[0].value,"timezone");
+            interaction.reply({content: `Saved timezone: ${interaction.data.options[0].options[0].value}`, ephemeral: true});
         } // Handle other commands here.
     }
 
@@ -61,16 +61,16 @@ Once you have it, click the button to proceed with the creation.
                                     .setMaxLength(2)
                                     .setPlaceholder("6")
                             ]),
-                        new ActionRow() //TODO: Implement natural inputting of time, convert it later to UNIX with user defined timezone, use Finnish for default.
+                        new ActionRow()
                             .setComponents([
                                 new TextInput()
                                     .setCustomId("lfg-time")
-                                    .setLabel("Timestamp when to start")
+                                    .setLabel("Time to start | (optional values)")
                                     .setStyle(TextInputStyle.Short)
                                     .setRequired(true)
-                                    .setMinLength(10)
-                                    .setMaxLength(10)
-                                    .setPlaceholder(Date.now().toString())
+                                    .setMinLength(5)
+                                    .setMaxLength(12)
+                                    .setPlaceholder("HH:MM (DD.MM)")
                             ]),
                         new ActionRow()
                             .setComponents([
@@ -152,24 +152,6 @@ Once you have it, click the button to proceed with the creation.
         } else if(cmd === "editOptions"){
             const creatorId = interaction.customId.split("-")[3]
             if (interaction.member.user.id === creatorId || interaction.member.permissions.has("MANAGE_MESSAGES")){ //created or has permissions to delete
-                // interaction.reply({
-                //     components: [
-                //         new SelectMenuComponent()
-                //             .setType(SelectMenuType.Text)
-                //             .setOptions([
-                //                 new SelectMenuOption()
-                //                     .setLabel("Delete")
-                //                     //.setEmoji(new Emoji())
-                //                     .setDescription("Delete the lfg post")
-                //                     .setValue(`lfg-delete-${interaction.customId}`)
-                //                 ,
-                //                 new SelectMenuOption()
-                //                     .setLabel("Edit")
-                //                     .setDescription("Edit lfg")
-                //                     .setValue(`lfg-edit-${interaction.customId}`)
-                //             ])
-                //     ], ephemeral: true
-                // })
                 interaction.reply({
                     components: [
                         new ActionRow()
@@ -217,17 +199,17 @@ Once you have it, click the button to proceed with the creation.
                                     .setMaxLength(2)
                                     .setPlaceholder("6")
                             ]),
-                        new ActionRow() //TODO: Implement natural inputting of time, convert it later to UNIX with user defined timezone, use Finnish for default.
+                        new ActionRow()
                             .setComponents([
                                 new TextInput()
                                     .setCustomId("lfg-time")
-                                    .setLabel("Timestamp when to start")
+                                    .setLabel("Time to start | (optional values)")
                                     .setStyle(TextInputStyle.Short)
-                                    .setValue(oldLFG.time ?? "")
+                                    .setValue(oldLFG.timeString)
                                     .setRequired(true)
-                                    .setMinLength(10)
-                                    .setMaxLength(10)
-                                    .setPlaceholder(Date.now().toString())
+                                    .setMinLength(5)
+                                    .setMaxLength(12)
+                                    .setPlaceholder("HH:MM (DD.MM)")
                             ]),
                         new ActionRow()
                             .setComponents([
@@ -247,9 +229,27 @@ Once you have it, click the button to proceed with the creation.
 
     async msRun(interaction, d2client){
         const data = interaction.data.components.map(x => x.components[0].value);
-        let size = data[0]; let time = data[1]; let desc = data[2];
-        if(isNaN(size) || parseInt(size) === 0 || isNaN(time) || (parseInt(time)*1000) - Date.now() < 0) return;
-        const name = d2client.DB.get(interaction.member.user.id).destinyName;
+        let size = data[0]; let timeString = data[1]; let desc = data[2];
+        if(isNaN(size) || parseInt(size) === 0) return;
+        if(!(/^\d{2}:\d{2}($| \d{2}.\d{2})/gi.test(timeString))) return;
+        const dbUser = d2client.DB.get(interaction.member.user.id);
+        const name = dbUser.destinyName;
+        const timezone = dbUser.timezone;
+        let hour = timeString.split(":")[0]; let minute = timeString.split(":")[1].split(" ")[0];
+        let day: string | null = null; let month: string | null = null;
+        if(timeString.split(" ").length === 2){
+            day = parseInt(timeString.split(" ")[1].split(".")[0]).toString();
+            month = (parseInt(timeString.split(" ")[1].split(".")[1])-1).toString();
+        }
+        let s = spacetime().goto(timezone).hour(hour).minute(minute);
+        if(day !== null && month !== null){
+            s = s.day(day).month(month)
+        }
+        console.log(`OG: ${timeString}
+H: ${hour} M:${minute} D:${day} M:${month}
+Epoch: ${s.epoch}
+${new Date(s.epoch).toUTCString()}`);
+        let time = Math.floor(s.epoch/1000);
         const embed = new Embed()
             .setFields([
                 {name: "**Activity**", value: interaction.customId.split("-")[1], inline: true},
@@ -262,7 +262,7 @@ Once you have it, click the button to proceed with the creation.
         if (interaction.customId.split("-")[2] === "edit") {
             interaction.deferUpdate();
             const oldLFG = d2client.lfgmanager.getLFG(interaction.customId.split("-")[1]);
-            oldLFG.time = time; oldLFG.maxSize = size; oldLFG.desc = desc;
+            oldLFG.time = time; oldLFG.timeString = timeString; oldLFG.maxSize = size; oldLFG.desc = desc;
             d2client.lfgmanager.editLFG(oldLFG, embed);
             return;
         }
@@ -292,6 +292,7 @@ Once you have it, click the button to proceed with the creation.
             d2client.lfgmanager.saveLFG({
                 id,
                 activity: interaction.customId.split("-")[1],
+                timeString,
                 time,
                 maxSize: size,
                 creator: interaction.member.user.id,
@@ -353,6 +354,12 @@ Once you have it, click the button to proceed with the creation.
                         .map(x => ({name: x, value: x}))
                 );
             }
+        } else if(option.name === "timezone"){
+            const reply = timezones()
+                .filter(x => x.toLowerCase().startsWith(option.options[0].value.toLowerCase()) || x.toLowerCase().split("/")[1].startsWith(option.options[0].value.toLowerCase()))
+                .map(x => ({name: x, value: x}));
+            if(reply.length > 25) reply.length = 25;
+            interaction.autocomplete(reply);
         }
     }
 }

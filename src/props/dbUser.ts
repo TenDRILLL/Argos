@@ -8,6 +8,7 @@ export class DBUser {
     dungeons: ActivityObject;
     grandmasters: ActivityObject;
     roles: string[];
+    timezone: string;
     tokens: {
         accessToken: string;
         accessExpiry: number;

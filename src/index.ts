@@ -492,6 +492,19 @@ function updateCmds(){
                             required: true
                         }
                     ]
+                }, {
+                    name: "timezone",
+                    description: "Set your timezone for LFG.",
+                    type: ApplicationCommandOptionType.SubCommand,
+                    options: [
+                        {
+                            name: "set",
+                            description: "Set your timezone for LFG.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
+                        }
+                    ]
                 }
             ]
         }

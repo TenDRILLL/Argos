@@ -129,6 +129,7 @@ class LFG {
     id: string;
     activity: string;
     time: string;
+    timeString: string;
     maxSize: string;
     creator: string;
     guardians: string[];
