@@ -328,7 +328,7 @@ dcclient.on("ready", async ()=>{
     //XUR Embed checking on Argos startup.
     const now = new Date();
     //0 = Sun
-    if(now.getDay() !== 3 || now.getDay() !== 4){
+    if(now.getDay() !== 3 && now.getDay() !== 4){
         //Day is Fri-Tue
         if(now.getDay() === 2){
             //Tue
