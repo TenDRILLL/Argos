@@ -52,7 +52,6 @@ export default class LFGManager {
     }
 
     editLFG(post: LFG, embed){
-        this.saveLFG(post);
         const editedEmbed = new Embed(embed);
         if(!(editedEmbed.fields)) return;
         editedEmbed.fields[0].value = post.activity;
@@ -72,6 +71,7 @@ export default class LFGManager {
                 }
             }
         }
+        this.saveLFG(post);
         editedEmbed.fields[3].name = `**Guardians Joined: ${post.guardians.length}/${post.maxSize}**`;
         editedEmbed.fields[3].value = post.guardians.map(x => this.d2client.DB.get(x).destinyName).join(", ");
         editedEmbed.fields[4].value = post.queue.length === 0 ? "None." : post.queue.map(x => this.d2client.DB.get(x).destinyName).join(", ");
