@@ -59,7 +59,6 @@ export default class LFGManager {
         editedEmbed.fields[1].value = `<t:${post.time}:F>
 <t:${post.time}:R>`;
         editedEmbed.fields[2].value = post.desc;
-        console.log(editedEmbed)
         if(post.guardians.length !== parseInt(post.maxSize)) {
             if(post.guardians.length > parseInt(post.maxSize)){
                 for (let i = post.guardians.length; i > parseInt(post.maxSize); i--) {
@@ -74,6 +73,8 @@ export default class LFGManager {
             }
         }
         editedEmbed.fields[3].name = `**Guardians Joined: ${post.guardians.length}/${post.maxSize}**`;
+        editedEmbed.fields[3].value = post.guardians.map(x => this.d2client.DB.get(x).destinyName).join(", ");
+        editedEmbed.fields[4].value = post.queue.length === 0 ? "None." : post.queue.map(x => this.d2client.DB.get(x).destinyName).join(", ");
         this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
             content: "",
             embeds: [editedEmbed]
