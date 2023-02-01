@@ -1,5 +1,9 @@
 import Command from "./Command";
-import {ActionRow, Button, ButtonStyle, Embed, Modal, TextInput, TextInputStyle} from "discord-http-interactions";
+import {ActionRow, Button, ButtonStyle, Embed, Emoji, Modal, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
+import { InteractionReplyData } from "discord-http-interactions/built/structures/InteractionReplyDataType";
+import { SelectMenuComponent } from "discord-http-interactions/built/structures/SelectMenuComponent";
+import { SelectMenuOption } from "discord-http-interactions/built/structures/SelectMenuOption";
+import LFGManager from "../handlers/lfgManager";
 
 export default class LFG extends Command {
     constructor(){
@@ -147,14 +151,82 @@ Once you have it, click the button to proceed with the creation.
                 embeds: [lfgemb],
                 components: [new ActionRow().setComponents(buttons)]
             },lfgid.split("&")[1]);
-        } else if(cmd === "edit"){
+        } else if(cmd === "editOptions"){
+            const creatorId = interaction.customId.split("-")[3]
+            if (interaction.member.user.id === creatorId || interaction.member.permissions.has("MANAGE_MESSAGES")){ //created or has permissions to delete
+                interaction.reply({
+                    components: [
+                        new StringSelectMenu()
+                            .setOptions([
+                                new SelectMenuOption()
+                                    .setLabel("Delete")
+                                    //.setEmoji(new Emoji())
+                                    .setDescription("Delete the lfg post")
+                                    .setValue(`lfg-delete-${interaction.customId}`)
+                                ,
+                                new SelectMenuOption()
+                                    .setLabel("Edit")
+                                    .setDescription("Edit lfg")
+                                    .setValue(`lfg-edit-${interaction.customId}`)
+                            ])
+                    ], ephemeral: true
+                })
+            }
+            else {
+                interaction.reply({
+                    content: "You can't edit a post that isn't yours.", ephemeral: true
+                })
+            }
             // Edit the LFG.
             //TODO: Display a selection menu to display edits or delete.
             //d2client.lfgmanager.editLFG(id, embed);
-            interaction.reply({
-                content: "Editing is not supported yet.",
-                ephemeral: true
-            });
+        } else if (cmd === "delete") {
+            const lfgid = interaction.customId.split("-")[2];
+            d2client.lfgmanager.deleteLFG(lfgid);
+        } else if (cmd === "edit") {
+            const lfgid = interaction.customId.split("-")[2];
+            const oldLFG = d2client.lfgmanager.getLFG(lfgid);
+            interaction.modal(
+                new Modal()
+                    .setTitle("LFG Editing")
+                    .setCustomId(`lfg-${interaction.customId.split("-")[2]}-edit`)
+                    .setComponents([
+                        new ActionRow()
+                            .setComponents([
+                                new TextInput()
+                                    .setCustomId("lfg-size")
+                                    .setLabel("Size of the fireteam")
+                                    .setStyle(TextInputStyle.Short)
+                                    .setValue(oldLFG.maxSize ?? 0)
+                                    .setRequired(true)
+                                    .setMinLength(1)
+                                    .setMaxLength(1)
+                                    .setPlaceholder("6")
+                            ]),
+                        new ActionRow() //TODO: Implement natural inputting of time, convert it later to UNIX with user defined timezone, use Finnish for default.
+                            .setComponents([
+                                new TextInput()
+                                    .setCustomId("lfg-time")
+                                    .setLabel("Timestamp when to start")
+                                    .setStyle(TextInputStyle.Short)
+                                    .setValue(oldLFG.time ?? Date.now.toString())
+                                    .setRequired(true)
+                                    .setMinLength(10)
+                                    .setMaxLength(10)
+                                    .setPlaceholder(Date.now().toString())
+                            ]),
+                        new ActionRow()
+                            .setComponents([
+                                new TextInput()
+                                    .setCustomId("lfg-description")
+                                    .setLabel("Description")
+                                    .setStyle(TextInputStyle.Paragraph)
+                                    .setValue(oldLFG.desc ?? "")
+                                    .setRequired(true)
+                                    .setPlaceholder("Chill cool raid, bring cookies :>")
+                            ])
+                    ])
+            );
         }
     }
 
@@ -172,6 +244,10 @@ Once you have it, click the button to proceed with the creation.
                 {name: `**Guardians Joined: 1/${size}**`, value: name, inline: true},
                 {name: "**Queue:**", value: "None.", inline: true}
             ]);
+        if (interaction.customId.split("-")[2] === "edit") {
+            const oldLFG = d2client.lfgmanager.getLFG(interaction.customId.split("-")[1]);
+            return d2client.lfgmanager.editLFG(oldLFG, embed);
+        }
         interaction.reply({
             embeds: [embed]
         }).then(ic => {
@@ -191,7 +267,7 @@ Once you have it, click the button to proceed with the creation.
                             new Button()
                                 .setLabel("Edit")
                                 .setStyle(ButtonStyle.Secondary)
-                                .setCustomId(`lfg-edit-${id}-${ic.member.user.id}`)
+                                .setCustomId(`lfg-editOptions-${id}-${ic.member.user.id}`)
                         ])
                 ]
             });
