@@ -1,5 +1,5 @@
 import enmap from "enmap";
-import {Embed} from "discord-http-interactions";
+import {ActionRow, Button, ButtonStyle, Embed} from "discord-http-interactions";
 import {setTimeoutAt} from "safe-timers";
 
 export default class LFGManager {
@@ -77,7 +77,24 @@ export default class LFGManager {
         editedEmbed.fields[4].value = post.queue.length === 0 ? "None." : post.queue.map(x => this.d2client.DB.get(x).destinyName).join(", ");
         this.dcclient.editMessage(post.id.split("&")[0], post.id.split("&")[1],{
             content: "",
-            embeds: [editedEmbed]
+            embeds: [editedEmbed],
+            components: [
+                new ActionRow()
+                    .setComponents([
+                        new Button()
+                            .setLabel(post.guardians.length === parseInt(post.maxSize) ? "Join in Queue" : "Join")
+                            .setStyle(post.guardians.length === parseInt(post.maxSize) ? ButtonStyle.Primary : ButtonStyle.Success)
+                            .setCustomId(`lfg-join-${post.id}`),
+                        new Button()
+                            .setLabel("Leave")
+                            .setStyle(ButtonStyle.Danger)
+                            .setCustomId(`lfg-leave-${post.id}`),
+                        new Button()
+                            .setLabel("Edit")
+                            .setStyle(ButtonStyle.Secondary)
+                            .setCustomId(`lfg-editOptions-${post.id}-${post.creator}`)
+                    ])
+            ]
         }).catch(()=>{return true;});
     }
 

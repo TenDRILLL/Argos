@@ -145,7 +145,7 @@ export default class LFG extends Command {
                 lfgData.guardians.push(userID);
                 guardians.name = `**Guardians Joined: ${lfgData.guardians.length}/${lfgData.maxSize}**`;
                 guardians.value = lfgData.guardians.map(x => d2client.DB.get(x).destinyName).join(", ");
-                if(lfgData.guardians.length === lfgData.maxSize){
+                if(lfgData.guardians.length === parseInt(lfgData.maxSize)){
                     buttons[0].setLabel("Join in Queue");
                     buttons[0].setStyle(ButtonStyle.Primary);
                 }
