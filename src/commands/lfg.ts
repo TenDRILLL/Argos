@@ -1,7 +1,5 @@
 import Command from "./Command";
 import {ActionRow, Button, ButtonStyle, ChannelSelectMenu, Embed, Emoji, MentionableSelectMenu, Modal, RoleSelectMenu, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
-import { SelectMenuOption } from "discord-http-interactions/built/structures/SelectMenuOption";
-import { SelectMenuComponent } from "discord-http-interactions/built/structures/SelectMenuComponent";
 import spacetime from "spacetime";
 import {timezones} from "../handlers/utils";
 
@@ -15,25 +13,66 @@ export default class LFG extends Command {
         if(interaction.data.options[0].name === "create"){
             const activity = interaction.data.options[0].options[1].value;
             let dbUser = d2client.DB.get(interaction.member.user.id);
-            if(dbUser.timezone === undefined) dbUser.timezone = "Europe/Helsinki"; d2client.DB.set(interaction.member.user.id, "Europe/Helsinki", "timezone");
-            interaction.reply({
-                embeds: [
-                    new Embed()
+            if(dbUser.timezone === undefined) { dbUser.timezone = "Europe/Helsinki"; d2client.DB.set(interaction.member.user.id, "Europe/Helsinki", "timezone");
+                interaction.reply({
+                    embeds: [
+                        new Embed()
+                            .setTitle("LFG Creation")
+                            .setDescription(`Hi! It seems that you haven't set your timezone yet. This means that as a default, your timezone will be set to Europe/Helsinki
+                            If that isn't correct, you can change your timezone using the command
+                            </lfg timezone:1068987387121782895>`)
+                    ],
+                    components: [
+                        new ActionRow()
+                            .setComponents([
+                                new Button()
+                                    .setLabel("Next")
+                                    .setStyle(ButtonStyle.Secondary)
+                                    .setCustomId(`lfg-create-${activity}`)
+                            ])
+                    ],
+                    ephemeral: true
+                });
+            } else {
+                interaction.modal(
+                    new Modal()
                         .setTitle("LFG Creation")
-                        .setDescription(`Hi! You'll be notified to set your timezone here later! (Only once)
-                        Your timezone is: ${dbUser.timezone}`)
-                ],
-                components: [
-                    new ActionRow()
+                        .setCustomId(`lfg-${activity}`)
                         .setComponents([
-                            new Button()
-                                .setLabel("Next")
-                                .setStyle(ButtonStyle.Secondary)
-                                .setCustomId(`lfg-create-${activity}`)
+                            new ActionRow()
+                                .setComponents([
+                                    new TextInput()
+                                        .setCustomId("lfg-size")
+                                        .setLabel("Size of the fireteam")
+                                        .setStyle(TextInputStyle.Short)
+                                        .setRequired(true)
+                                        .setMinLength(1)
+                                        .setMaxLength(2)
+                                        .setPlaceholder("6")
+                                ]),
+                            new ActionRow()
+                                .setComponents([
+                                    new TextInput()
+                                        .setCustomId("lfg-time")
+                                        .setLabel("Time to start | (optional values)")
+                                        .setStyle(TextInputStyle.Short)
+                                        .setRequired(true)
+                                        .setMinLength(5)
+                                        .setMaxLength(12)
+                                        .setPlaceholder("HH:MM (DD.MM)")
+                                ]),
+                            new ActionRow()
+                                .setComponents([
+                                    new TextInput()
+                                        .setCustomId("lfg-description")
+                                        .setLabel("Description")
+                                        .setStyle(TextInputStyle.Paragraph)
+                                        .setRequired(true)
+                                        .setPlaceholder("Chill cool raid, bring cookies :>")
+                                ])
                         ])
-                ],
-                ephemeral: true
-            });
+                );
+            }
         } else if(interaction.data.options[0].name === "timezone"){
             d2client.DB.set(interaction.member.user.id,interaction.data.options[0].options[0].value,"timezone");
             interaction.reply({content: `Saved timezone: ${interaction.data.options[0].options[0].value}`, ephemeral: true});
@@ -231,24 +270,20 @@ export default class LFG extends Command {
         const data = interaction.data.components.map(x => x.components[0].value);
         let size = data[0]; let timeString = data[1]; let desc = data[2];
         if(isNaN(size) || parseInt(size) === 0) return;
-        if(!(/^\d{2}:\d{2}($| \d{2}.\d{2})/gi.test(timeString))) return;
+        if(!(/^\d{2}:\d{2}($| \d{1,2}.\d{1,2})/gi.test(timeString))) return;
         const dbUser = d2client.DB.get(interaction.member.user.id);
         const name = dbUser.destinyName;
         const timezone = dbUser.timezone;
-        let hour = timeString.split(":")[0]; let minute = timeString.split(":")[1].split(" ")[0];
-        let day: string | null = null; let month: string | null = null;
+        let hour = parseInt(timeString.split(":")[0]); let minute = parseInt(timeString.split(":")[1].split(" ")[0]);
+        let day: number | null = null; let month: number | null = null;
         if(timeString.split(" ").length === 2){
-            day = parseInt(timeString.split(" ")[1].split(".")[0]).toString();
-            month = (parseInt(timeString.split(" ")[1].split(".")[1])-1).toString();
+            day = parseInt(timeString.split(" ")[1].split(".")[0]);
+            month = (parseInt(timeString.split(" ")[1].split(".")[1])-1);
         }
         let s = spacetime().goto(timezone).hour(hour).minute(minute);
         if(day !== null && month !== null){
-            s = s.day(day).month(month)
+            s = s.date(day).month(month)
         }
-        console.log(`OG: ${timeString}
-H: ${hour} M:${minute} D:${day} M:${month}
-Epoch: ${s.epoch}
-${new Date(s.epoch).toUTCString()}`);
         let time = Math.floor(s.epoch/1000);
         const embed = new Embed()
             .setFields([
