@@ -44,6 +44,7 @@ export default class LFGManager {
             this.createTimer(post);
         } else {
             let check = this.timers.get(post.id);
+            console.log(`${check!.time} - ${post.time}`);
             if(check!.time !== post.time){
                 this.deleteTimer(post.id);
                 this.createTimer(post);

@@ -280,7 +280,7 @@ export default class LFG extends Command {
             day = parseInt(timeString.split(" ")[1].split(".")[0]);
             month = (parseInt(timeString.split(" ")[1].split(".")[1])-1);
         }
-        let s = spacetime().goto(timezone).hour(hour).minute(minute);
+        let s = spacetime().goto(timezone).hour(hour).minute(minute).second(0).millisecond(0);
         if(day !== null && month !== null){
             s = s.date(day).month(month)
         }
