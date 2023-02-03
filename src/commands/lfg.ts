@@ -9,7 +9,7 @@ export default class LFG extends Command {
     }
 
     async cmdRun(interaction, d2client) {
-        if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience."});
+        if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience.", ephemeral: true});
         if(interaction.data.options[0].name === "create"){
             const activity = interaction.data.options[0].options[1].value;
             let dbUser = d2client.DB.get(interaction.member.user.id);
@@ -80,7 +80,7 @@ export default class LFG extends Command {
     }
 
     async btnRun(interaction, d2client){
-        if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience."});
+        if(!(d2client.DB.has(interaction.member.user.id))) return interaction.reply({content: "Hi, you're not registered with me yet so unfortunately you can't use my functionality to the fullest :( Please register yourself at the earliest inconvenience.", ephemeral: true});
         const cmd = interaction.customId.split("-")[1];
         if(cmd === "create"){
             interaction.client.deleteWebhookMessage(interaction.applicationId, interaction.token, interaction.message.id).catch(() => {return true});
