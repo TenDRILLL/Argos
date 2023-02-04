@@ -130,11 +130,13 @@ dcclient.on("authorization", (req, res) => {
             \\n
             For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
-    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.redirect(`/error?message=
+    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") {
+        return res.redirect(`/error?message=
             Destiny 2 oAuth2 Code Error. Please try again.
                                         
             \\n
             For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
+    }
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
 });
 
@@ -245,6 +247,13 @@ dcclient.on("panel",(req,res)=>{
     }
     if(d2client.DB.has(discID)){
         d2client.dbUserUpdater.updateStats(discID).then((data)=>{
+            if(data.destinyId === undefined || data.membershipType === undefined) {
+                return res.redirect(`/error?message=
+                Destiny 2 oAuth2 Code Error. Please try again.
+                                        
+                \\n
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
+            }
             d2client.discordTokens.getDiscordInformation(discID).then(dcuser => {
                 getPanelPage(d2client, discID, data, dcuser).then(resp => {
                     res.send(resp);
