@@ -87,7 +87,8 @@ export class requestHandler {
                             res(response);
                         }
                     }).catch(e => {
-                    rej(`${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
+                        console.log(e);
+                    rej(`${e.response.status} ${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
                 });
             }
         });

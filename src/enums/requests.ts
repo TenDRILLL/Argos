@@ -24,6 +24,7 @@ requests.set("getItem", "/Destiny2/membershipType/Profile/destinyMembershipId/It
 export function getRequest(id,data){
     if(requests.has(id)){
         let request = requests.get(id);
+        let queryParams = null;
         if(data){
             let comps = request.split("?").splice(1);
             request = request.split("?")[0].split("/");
@@ -31,12 +32,15 @@ export function getRequest(id,data){
                 if(request.includes(key)){
                     request[request.indexOf(key)] = data[key];
                 }
+                if(key === "query"){
+                    queryParams = data[key];
+                }
             });
             request = request.join("/");
             if(comps.length > 0){
                 request = [request,comps].join("?");
             }
         }
-        return `${apiRoot}${request}`;
+        return `${apiRoot}${queryParams !== null ? request + "?" + queryParams : request}`;
     }
 }
