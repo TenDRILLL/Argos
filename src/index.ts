@@ -326,10 +326,10 @@ dcclient.on("ready", async ()=>{
         fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
     //XUR Embed timers while Argos running.
-    const createXur = cron.schedule("0 17 * * 5", ()=>{
+    const createXur = cron.schedule("5 17 * * 5", ()=>{
         generateXurEmbed();
     }, {timezone: "etc/UTC"});
-    const deleteXur = cron.schedule("0 17 * * 2", ()=>{
+    const deleteXur = cron.schedule("5 17 * * 2", ()=>{
         deleteXurEmbed();
     }, {timezone: "etc/UTC"});
     createXur.start();
