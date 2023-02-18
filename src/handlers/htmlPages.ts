@@ -102,7 +102,8 @@ export function getPanelPage(d2client, ID, d, discordUser) {
     </div>`});
         ans += "</div>";
         ans += `<div id="completions">`;
-        ans += `<div class="completionDiv">`;
+        if (DBData.raids["Total"] != 0) {
+            ans += `<div class="completionDiv">`;
         ans += `<div class="completionTitle">
                      <h4><b><u>Raid completions</u></b></h4>
                 </div>`;
@@ -127,55 +128,58 @@ export function getPanelPage(d2client, ID, d, discordUser) {
             }
         });
         ans += "</div> </div>";
-        ans += `<div class="completionDiv">`;
-        ans += `<div class="completionTitle">
-                     <h4><b><u>Dungeon completions</u></b></h4>
-                </div>`;
-        ans += `<div class="completionTotal">
-                     <b>Total: ${DBData.dungeons["Total"]}</b>
-                </div>
-                <div class="completionGrid">`
-    const dungeons = sortActivities(DBData.dungeons);
-    Object.keys(dungeons).forEach(dungeon => {
-            if (DBData.dungeons[dungeon] !== 0 && dungeon !== "Total") {
-                ans += `<div>
-                        <b>${dungeon}</b>
-                        <div class="tooltipContainer">${dungeons[dungeon].length === 1 ? `${DBData.dungeons[dungeon]}` : `${DBData.dungeons[dungeon]}*`}
-                            ${ dungeons[dungeon].length === 1 ? `<div></div>` :
-                                `<div class="tooltiptext">
-                                    <p>Normal: ${dungeons[dungeon][0] - dungeons[dungeon][2]}</p>
-                                    <p>${dungeons[dungeon][1]}: ${dungeons[dungeon][2]}</p>
-                        </div>`
-                    }
-                </div>
-            </div>`
-            }
-        });
-        ans += "</div> </div>";
-        ans += `<div class="completionDiv">`;
-        ans += `<div class="completionTitle">
-                     <h4><b><u>Grandmaster completions</u></b></h4>
-                </div>`;
-        ans += `<div class="completionTotal">
-                     <b>Total: ${DBData.grandmasters["Total"]}</b>
-                </div>
-                <div class="completionGrid">`
-    const gms = sortActivities(DBData.grandmasters);
-    Object.keys(gms).forEach(gm => {
-            if (DBData.grandmasters[gm] !== 0 && gm !== "Total") {
-                ans += `
-                        <div>
-                            <b>${gm}</b>
-                            <div class="tooltipContainer">${DBData.grandmasters[gm]}
-                                <div></div>
-                            </div>
-                        </div>`
-            }
-        });
-        ans += `
-        </div> </div>`;
+        } if (DBData.dungeons["Total"] != 0) {
+            ans += `<div class="completionDiv">`;
+            ans += `<div class="completionTitle">
+                         <h4><b><u>Dungeon completions</u></b></h4>
+                    </div>`;
+            ans += `<div class="completionTotal">
+                         <b>Total: ${DBData.dungeons["Total"]}</b>
+                    </div>
+                    <div class="completionGrid">`
+        const dungeons = sortActivities(DBData.dungeons);
+        Object.keys(dungeons).forEach(dungeon => {
+                if (DBData.dungeons[dungeon] !== 0 && dungeon !== "Total") {
+                    ans += `<div>
+                            <b>${dungeon}</b>
+                            <div class="tooltipContainer">${dungeons[dungeon].length === 1 ? `${DBData.dungeons[dungeon]}` : `${DBData.dungeons[dungeon]}*`}
+                                ${ dungeons[dungeon].length === 1 ? `<div></div>` :
+                                    `<div class="tooltiptext">
+                                        <p>Normal: ${dungeons[dungeon][0] - dungeons[dungeon][2]}</p>
+                                        <p>${dungeons[dungeon][1]}: ${dungeons[dungeon][2]}</p>
+                            </div>`
+                        }
+                    </div>
+                </div>`
+                }
+            });
+            ans += "</div> </div>";
+        } if (DBData.grandmasters["Total"] != 0) {
+            ans += `<div class="completionDiv">`;
+            ans += `<div class="completionTitle">
+                        <h4><b><u>Grandmaster completions</u></b></h4>
+                    </div>`;
+            ans += `<div class="completionTotal">
+                        <b>Total: ${DBData.grandmasters["Total"]}</b>
+                    </div>
+                    <div class="completionGrid">`
+        const gms = sortActivities(DBData.grandmasters);
+        Object.keys(gms).forEach(gm => {
+                if (DBData.grandmasters[gm] !== 0 && gm !== "Total") {
+                    ans += `
+                            <div>
+                                <b>${gm}</b>
+                                <div class="tooltipContainer">${DBData.grandmasters[gm]}
+                                    <div></div>
+                                </div>
+                            </div>`
+                }
+            });
+            ans += `
+            </div> </div>
+            </div>`;
+        }
         ans += `</div>
-    </div>
     </body></html>`;
         res(ans);
     });
