@@ -170,7 +170,7 @@ export function updateStatRolesUser(dcclient,d2client,id){
         });
         j = tempArr.length;
         let clanMember = false;
-        await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
+        d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
             const resp = d.Response as BungieGroupQuery;
             if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
                 clanMember = true;
