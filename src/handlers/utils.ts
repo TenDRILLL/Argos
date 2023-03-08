@@ -170,12 +170,12 @@ export function updateStatRolesUser(dcclient,d2client,id){
         });
         j = tempArr.length;
         let clanMember = false;
-        d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/}).then(d => {
-            const resp = d.Response as BungieGroupQuery;
-            if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
-                clanMember = true;
-            }
-        }).catch(e => console.log(4));
+        let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
+            .catch(e => console.log(4));
+        const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
+        if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
+            clanMember = true;
+        }
         dcclient.getMember(statRoles.guildID,id).then(async member => {
             let data: { nick?: string, roles: string[] } = {
                 roles: []
