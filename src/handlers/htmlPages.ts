@@ -368,6 +368,15 @@ export function getErrorPage(errorDetails: string[], button: string) {
     </div>` 
 
     res += `
+    <script>
+        addEventListener(document, "keypress", (e)=>{
+            e = e || window.event;
+            if(e.keyCode === 13){
+                console.log("enter!")
+                window.location.href = links[button] ?? "/";
+            }
+        });
+    </script>
     </body>
     </html>    `
     return res;
