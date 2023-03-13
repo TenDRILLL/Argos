@@ -16,6 +16,7 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["Vow of the Disciple, Master",[4217492330]],
     ["King's Fall",[1374392663]],
     ["King's Fall, Master",[2964135793]],
+    ["Root of Nightmares", [2381413764]],
 
     ["The Glassway", [4197461112, 3812135451]],
     ["The Lightblade", [968885838, 1964120205]],

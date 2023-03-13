@@ -357,7 +357,7 @@ export function updateActivityIdentifierDB(d2client) {
                             d2client.entityDB.set("activityOrder", temp);
                         }
                     }
-                } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster") {
+                } else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster" && !(activity.displayProperties.description != "Nightfall: Grandmaster")) {
                     const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
                     saved.type = 2;
                     if (!saved.IDs.includes(activity.hash)) {
