@@ -9,7 +9,9 @@ import {
     updateStatRoles,
     decrypt,
     updateStatRolesUser,
-    crypt, getXurEmbed
+    crypt,
+    getXurEmbed,
+    updateClanMembers
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
@@ -319,11 +321,14 @@ dcclient.on("resource",(req, res)=>{
 dcclient.on("ready", async ()=>{
     commands = await load();
     console.log(`BungoAPIShits http://localhost:${dcclient.port}/`);
-    setInterval(()=>{
-        console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
-        updateStatRoles(dcclient,d2client);
+    setInterval(async ()=>{
+        console.log(`Time: ${new Date().toUTCString()}`);
+        console.log("Updating clanmember list.");
+        await updateClanMembers(d2client);
+        console.log("Updating statroles");
+        await updateStatRoles(dcclient,d2client);
         console.log("Checking clan requests.");
-        fetchPendingClanRequests(dcclient,d2client);
+        await fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
     //XUR Embed timers while Argos running.
     const createXur = cron.schedule("5 17 * * 5", ()=>{

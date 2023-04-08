@@ -169,13 +169,6 @@ export function updateStatRolesUser(dcclient,d2client,id){
             }
         });
         j = tempArr.length;
-        let clanMember = false;
-        let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
-            .catch(e => console.log(4));
-        const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
-        if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
-            clanMember = true;
-        }
         dcclient.getMember(statRoles.guildID,id).then(async member => {
             let data: { nick?: string, roles: string[] } = {
                 roles: []
@@ -186,6 +179,7 @@ export function updateStatRolesUser(dcclient,d2client,id){
             const roles = member.roles.sort();
             data.roles = roles.filter(x => !statRoles.allIDs.includes(x));
             data.roles = [...data.roles, ...tempArr].sort();
+            data.roles.push(dbUser.inClan);
             if(!(data.roles.length === roles.length && data.roles.every((role, i) => roles[i] === role))){
                 dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
             }
@@ -194,8 +188,6 @@ export function updateStatRolesUser(dcclient,d2client,id){
                     platform_name: "Destiny 2",
                     platform_username: d2name,
                     metadata: {
-                        clanmember: clanMember ? 1 : 0,
-                        visitor: clanMember ? 0 : 1,
                         raids: dbUser.raids.Total,
                         dungeons: dbUser.dungeons.Total,
                         gms: dbUser.grandmasters.Total
@@ -254,6 +246,19 @@ export function fetchPendingClanRequests(dcclient, d2client) {
             })
         }).catch(e => console.log(e));
     });
+}
+
+export async function updateClanMembers(d2client){
+    let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
+        .catch(e => console.log(5));
+    const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
+    const ids = resp.results.map(x => x.bungieNetUserInfo.membershipId);
+    if(ids.length > 0){
+        for (let [key, data] of d2client.DB){
+            data.inClan = ids.includes(data.bungieId) ? statRoles.clanMember : statRoles.justVisiting;
+            d2client.DB.set(key, data);
+        }
+    }
 }
 
 export function sortActivities(activities: ActivityObject): Map<string, string[]> {
