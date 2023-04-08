@@ -2,30 +2,29 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
-import {Client} from "discord-http-interactions";
+import {ApplicationCommandOptionType, Client, Emoji} from "discord-http-interactions";
 import {
     fetchPendingClanRequests,
     newRegistration,
     updateStatRoles,
     decrypt,
     updateStatRolesUser,
-    GetDiscordInformation,
     crypt,
-    GetDiscordOauthExchange
+    getXurEmbed,
+    updateClanMembers
 } from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
-import {getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
+import {getErrorPage, getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
+import * as cron from "node-cron";
 
 let commands;
-const d2client = new requestHandler();
 const dcclient = new Client({
     token: process.env.discordToken as string,
     publicKey: process.env.discordKey as string,
     port: 11542,
     endpoint: "/api/interactions",
-    linkedRolesEndpoint: "/api/linkedroles",
     additionalEndpoints: [
         {
             name: "site",
@@ -67,13 +66,22 @@ const dcclient = new Client({
             name: "resource",
             method: "GET",
             endpoint: "/resource/:resourceName"
+        }, {
+            name: "getError",
+            method: "GET",
+            endpoint: "/error"
+        }, {
+            name: "undefined",
+            method: "GET",
+            endpoint: "*"
         }
     ]
 });
+const d2client = new requestHandler(dcclient);
 
-dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,bodyParser.urlencoded({ extended: false }));
-dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,bodyParser.json());
-dcclient.app.use(/^\/(?!.*(api\/interaction|api\/linkedroles)).{0,99}/,cookieParser());
+dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.urlencoded({ extended: false }));
+dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.json());
+dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,cookieParser());
 
 dcclient.on("interaction", interaction => {
     if(commands === undefined) return; //This shouldn't really happen, but there's a slight possibility when the bot is starting.
@@ -91,29 +99,46 @@ dcclient.on("interaction", interaction => {
     }
 });
 
-dcclient.on("linkedRoles", data =>{ //Will be used to check how discord sends the data and appearantly will be the thing we update the roles with?!
-    console.log(data);
-});
-
 dcclient.on("site",(req,res)=>{
     res.send(landingPage());
 });
 
 dcclient.on("db",(req,res)=>{
     if(req.params.id === undefined) {
-        res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0 0 0;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
+        return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     } else {
         const dID = decrypt(process.env.argosIdPassword as string,req.params.id);
         if(d2client.DB.has(dID)){
             res.json(d2client.DB.get(dID));
         } else {
-            res.send(`<body><style>body {background-color: #111; color: #FFF; padding: 140px 0 0 0;}h1 { background-color: rgba(256,256,256,.03); background-image: -webkit-linear-gradient(top, #111, #0c0c0c); background-image: -moz-linear-gradient(top, #111, #0c0c0c); background-image: -ms-linear-gradient(top, #111, #0c0c0c); background-image: -o-linear-gradient(top, #111, #0c0c0c); font-size: 2em; font-family: 'Amethysta', serif; text-align: center; line-height: 1.4em; text-transform: uppercase; letter-spacing: .3em; white-space:nowrap;}span { color: #000; font-family: 'Caesar Dressing', cursive; font-size: 5em; text-transform: lowercase; vertical-align: middle; letter-spacing: .2em;}.fire { animation: animation 1s ease-in-out infinite alternate; -moz-animation: animation 1s ease-in-out infinite alternate; -webkit-animation: animation 1s ease-in-out infinite alternate; -o-animation: animation 1s ease-in-out infinite alternate;}.burn { animation: animation .65s ease-in-out infinite alternate; -moz-animation: animation .65s ease-in-out infinite alternate; -webkit-animation: animation .65s ease-in-out infinite alternate; -o-animation: animation .65s ease-in-out infinite alternate;}@keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-moz-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-webkit-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}@-o-keyframes animation{0% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #feec85, -20px -20px 40px #ffae34, 20px -40px 50px #ec760c, -20px -60px 60px #cd4606, 0 -80px 70px #973716, 10px -90px 80px #451b0e;}100% {text-shadow: 0 0 20px #fefcc9, 10px -10px 30px #fefcc9, -20px -20px 40px #feec85, 22px -42px 60px #ffae34, -22px -58px 50px #ec760c, 0 -82px 80px #cd4606, 10px -90px 80px #973716;}}</style><link href='https://fonts.googleapis.com/css?family=Amethysta' rel='stylesheet' type='text/css'><link href='https://fonts.googleapis.com/css?family=Caesar+Dressing' rel='stylesheet' type='text/css'><h1><span class="fire">U</span><span class="burn">n</span><span class="burn">a</span><span class="burn">u</span><span class="burn">t</span><span class="burn">h</span><span class="burn">o</span><span class="burn">r</span><span class="burn">i</span><span class="burn">z</span><span class="burn">e</span><span class="fire">d</span></h1><br><br><h1>[ Error code: 871 ]<br>This incident will be reported.</h1></body>`);
+            return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
         }
     }
 });
 
 dcclient.on("authorization", (req, res) => {
-    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") return res.send("ERROR: No registration code found.");
+    if(req.url.split("?").length < 2){
+        return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
+    }
+    if(req.url.split("?")[1].split("=").length !== 2 || req.url.split("?")[1].split("=")[0] !== "code") {
+        return res.redirect(`/error?message=
+            Destiny 2 oAuth2 Code Error. Please try again.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
+    }
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&state=${req.url.split("=")[1]}&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections`)
 });
 
@@ -122,22 +147,42 @@ dcclient.on("oauthPreload",(req,res)=>{
 });
 
 dcclient.on("oauth", (req,res)=>{
-    if(req.url.split("?").length < 2){return res.send("You should not be here on your own.");}
+    if(req.url.split("?").length < 2){
+        return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
+    }
     let urlData: {code: string | undefined, state: string | undefined, error: string | undefined, error_description: string | undefined} = {code: undefined, state: undefined, error: undefined, error_description: undefined};
     req.url.split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
     if(urlData.code === undefined || urlData.state === undefined){
         if(urlData.error && urlData.error_description){
-            return res.send(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
+            console.log(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
+            return res.redirect(`/error?message=
+                Faulty Discord oAuth Token Exchange. Please try again.
+                            
+                \\n
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Splicer`);
         } else if(urlData.state === undefined) {
-            GetDiscordOauthExchange(urlData.code).then(dcdata => {
-                d2client.DB.set(dcdata.user.id,dcdata.user,"discordUser");
-                d2client.DB.set(dcdata.user.id,dcdata.tokens,"discordTokens");
-                return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcdata.user.id)).redirect("/panel");
+            d2client.discordTokens.discordOauthExchange(urlData.code).then(dcuser => {
+                d2client.DB.set(dcuser.id,dcuser,"discordUser");
+                return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcuser.id)).redirect("/panel");
             }).catch(e => {
-                return res.send(e.message);
+                console.log(e);
+                return res.redirect(`/error?message=
+                Faulty Discord oAuth Token Exchange. Please try again.
+                            
+                \\n
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Splicer
+                &button=register`);
             });
         } else {
-            return res.send("You should not be here on your own.");
+            return res.redirect(`/error?message=
+            Turn back now... Darkness is too strong in here.
+                                        
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
         }
     } else {
         const discordCode = urlData.code;
@@ -146,16 +191,36 @@ dcclient.on("oauth", (req,res)=>{
     }
 });
 
+dcclient.on("undefined", (req,res)=>{
+    return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
+});
+
 dcclient.on("register",(req, res)=>{
     if(req.params.account === undefined || req.cookies["conflux"] === undefined){
-        return res.send("You should not be here on your own.");
+        return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     const account = decrypt(process.env.argosRegisterPassword as string,req.params.account).split("/seraph/");
     const discordID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
-    if(account.length !== 2) return res.send("You should not be here on your own.");
+    if(account.length !== 2) return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     //Account 0 = type
     //Account 1 = id
-    if(!d2client.DB.has(discordID)) return res.send("You shouldn't be here on your own.");
+    if(!d2client.DB.has(discordID)) return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     let dbUser = d2client.DB.get(discordID);
     dbUser["destinyId"] = account[1];
     dbUser["membershipType"] = account[0];
@@ -184,24 +249,50 @@ dcclient.on("panel",(req,res)=>{
     }
     if(d2client.DB.has(discID)){
         d2client.dbUserUpdater.updateStats(discID).then((data)=>{
-            GetDiscordInformation(d2client,discID).then(dcuser => {
+            if(data.destinyId === undefined || data.membershipType === undefined) {
+                return res.redirect(`/error?message=
+                Destiny 2 oAuth2 Code Error. Please try again.
+                                        
+                \\n
+                For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
+            }
+            d2client.discordTokens.getDiscordInformation(discID).then(dcuser => {
                 getPanelPage(d2client, discID, data, dcuser).then(resp => {
                     res.send(resp);
                 }).catch(e => {
-                    res.send(e);
+                    console.log(e);
+                    res.redirect(`/error?message=
+                    Panel could not be loaded.
+                            
+                    \\n
+                    For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
                 });
             }).catch(e => {
                 getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
                     res.send(resp);
                 }).catch(e => {
-                    res.send(e);
+                    console.log(e);
+                    res.redirect(`/error?message=
+                    Panel could not be loaded.
+                            
+                    \\n
+                    For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
                 });
             });
         });
     } else {
-        res.redirect("/");
+        res.redirect(`/error?message=
+        Could not find user registration, please make sure you have registered to Argos.
+        
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Oracle
+        &button=Register`);
     }
 });
+
+dcclient.on("getError",(req,res)=>{
+    res.send(getErrorPage(req.query.message.split("\\n"), req.query.button))
+})
 
 dcclient.on("logout",(req,res)=>{
     res.clearCookie("conflux").send(logout());
@@ -209,26 +300,95 @@ dcclient.on("logout",(req,res)=>{
 
 dcclient.on("resource",(req, res)=>{
     if(req.params.resourceName === undefined){
-        return res.send("You should not be here on your own.");
+        return res.redirect(`/error?message=
+        Turn back now... Darkness is too strong in here.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     const resources = readdirSync("./html");
     if(resources.includes(req.params.resourceName)){
         res.sendFile(`${__dirname}/html/${req.params.resourceName}`);
     } else {
-        res.status(404).send(`${req.params.resourceName} resource doesn't exist.`);
+        return res.redirect(`/error?message=
+        Resource ${req.params.resourceName} does not exist.
+                            
+        \\n
+        For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Atheon`);
     }
 });
 
 dcclient.on("ready", async ()=>{
     commands = await load();
     console.log(`BungoAPIShits http://localhost:${dcclient.port}/`);
-    setInterval(()=>{
-        console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
-        updateStatRoles(dcclient,d2client);
+    setInterval(async ()=>{
+        console.log(`Time: ${new Date().toUTCString()}`);
+        console.log("Updating clanmember list.");
+        await updateClanMembers(d2client);
+        console.log("Updating statroles");
+        await updateStatRoles(dcclient,d2client);
         console.log("Checking clan requests.");
-        fetchPendingClanRequests(dcclient,d2client);
+        await fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
+    //XUR Embed timers while Argos running.
+    const createXur = cron.schedule("5 17 * * 5", ()=>{
+        generateXurEmbed();
+    }, {timezone: "etc/UTC"});
+    const deleteXur = cron.schedule("5 17 * * 2", ()=>{
+        deleteXurEmbed();
+    }, {timezone: "etc/UTC"});
+    createXur.start();
+    deleteXur.start();
+    //XUR Embed checking on Argos startup.
+    const now = new Date();
+    //0 = Sun
+    if(now.getDay() !== 3 && now.getDay() !== 4){
+        //Day is Fri-Tue
+        if(now.getDay() === 2){
+            //Tue
+            if(now.getUTCHours() >= 17){
+                deleteXurEmbed();
+            } else {
+                generateXurEmbed();
+            }
+        } else if(now.getDay() === 5){
+            //Fri
+            if(now.getUTCHours() < 17){
+                deleteXurEmbed();
+            } else {
+                generateXurEmbed();
+            }
+        } else {
+            generateXurEmbed();
+        }
+    } else {
+        deleteXurEmbed();
+    }
 });
+
+function deleteXurEmbed(){
+    if(d2client.miscDB.has("xurEmbed")){
+        console.log(`Deleting XUR embed and emojies: ${new Date().toISOString()}`);
+        d2client.miscDB.delete("xurEmbed");
+        dcclient.getEmoji("990974785674674187").then((emojies) => {
+            return !(emojies instanceof Emoji) ? emojies.forEach(emoji => {
+                dcclient.removeEmoji("990974785674674187", emoji.id);
+            }) : dcclient.removeEmoji("990974785674674187", emojies.id);
+        });
+    }
+}
+
+function generateXurEmbed(){
+    if(!(d2client.miscDB.has("xurEmbed"))){
+        console.log(`Generating XUR embed: ${new Date().toISOString()}`);
+        getXurEmbed(d2client, dcclient).then(x => {
+            console.log("XUR embed saved.");
+            d2client.miscDB.set("xurEmbed",x);
+        });
+    } else {
+        console.log("XUR embed exists.");
+    }
+}
 
 dcclient.login();
 
@@ -251,7 +411,7 @@ function updateCmds(){
             options: [
                 {
                     name: "name",
-                    type: 3,
+                    type: ApplicationCommandOptionType.String,
                     description: "Name of the leaderboard.",
                     required: true,
                     autocomplete: true
@@ -263,7 +423,7 @@ function updateCmds(){
             options: [
                 {
                     name: "activity",
-                    type: 3,
+                    type: ApplicationCommandOptionType.String,
                     description: "Please select the activity from the list below.",
                     required: true,
                     autocomplete: true
@@ -274,51 +434,89 @@ function updateCmds(){
             description: "Get Destiny 2 statistics of yourself or the requested user.",
             options: [
                 {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "summary",
                     description: "Requested user's general statistics Argos monitors.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "raids",
                     description: "Requested user's raid completions per raid.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "dungeons",
                     description: "Requested user's dungeon completions per dungeon.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
                         }
                     ]
                 }, {
-                    type: 1,
+                    type: ApplicationCommandOptionType.SubCommand,
                     name: "grandmasters",
                     description: "Requested user's Grandmaster Nightfall completions per Grandmaster Nightfall.",
                     options: [
                         {
-                            type: 6,
+                            type: ApplicationCommandOptionType.User,
                             name: "user",
                             description: "The Discord user whose stats you wish to request.",
                             required: false
+                        }
+                    ]
+                }
+            ]
+        }, {
+            name: "lfg",
+            description: "Access LFG commands.",
+            options: [
+                {
+                    name: "create",
+                    description: "Create an LFG.",
+                    type: ApplicationCommandOptionType.SubCommand,
+                    options: [
+                        {
+                            name: "type",
+                            description: "Type of an activity to create an LFG for.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
+                        }, {
+                            name: "activity",
+                            description: "The activity to create an LFG for.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
+                        }
+                    ]
+                }, {
+                    name: "timezone",
+                    description: "Set your timezone for LFG.",
+                    type: ApplicationCommandOptionType.SubCommand,
+                    options: [
+                        {
+                            name: "set",
+                            description: "Set your timezone for LFG.",
+                            type: ApplicationCommandOptionType.String,
+                            autocomplete: true,
+                            required: true
                         }
                     ]
                 }

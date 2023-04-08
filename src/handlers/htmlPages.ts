@@ -102,7 +102,8 @@ export function getPanelPage(d2client, ID, d, discordUser) {
     </div>`});
         ans += "</div>";
         ans += `<div id="completions">`;
-        ans += `<div class="completionDiv">`;
+        if (DBData.raids["Total"] != 0) {
+            ans += `<div class="completionDiv">`;
         ans += `<div class="completionTitle">
                      <h4><b><u>Raid completions</u></b></h4>
                 </div>`;
@@ -127,55 +128,58 @@ export function getPanelPage(d2client, ID, d, discordUser) {
             }
         });
         ans += "</div> </div>";
-        ans += `<div class="completionDiv">`;
-        ans += `<div class="completionTitle">
-                     <h4><b><u>Dungeon completions</u></b></h4>
-                </div>`;
-        ans += `<div class="completionTotal">
-                     <b>Total: ${DBData.dungeons["Total"]}</b>
-                </div>
-                <div class="completionGrid">`
-    const dungeons = sortActivities(DBData.dungeons);
-    Object.keys(dungeons).forEach(dungeon => {
-            if (DBData.dungeons[dungeon] !== 0 && dungeon !== "Total") {
-                ans += `<div>
-                        <b>${dungeon}</b>
-                        <div class="tooltipContainer">${dungeons[dungeon].length === 1 ? `${DBData.dungeons[dungeon]}` : `${DBData.dungeons[dungeon]}*`}
-                            ${ dungeons[dungeon].length === 1 ? `<div></div>` :
-                                `<div class="tooltiptext">
-                                    <p>Normal: ${dungeons[dungeon][0] - dungeons[dungeon][2]}</p>
-                                    <p>${dungeons[dungeon][1]}: ${dungeons[dungeon][2]}</p>
-                        </div>`
-                    }
-                </div>
-            </div>`
-            }
-        });
-        ans += "</div> </div>";
-        ans += `<div class="completionDiv">`;
-        ans += `<div class="completionTitle">
-                     <h4><b><u>Grandmaster completions</u></b></h4>
-                </div>`;
-        ans += `<div class="completionTotal">
-                     <b>Total: ${DBData.grandmasters["Total"]}</b>
-                </div>
-                <div class="completionGrid">`
-    const gms = sortActivities(DBData.grandmasters);
-    Object.keys(gms).forEach(gm => {
-            if (DBData.grandmasters[gm] !== 0 && gm !== "Total") {
-                ans += `
-                        <div>
-                            <b>${gm}</b>
-                            <div class="tooltipContainer">${DBData.grandmasters[gm]}
-                                <div></div>
-                            </div>
-                        </div>`
-            }
-        });
-        ans += `
-        </div> </div>`;
+        } if (DBData.dungeons["Total"] != 0) {
+            ans += `<div class="completionDiv">`;
+            ans += `<div class="completionTitle">
+                         <h4><b><u>Dungeon completions</u></b></h4>
+                    </div>`;
+            ans += `<div class="completionTotal">
+                         <b>Total: ${DBData.dungeons["Total"]}</b>
+                    </div>
+                    <div class="completionGrid">`
+        const dungeons = sortActivities(DBData.dungeons);
+        Object.keys(dungeons).forEach(dungeon => {
+                if (DBData.dungeons[dungeon] !== 0 && dungeon !== "Total") {
+                    ans += `<div>
+                            <b>${dungeon}</b>
+                            <div class="tooltipContainer">${dungeons[dungeon].length === 1 ? `${DBData.dungeons[dungeon]}` : `${DBData.dungeons[dungeon]}*`}
+                                ${ dungeons[dungeon].length === 1 ? `<div></div>` :
+                                    `<div class="tooltiptext">
+                                        <p>Normal: ${dungeons[dungeon][0] - dungeons[dungeon][2]}</p>
+                                        <p>${dungeons[dungeon][1]}: ${dungeons[dungeon][2]}</p>
+                            </div>`
+                        }
+                    </div>
+                </div>`
+                }
+            });
+            ans += "</div> </div>";
+        } if (DBData.grandmasters["Total"] != 0) {
+            ans += `<div class="completionDiv">`;
+            ans += `<div class="completionTitle">
+                        <h4><b><u>Grandmaster completions</u></b></h4>
+                    </div>`;
+            ans += `<div class="completionTotal">
+                        <b>Total: ${DBData.grandmasters["Total"]}</b>
+                    </div>
+                    <div class="completionGrid">`
+        const gms = sortActivities(DBData.grandmasters);
+        Object.keys(gms).forEach(gm => {
+                if (DBData.grandmasters[gm] !== 0 && gm !== "Total") {
+                    ans += `
+                            <div>
+                                <b>${gm}</b>
+                                <div class="tooltipContainer">${DBData.grandmasters[gm]}
+                                    <div></div>
+                                </div>
+                            </div>`
+                }
+            });
+            ans += `
+            </div> </div>
+            </div>`;
+        }
         ans += `</div>
-    </div>
     </body></html>`;
         res(ans);
     });
@@ -308,8 +312,72 @@ export function logout(){
         <p>Logged out, redirecting...</p>
         <script>
         setTimeout(()=>{
-            window.location = "/panel";
+            window.location = "/";
         },2000);
         </script>
     </body></html>`;
+}
+
+export function getErrorPage(errorDetails: string[], button: string) {
+    const links = {
+        Register: "http://register.venerity.xyz"
+    }
+    let res = `<!DOCTYPE html>
+    <head>
+        <title>Error</title>
+        <link rel="stylesheet" href="/resource/error.css">
+    </head>
+    <html>
+    <body>
+    
+    <div class="container">
+        <div class="extraShadow1"></div>
+        <div class="extraShadow2"></div>
+        <div class="borderContainer">
+            <div class="border">
+                <div class="straight"></div>
+                <div class="dot"></div>
+                <div class="circleShadow"></div>
+            </div>
+        </div>
+        <div class="ErrorContainer1">
+            <div class="ErrorContainer2">
+                <div class="ErrorMessage">
+                    <h1>ERROR</h1>
+                </div>
+                <div class="ErrorContents">
+                    <div class="ErrorContents2">`
+    errorDetails.forEach(e => {
+        res += `
+<p>${e}</p>`
+    })
+    res += `
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>`
+    res += `
+    <div class="buttonContainer">
+    <button onclick="window.location.href='${links[button] ?? "/"}';">
+        Enter
+    </button>
+    <h4 onclick="window.location.href='${links[button] ?? "/"}';">
+        ${button ?? "Retry"}
+    </h4>
+    </div>` 
+
+    res += `
+    <script>
+        addEventListener(document, "keypress", (e)=>{
+            e = e || window.event;
+            if(e.keyCode === 13){
+                console.log("enter!")
+                window.location.href = links[button] ?? "/";
+            }
+        });
+    </script>
+    </body>
+    </html>    `
+    return res;
 }

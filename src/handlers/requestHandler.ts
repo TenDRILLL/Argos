@@ -10,6 +10,8 @@ import {LinkedProfileResponse} from "../props/linkedProfileResponse";
 import {DBUserUpdater} from "./dbUserUpdater";
 import {statRoles} from "../enums/statRoles";
 import {DBUser} from "../props/dbUser";
+import DiscordTokens from "./discordTokens";
+import LFGManager from "./lfgManager";
 
 export class requestHandler {
     private apiKey: string;
@@ -18,18 +20,24 @@ export class requestHandler {
     public dbUserUpdater: DBUserUpdater;
     public DB;
     public entityDB;
+    public miscDB;
     public activityIdentifierDB;
+    public lfgmanager;
     public adminuserID: string;
+    public discordTokens: DiscordTokens;
 
-    constructor(){
+    constructor(dcclient){
         this.apiKey = process.env.apikey as string;
         this.secret = process.env.apisecret as string;
         this.clientID = "37090";
         this.DB = new enmap({name:"users"});
+        this.miscDB = new enmap({name:"misc"})
         this.dbUserUpdater = new DBUserUpdater(this);
         this.entityDB = new enmap({name: "entities"});
         this.activityIdentifierDB = new enmap({name: "activityIdentifiers"});
+        this.lfgmanager = new LFGManager(this,dcclient);
         this.adminuserID = process.env.apiadminuserID as string;
+        this.discordTokens = new DiscordTokens();
     }
 
     async rawRequest(url): Promise<JSON>{
@@ -79,7 +87,8 @@ export class requestHandler {
                             res(response);
                         }
                     }).catch(e => {
-                    rej(`${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
+                        console.log(e);
+                    rej(`${e.response.status} ${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
                 });
             }
         });
@@ -150,7 +159,7 @@ export class requestHandler {
 
 
     async handleRegistration(interaction){
-        const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1045354080794595339", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}, "", "", {name: "EpicGames", id: "1048534129500770365", animated:false}];
+        const emoji = ["", {name: "Xbox", id: "1045358581316321280", animated:false}, {name: "PlayStation", id: "1057027325809672192", animated:false}, {name: "Steam", id: "1045354053087006800", animated:false}, "", "", {name: "EpicGames", id: "1048534129500770365", animated:false}];
         const style = ["",3,1,2,"","",1];
         await interaction.defer({flags: 64});
         const code = interaction.data.options[0].value;

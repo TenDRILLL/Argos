@@ -13,7 +13,7 @@ export class entityQuery{
     displaySource: string;
     action: Object[];
     inventory: inventory;
-    stats: Object[];
+    stats: entityStats;
     equippingBlock: {
         uniqueLabel: string;
         uniqueLabelHash: number;
@@ -29,7 +29,7 @@ export class entityQuery{
     quality: Object[];
     acquireRewardSiteHash: number;
     acquireUnlockHash: number;
-    sockets: Object[];
+    sockets: socket;
     talentGrid: Object[];
     investmentStats: Object[];
     perks: [];
@@ -56,6 +56,45 @@ export class entityQuery{
     index: number;
     redacted: boolean;
     blacklisted: boolean;
+}
+
+export class entityStats {
+    disablePrimaryStatDisplay: boolean;
+    statGroupHash: number;
+    stats: {
+        [key: number]: {
+            statHash: number;
+            value: number;
+            minimum: number;
+            maximum: number;
+            displayMaximum: number | null;
+        }
+    }
+    hasDisplayableStats: boolean;
+    primaryBaseStatHash: number;
+}
+
+export class socket {
+    detail: string;
+    socketEntries: socketEntry[];
+    intrinsicSockets: intrinsicSocket[];
+    socketCategories: socketCategory[];
+}
+
+export class socketEntry {
+    socketCategoryHash: number;
+    socketIndexes: number[];
+}
+
+export class intrinsicSocket {
+    plugItemHash: number;
+    socketTypeHash: number;
+    defaultVisible: boolean;
+}
+
+export class socketCategory {
+    socketCategoryHash: number;
+    socketIndexes: number[];
 }
 
 export class inventory {

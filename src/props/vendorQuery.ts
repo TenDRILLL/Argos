@@ -4,14 +4,60 @@ export class vendorQuery {
         privacy: number;
         disabled: boolean;
     }
-    categories: Object;
+    categories: {
+        data: {
+            categories: vendorCategories[]
+        };
+        privacy: number;
+        disabled: boolean;
+    }
     sales: {
         data: vendorSaleComponent[];
         privary; number;
         disabled; boolean;
     };
-    itemComponents: Object;
+    itemComponents: {
+        instances: {
+            data: [string: Object][];
+            privacy: number;
+        }
+        sockets: {
+            data: itemComponentSocket;
+            
+            privacy: number;
+            disabled: boolean;
+        }
+        stats: {
+            data: {
+                [key: string]: {
+                    stats: {
+                        [key: string]: {
+                            statHash: number;
+                            value: number;
+                        }
+                    }
+                }
+            }
+            privacy: number;
+        }
+    }
     currencyLookups: Object;
+}
+
+export class itemComponentSocket {
+    sockets: socketComponents[];
+}
+
+export class socketComponents {
+    plugHash: number;
+    isEnabled: boolean;
+    isVisible: boolean;
+    enableFailIndexes: number[];
+}
+
+export class vendorCategories {
+    displayCategoryIndex: number;
+    itemIndexes: number[];
 }
 
 export class vendorComponent {
@@ -38,8 +84,4 @@ export class vendorSaleComponent {
     costs: Object[];
     overrideNextRefreshDate: string;
     apiPurchasable: boolean;
-}
-
-export class vendorInformation {
-    
 }

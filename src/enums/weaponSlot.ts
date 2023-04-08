@@ -5,4 +5,9 @@ export class WeaponSlot {
     static 1498876634 = "Kinetic";
     static 2465295065 = "Special";
     static 953998645 = "Heavy";
+    static weapons = [
+        1498876634,
+        2465295065,
+        953998645
+    ]
 }

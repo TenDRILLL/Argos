@@ -1,4 +1,5 @@
 import {ActivityChallenge, ActivityModifier, ActivityInsertionPoint, RewardItem} from "./activity";
+import { entityQuery } from "./entityQuery";
 export class ManifestQuery {
     version: string;
     mobileAssetContentPath: string;
@@ -61,6 +62,10 @@ export class ManifestQuery {
 
 export class RawManifestQuery {
     [key: string]: Object;
+}
+
+export class RawEntityQuery {
+    [key: string]: entityQuery;
 }
 
 export class ManifestActivityQuery {

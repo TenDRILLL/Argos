@@ -16,7 +16,7 @@ export class DBUserUpdater {
             this.d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
                 const resp = d.Response as CharacterQuery;
                 const stats: Stats = {
-                    kd: resp.mergedAllCharacters.results.allPvP.allTime.killsDeathsRatio.basic.value,
+                    kd: resp.mergedAllCharacters.results.allPvP?.allTime?.killsDeathsRatio?.basic.value ?? 0,
                     light: resp.mergedAllCharacters.merged.allTime.highestLightLevel.basic.value
                 };
                 const promises: Promise<Object>[] = [];
@@ -27,7 +27,7 @@ export class DBUserUpdater {
                             let activityIds = {0: {"Total": 0}, 1: {"Total": 0}, 2: {"Total": 0}};
                             for (let [key, data] of this.d2client.activityIdentifierDB) {
                                 const IDs = data["IDs"];
-                                const type = data["type"]; // 0 raids, 1 GMS, 2 dungeons
+                                const type = data["type"]; // 0 raids, 1 dungeons, 2 GMS
                                 const difficultName = data["difficultName"];
                                 const difficultIDs = data["difficultIDs"];
                                 activityIds[type][key] = 0;
@@ -70,7 +70,7 @@ export class DBUserUpdater {
                     this.d2client.DB.set(userid, dbUser);
                     res(dbUser);
                 }).catch(e => console.log(2));
-            }).catch(e => console.log(3));
+            }).catch(e => console.log(e));
         });
     }
 
@@ -79,7 +79,7 @@ export class DBUserUpdater {
             this.d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: partialUser.destinyId, membershipType: partialUser.membershipType}).then(d => {
                 const resp = d.Response as CharacterQuery;
                 const stats: Stats = {
-                    kd: resp.mergedAllCharacters.results.allPvP.allTime.killsDeathsRatio.basic.value,
+                    kd: resp.mergedAllCharacters.results.allPvP?.allTime?.killsDeathsRatio?.basic.value ?? 0,
                     light: resp.mergedAllCharacters.merged.allTime.highestLightLevel.basic.value
                 };
                 const promises: Promise<Object>[] = [];

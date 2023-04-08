@@ -3,11 +3,13 @@ export class DBUser {
     destinyId: string;
     destinyName: string;
     membershipType: number;
+    inClan: string;
     stats: Stats;
     raids: ActivityObject;
     dungeons: ActivityObject;
     grandmasters: ActivityObject;
     roles: string[];
+    timezone: string;
     tokens: {
         accessToken: string;
         accessExpiry: number;
