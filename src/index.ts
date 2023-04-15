@@ -3,19 +3,16 @@ import cookieParser from "cookie-parser";
 import "dotenv/config";
 import {requestHandler} from "./handlers/requestHandler";
 import {ApplicationCommandOptionType, Client, Emoji} from "discord-http-interactions";
-import {
-    fetchPendingClanRequests,
-    newRegistration,
-    updateStatRoles,
-    decrypt,
-    updateStatRolesUser,
-    crypt, getXurEmbed
-} from "./handlers/utils";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
 import {getErrorPage, getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
 import * as cron from "node-cron";
+import { crypt, decrypt } from "./utils/crypt";
+import { newRegistration } from "./utils/newRegistration";
+import { fetchPendingClanRequests } from "./utils/fetchPendingClanRequests";
+import { getXurEmbed } from "./utils/getXurEmbed";
+import { instantiateActivityDatabase, updateActivityIdentifierDB } from "./utils/updateActivityIdentifierDB";
 
 let commands;
 const dcclient = new Client({
@@ -233,7 +230,7 @@ dcclient.on("register",(req, res)=>{
         //@ts-ignore
         dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
     });
-    updateStatRolesUser(dcclient,d2client,discordID);
+    d2client.dbUserUpdater.updateUserRoles(dcclient,d2client,discordID);
 });
 
 dcclient.on("panelPreload",(req,res)=>{
@@ -289,7 +286,7 @@ dcclient.on("panel",(req,res)=>{
 });
 
 dcclient.on("getError",(req,res)=>{
-    res.send(getErrorPage(req.query.message.split("\\n"), req.query.button))
+    res.send(getErrorPage(req.query.message.split("\\n"), req.query.button ?? "Register"))
 })
 
 dcclient.on("logout",(req,res)=>{
@@ -304,9 +301,9 @@ dcclient.on("resource",(req, res)=>{
         \\n
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
-    const resources = readdirSync("./html");
+    const resources = readdirSync("./html/styles");
     if(resources.includes(req.params.resourceName)){
-        res.sendFile(`${__dirname}/html/${req.params.resourceName}`);
+        res.sendFile(`${__dirname}/html/styles/${req.params.resourceName}`);
     } else {
         return res.redirect(`/error?message=
         Resource ${req.params.resourceName} does not exist.
@@ -321,7 +318,7 @@ dcclient.on("ready", async ()=>{
     console.log(`BungoAPIShits http://localhost:${dcclient.port}/`);
     setInterval(()=>{
         console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
-        updateStatRoles(dcclient,d2client);
+        d2client.dbUserUpdater.updateAllUserRoles(dcclient,d2client);
         console.log("Checking clan requests.");
         fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
@@ -383,6 +380,11 @@ function generateXurEmbed(){
     } else {
         console.log("XUR embed exists.");
     }
+}
+
+if (d2client.activityIdentifierDB.size == 0) { //In case activityIdentifierDB is empty
+    instantiateActivityDatabase(d2client);
+    updateActivityIdentifierDB(d2client);
 }
 
 dcclient.login();

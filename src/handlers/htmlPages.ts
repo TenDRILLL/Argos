@@ -2,8 +2,9 @@ import { APIResponse } from "../props/apiResponse";
 import { characterInventoryQuery, CharacterQuery } from "../props/characterQuery";
 import { DBUser } from "../props/dbUser";
 import { RawManifestQuery } from "../props/manifest";
-import { crypt, sortActivities} from "./utils";
 import "dotenv/config";
+import { sortActivities } from "../utils/sortActivities";
+import { crypt } from "../utils/crypt";
 
 export function getPanelPage(d2client, ID, d, discordUser) {
     return new Promise(async (res,rej)=>{
@@ -28,8 +29,8 @@ export function getPanelPage(d2client, ID, d, discordUser) {
         <meta content="https://cdn.discordapp.com/attachments/1045010061799460864/1062832377262526535/crotalogo.jpg" property="og:image" />
         <meta content="#ae27ff" data-react-helmet="true" name="theme-color" />
         <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/resource/panel.css">
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/resource/panel.css">
         <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
         <title>Venerity</title>
     </head>
@@ -196,7 +197,7 @@ export function choosePlatformhtml(platforms) {
         <head>
             <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
             <title>Venerity</title>
-            <link rel="stylesheet" href="/resource/choosePlatform.css">
+            <link rel="stylesheet" type="text/css" href="/resource/choosePlatform.css">
         </head>
         <body>
         <ul><h1>Choose a platform to use</h1><div class="container">`;
@@ -283,16 +284,17 @@ export function getPreload(url){
 }
 
 export function landingPage(){
+    const redirectUrl = "localhost:11542"; //api.venerity.xyz
     return `<!DOCTYPE html>
     <html lang="en">
     <head>
         <title>Venerity</title>
-        <link rel="stylesheet" href="/resource/landing.css">
+        <link rel="stylesheet" type="text/css" href="/resource/landing.css">
         <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
     </head>
     <body>
         <h1>Venerity</h1>
-        <a class="btn blurple" id="login-link" href="https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&redirect_uri=https%3A%2F%2Fapi.venerity.xyz%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections">Login with Discord</a>
+        <a class="btn blurple" id="login-link" href="https://discord.com/api/oauth2/authorize?client_id=1045324859586125905&redirect_uri=https%3A%2F%2F${redirectUrl}%2Foauth&response_type=code&scope=identify%20role_connections.write%20connections">Login with Discord</a>
     </body></html>`;
 }
 
@@ -325,7 +327,7 @@ export function getErrorPage(errorDetails: string[], button: string) {
     let res = `<!DOCTYPE html>
     <head>
         <title>Error</title>
-        <link rel="stylesheet" href="/resource/error.css">
+        <link rel="stylesheet" type="text/css" href="/resource/error.css">
     </head>
     <html>
     <body>
@@ -369,11 +371,11 @@ export function getErrorPage(errorDetails: string[], button: string) {
 
     res += `
     <script>
-        addEventListener(document, "keypress", (e)=>{
+        document.addEventListener("keypress", (e)=>{
             e = e || window.event;
             if(e.keyCode === 13){
                 console.log("enter!")
-                window.location.href = links[button] ?? "/";
+                window.location.href = '${links[button] ?? "/"}';
             }
         });
     </script>

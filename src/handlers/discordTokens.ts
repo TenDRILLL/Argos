@@ -42,7 +42,7 @@ export default class DiscordTokens {
             data.append("client_secret",process.env.discordSecret as string);
             data.append("grant_type","authorization_code");
             data.append("code",code);
-            data.append("redirect_uri","https://api.venerity.xyz/oauth");
+            data.append("redirect_uri","http://localhost:11542/oauth"); // https://api.venerity.xyz/oauth
             axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}}).then(x => {
                 const tokens: Tokens = x.data;
                 axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${tokens.token_type} ${tokens.access_token}`}}).then(y => {

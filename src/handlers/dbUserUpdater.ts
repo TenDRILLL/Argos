@@ -1,6 +1,9 @@
 import {DBUser, partialDBUser, Stats} from "../props/dbUser";
 import {CharacterQuery} from "../props/characterQuery";
 import {ActivityQuery} from "../props/activity";
+import axios from "axios";
+import { statRoles } from "../enums/statRoles";
+import { BungieGroupQuery } from "../props/bungieGroupQuery";
 
 export class DBUserUpdater {
     private d2client;
@@ -31,7 +34,7 @@ export class DBUserUpdater {
                                 const difficultName = data["difficultName"];
                                 const difficultIDs = data["difficultIDs"];
                                 activityIds[type][key] = 0;
-                                resp.activities.forEach(a => {                                    
+                                resp.activities.forEach(a => {
                                     if(IDs.includes(a.activityHash)){
                                         activityIds[type][key] += a.values.activityCompletions.basic.value;
                                         activityIds[type]["Total"] += a.values.activityCompletions.basic.value;
@@ -135,6 +138,96 @@ export class DBUserUpdater {
                     });
                 }).catch(e => console.log(2));
             }).catch(e => console.log(3));
+        });
+    }
+
+    async updateAllUserRoles(dcclient,d2client){
+        const memberIds: string[] = Array.from(d2client.DB.keys());
+        for (let i = 0; i < memberIds.length; i += 10) {
+            await this.sleep(i);
+            const ids: string[] = memberIds.slice(i, i + 10);
+            ids.forEach(id => {
+                this.updateUserRoles(dcclient,d2client,id);
+            });
+        }
+    }
+    
+    updateUserRoles(dcclient,d2client,id){
+        d2client.dbUserUpdater.updateStats(id).then(async (dbUser) => {
+            if (!dbUser) {
+                console.log(`NO DB USER FOR - ${id}`);
+                return;
+            }
+            const discordAccessToken = await d2client.discordTokens.getToken(id)
+                .catch(e => console.log(e));
+            if(!discordAccessToken) return console.log(`${id} has no token, please ask them to re-register.`);
+            let tempRaidObj = {};
+            statRoles.raidNames.forEach(e => {
+                tempRaidObj[e.toString()] = dbUser.raids[e.toString()]
+            })
+            let tempArr: string[] = [];
+            let j;
+            Object.keys(statRoles.raids).forEach((key) => { //kingsFall
+                j = tempArr.length;
+                Object.keys(statRoles.raids[key]).forEach(key2 => { //1
+                    if(tempRaidObj[key] >= key2){
+                        tempArr[j] = statRoles.raids[key][key2];
+                    }
+                });
+            });
+            j = tempArr.length;
+            Object.keys(statRoles.kd).map(d => parseInt(d)).sort((a,b) => a-b ).forEach(key => {
+                if(dbUser.stats.kd*10 >= key){
+                    tempArr[j] = statRoles.kd[key];
+                }
+            });
+            j = tempArr.length;
+            Object.keys(statRoles.lightLevel).map(d => parseInt(d)).sort((a,b) => a-b ).forEach(key => {
+                if(dbUser.stats.light >= key){
+                    tempArr[j] = statRoles.lightLevel[key];
+                }
+            });
+            j = tempArr.length;
+            let clanMember = false;
+            let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
+                .catch(e => console.log(4));
+            const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
+            if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
+                clanMember = true;
+            }
+            dcclient.getMember(statRoles.guildID,id).then(async member => {
+                let data: { nick?: string, roles: string[] } = {
+                    roles: []
+                };
+                const d2name = await d2client.getBungieTag(dbUser.bungieId);
+                if(!dbUser.destinyName || dbUser.destinyName !== d2name) dbUser.destinyName = d2name;
+                d2client.DB.set(id,dbUser);
+                const roles = member.roles.sort();
+                data.roles = roles.filter(x => !statRoles.allIDs.includes(x));
+                data.roles = [...data.roles, ...tempArr].sort();
+                if(!(data.roles.length === roles.length && data.roles.every((role, i) => roles[i] === role))){
+                    dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
+                }
+                axios.put(`https://discord.com/api/v10/users/@me/applications/${process.env.discordId}/role-connection`,
+                    {
+                        platform_name: "Destiny 2",
+                        platform_username: d2name,
+                        metadata: {
+                            clanmember: clanMember ? 1 : 0,
+                            visitor: clanMember ? 0 : 1,
+                            raids: dbUser.raids.Total,
+                            dungeons: dbUser.dungeons.Total,
+                            gms: dbUser.grandmasters.Total
+                        }},{headers: {"Authorization": discordAccessToken, "Content-Type": "application/json"}}).catch(e => console.log(e));
+            }).catch(e => {});//Member not on the server.
+        });
+    }
+    
+    sleep(seconds){
+        return new Promise(res => {
+            setTimeout(()=>{
+                res("");
+            },seconds*1000);
         });
     }
 }

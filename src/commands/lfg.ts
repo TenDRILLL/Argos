@@ -1,7 +1,7 @@
 import Command from "./Command";
 import {ActionRow, Button, ButtonStyle, ChannelSelectMenu, Embed, Emoji, MentionableSelectMenu, Modal, RoleSelectMenu, SelectMenuType, StringSelectMenu, TextInput, TextInputStyle} from "discord-http-interactions";
 import spacetime from "spacetime";
-import {timezones} from "../handlers/utils";
+import { timezones } from "../utils/timezones";
 
 export default class LFG extends Command {
     constructor(){
