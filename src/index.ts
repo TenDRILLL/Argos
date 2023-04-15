@@ -316,11 +316,14 @@ dcclient.on("resource",(req, res)=>{
 dcclient.on("ready", async ()=>{
     commands = await load();
     console.log(`BungoAPIShits http://localhost:${dcclient.port}/`);
-    setInterval(()=>{
-        console.log(`Updating statroles, Date: ${new Date().toUTCString()}`);
+    setInterval(async ()=>{
+        console.log(`Time: ${new Date().toUTCString()}`);
+        console.log("Updating clanmember list.");
+        await d2client.dbUserUpdater.updateClanMembers(d2client);
+        console.log("Updating statroles");
         d2client.dbUserUpdater.updateAllUserRoles(dcclient,d2client);
         console.log("Checking clan requests.");
-        fetchPendingClanRequests(dcclient,d2client);
+        await fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
     //XUR Embed timers while Argos running.
     const createXur = cron.schedule("5 17 * * 5", ()=>{

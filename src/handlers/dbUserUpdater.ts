@@ -230,4 +230,17 @@ export class DBUserUpdater {
             },seconds*1000);
         });
     }
+
+    async updateClanMembers(d2client){
+        let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
+            .catch(e => console.log(5));
+        const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
+        const ids = resp.results.map(x => x.bungieNetUserInfo.membershipId);
+        if(ids.length > 0){
+            for (let [key, data] of d2client.DB){
+                data.inClan = ids.includes(data.bungieId) ? statRoles.clanMember : statRoles.justVisiting;
+                d2client.DB.set(key, data);
+            }
+        }
+    }
 }
