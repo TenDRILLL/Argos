@@ -284,7 +284,7 @@ export function getPreload(url){
 }
 
 export function landingPage(){
-    const redirectUrl = "localhost:11542"; //api.venerity.xyz
+    const redirectUrl = "api.venerity.xyz";
     return `<!DOCTYPE html>
     <html lang="en">
     <head>
