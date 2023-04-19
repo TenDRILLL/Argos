@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta content="Venerity panel" property="og:title" />
+        <meta content="https://api.venerity.xyz/api/panel" property="og:url" />
+        <meta content="https://cdn.discordapp.com/attachments/1045010061799460864/1062832377262526535/crotalogo.jpg" property="og:image" />
+        <meta content="#ae27ff" data-react-helmet="true" name="theme-color" />
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/resource/panel.css">
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+        <title>Venerity</title>
+    </head>
+    <body>
+        <nav>
+            <ul>
+                <li class="dc">
+                    <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/<%=data.discordUser.id%>/<%=data.discordUser.avatar%>.png">
+                    <p><%= data.DBData.discordUser.username %>#<%= data.discordUser.discriminator %></p>
+                </li>
+                <li>
+                    <h1 id="heading text">
+                        Welcome, <%= data.DBData.destinyName %>
+                    </h1>
+                </li>
+                <li>
+                    <button onclick="window.location = '/logout'">
+                        <span class="glyphicon glyphicon-log-out" style="margin-right: 3px"></span>
+                        Logout
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <div id="content">
+            <div id="characters">
+                <% data.characters.sort((a,b) => b.character.data.light-a.character.data.light).map(character => { %>
+                    <div class="singleCharacter">
+                        <div class="characterBanner" style="background-image: url(https://www.bungie.net<%=character.character.data.emblemBackgroundPath%>);">
+                            <div style="height: 32px; width:32px; margin: 0 8px; align-self: center; position: relative;"></div>
+                            <div style="display: flex; flex-direction: column; flex: 1;">
+                                <div class="nameAndLightContainer">
+                                    <div class="className"><%=data.classHashes.get(character.character.data.classHash)%></div>
+                                    <div class="lightLevel"><%=character.character.data.light%></div>
+                                </div>
+                                <span class="titleName">
+                                    <%-data.recordDefinitions[character.character.data.titleRecordHash] !== undefined ? data.recordDefinitions[character.character.data.titleRecordHash]["titleInfo"]["titlesByGender"]["Male"] : ""%>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="characterStats">
+                            <div class="statRow">
+                                <div>
+                                    <img src="https://www.bungie.net/common/destiny2_content/icons/e26e0e93a9daf4fdd21bf64eb9246340.png">
+                                    <div><%=character.character.data.stats["2996146975"]%></div>
+                                </div>
+                                <div>
+                                    <img src="https://www.bungie.net/common/destiny2_content/icons/202ecc1c6febeb6b97dafc856e863140.png">
+                                    <div><%=character.character.data.stats["392767087"]%></div>
+                                </div>
+                                <div>
+                                    <img src="https://www.bungie.net/common/destiny2_content/icons/128eee4ee7fc127851ab32eac6ca91cf.png">
+                                    <div><%=character.character.data.stats["1943323491"]%></div>
+                                </div>
+                                <div>
+                                    <img src="https://www.bungie.net/common/destiny2_content/icons/ca62128071dc254fe75891211b98b237.png">
+                                    <div><%=character.character.data.stats["1735777505"]%></div>
+                                </div>
+                                <div>
+                                    <img src="https://www.bungie.net/common/destiny2_content/icons/59732534ce7060dba681d1ba84c055a6.png">
+                                    <div><%=character.character.data.stats["144602215"]%></div>
+                                </div>
+                                <div>
+                                    <img src="https://www.bungie.net/common/destiny2_content/icons/c7eefc8abbaa586eeab79e962a79d6ad.png">
+                                    <div><%=character.character.data.stats["4244567218"]%></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            <div id="completions">
+                <% if (data.DBData.raids["Total"] !== 0) { %>
+                    <div class="completionDiv">
+                        <div class="completionTitle">
+                            <h4><b><u>Raid completions</u></b></h4>
+                        </div>
+                        <div class="completionTotal">
+                            <b>Total: <%=data.DBData.raids["Total"]%></b>
+                        </div>
+                        <div class="completionGrid">
+                            <% Object.keys(data.raids).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(raid => { %>
+                                <div>
+                                    <b><%=raid%></b>
+                                    <div class="tooltipContainer">
+                                        <%=data.raids[raid].length === 1 ? data.DBData.raids[raid] : data.DBData.raids[raid]+"*" %>
+                                        <% if (data.raids[raid].length !== 1) { %>
+                                            <div class="tooltiptext">
+                                                <p>Normal: <%- data.raids[raid][0] - data.raids[raid][2]%></p>
+                                                <p><%=data.raids[raid][1]%>: <%=data.raids[raid][2]%></p>
+                                            </div>
+                                        <% } else { %>
+                                            <div></div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% } %>
+                <% if (data.DBData.dungeons["Total"] !== 0) { %>
+                    <div class="completionDiv">
+                        <div class="completionTitle">
+                            <h4><b><u>Dungeon completions</u></b></h4>
+                        </div>
+                        <div class="completionTotal">
+                            <b>Total: <%=data.DBData.dungeons["Total"]%></b>
+                        </div>
+                        <div class="completionGrid">
+                            <% Object.keys(data.dungeons).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(dungeon => { %>
+                                <div>
+                                    <b><%=dungeon%></b>
+                                    <div class="tooltipContainer">
+                                        <%=data.dungeons[dungeon].length === 1 ? data.DBData.dungeons[dungeon] : data.DBData.dungeons[dungeon]+"*" %>
+                                        <% if (data.dungeons[dungeon].length !== 1) { %>
+                                            <div class="tooltiptext">
+                                                <p>Normal: <%- data.dungeons[dungeon][0] - data.dungeons[dungeon][2]%></p>
+                                                <p><%=data.dungeons[dungeon][1]%>: <%=data.dungeons[dungeon][2]%></p>
+                                            </div>
+                                        <% } else { %>
+                                            <div></div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% } %>
+                <% if (data.DBData.grandmasters["Total"] !== 0) { %>
+                    <div class="completionDiv">
+                        <div class="completionTitle">
+                            <h4><b><u>Grandmaster completions</u></b></h4>
+                        </div>
+                        <div class="completionTotal">
+                            <b>Total: <%=data.DBData.grandmasters["Total"]%></b>
+                        </div>
+                        <div class="completionGrid">
+                            <% Object.keys(data.gms).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(gm => { %>
+                                <div>
+                                    <b><%=gm%></b>
+                                    <div class="tooltipContainer">
+                                        <%=data.gms[gm].length === 1 ? data.DBData.grandmasters[gm] : data.DBData.grandmasters[gm]+"*" %>
+                                        <% if (data.gms[gm].length !== 1) { %>
+                                            <div class="tooltiptext">
+                                                <p>Normal: <%- data.gms[gm][0] - data.gms[gm][2]%></p>
+                                                <p><%=data.gms[gm][1]%>: <%=data.gms[gm][2]%></p>
+                                            </div>
+                                        <% } else { %>
+                                            <div></div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        </div>
+    </body>
+</html>

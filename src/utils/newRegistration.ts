@@ -1,7 +1,6 @@
 import { statRoles } from "../enums/statRoles";
 import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
-import { choosePlatformhtml } from "../handlers/htmlPages";
 import { crypt } from "./crypt";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
@@ -86,9 +85,13 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 },
                                 discordUser: dcuser
                             });
-                            const endResult = choosePlatformhtml(reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}))
+                            const icons = ["", "https://cdn.discordapp.com/emojis/1045358581316321280.webp?size=96&quality=lossless",
+                                            "https://cdn.discordapp.com/emojis/1057027325809672192.webp?size=96&quality=lossless", 
+                                            "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
+                                            "","",
+                                            "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
                             res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
-                                .send(endResult);
+                                .render('choosePlatform.ejs' ,{ profiles: reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}), icons: icons})    
                         }
                     }).catch(e => console.log(e));
                 }).catch(e => console.log(e));

@@ -5,14 +5,15 @@ import {requestHandler} from "./handlers/requestHandler";
 import {ApplicationCommandOptionType, Client, Emoji} from "discord-http-interactions";
 import {statRoles} from "./enums/statRoles";
 import {load} from "./commands/CommandLoader";
-import {getErrorPage, getPanelPage, getPreload, landingPage, logout} from "./handlers/htmlPages";
 import {readdirSync} from "fs";
 import * as cron from "node-cron";
 import { crypt, decrypt } from "./utils/crypt";
 import { newRegistration } from "./utils/newRegistration";
 import { fetchPendingClanRequests } from "./utils/fetchPendingClanRequests";
 import { getXurEmbed } from "./utils/getXurEmbed";
-import { instantiateActivityDatabase, updateActivityIdentifierDB } from "./utils/updateActivityIdentifierDB";
+import { getPanelPageVariables } from "./html/getters/getPanelPageVariables";
+import { updateActivityIdentifierDB } from "./utils/updateActivityIdentifierDB";
+import { instantiateActivityDatabase } from "./utils/updateActivityIdentifierDB";
 
 let commands;
 const dcclient = new Client({
@@ -77,6 +78,7 @@ const d2client = new requestHandler(dcclient);
 dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.urlencoded({ extended: false }));
 dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,bodyParser.json());
 dcclient.app.use(/^\/(?!.*(api\/interaction)).{0,99}/,cookieParser());
+dcclient.app.set('views', './html/pages');
 
 dcclient.on("interaction", interaction => {
     if(commands === undefined) return; //This shouldn't really happen, but there's a slight possibility when the bot is starting.
@@ -95,7 +97,8 @@ dcclient.on("interaction", interaction => {
 });
 
 dcclient.on("site",(req,res)=>{
-    res.send(landingPage());
+    res.render('landingPage.ejs');
+    //res.send(landingPage());
 });
 
 dcclient.on("db",(req,res)=>{
@@ -138,7 +141,8 @@ dcclient.on("authorization", (req, res) => {
 });
 
 dcclient.on("oauthPreload",(req,res)=>{
-    res.send(getPreload(`/api/oauth?${req.url.split("?")[1]}`));
+    res.render('preload.ejs', { url: `/api/oauth?${req.url.split("?")[1]}` })
+    //res.send(getPreload(`/api/oauth?${req.url.split("?")[1]}`));
 });
 
 dcclient.on("oauth", (req,res)=>{
@@ -234,7 +238,7 @@ dcclient.on("register",(req, res)=>{
 });
 
 dcclient.on("panelPreload",(req,res)=>{
-    res.send(getPreload("/api/panel"));
+    res.render('preload.ejs', { url: "/api/panel" })
 });
 
 dcclient.on("panel",(req,res)=>{
@@ -252,9 +256,12 @@ dcclient.on("panel",(req,res)=>{
                 For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Shrieker`);
             }
             d2client.discordTokens.getDiscordInformation(discID).then(dcuser => {
-                getPanelPage(d2client, discID, data, dcuser).then(resp => {
-                    res.send(resp);
-                }).catch(e => {
+                getPanelPageVariables(d2client, discID, data, dcuser).then(resp => {
+                    res.render('panel.ejs', { data: resp })
+                })
+                /*getPanelPage(d2client, discID, data, dcuser).then(resp => {
+                    res.send(resp);})*/
+                .catch(e => {
                     console.log(e);
                     res.redirect(`/error?message=
                     Panel could not be loaded.
@@ -263,9 +270,13 @@ dcclient.on("panel",(req,res)=>{
                     For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
                 });
             }).catch(e => {
-                getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
+                /*getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
                     res.send(resp);
-                }).catch(e => {
+                })*/
+                getPanelPageVariables(d2client, discID, data, data.discordUser).then(resp => {
+                    res.render('panel.ejs', { data: resp })
+                })
+                .catch(e => {
                     console.log(e);
                     res.redirect(`/error?message=
                     Panel could not be loaded.
@@ -286,11 +297,13 @@ dcclient.on("panel",(req,res)=>{
 });
 
 dcclient.on("getError",(req,res)=>{
-    res.send(getErrorPage(req.query.message.split("\\n"), req.query.button ?? "Register"))
+    res.render('errorPage.ejs', { errorDetails: req.query.message.split("\\n"), button: req.query.button });
+    //res.send(getErrorPage(req.query.message.split("\\n"), req.query.button))
 })
 
 dcclient.on("logout",(req,res)=>{
-    res.clearCookie("conflux").send(logout());
+    res.clearCookie("conflux").render('logout.ejs');
+    //res.clearCookie("conflux").send(logout());
 });
 
 dcclient.on("resource",(req, res)=>{
@@ -301,9 +314,12 @@ dcclient.on("resource",(req, res)=>{
         \\n
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
-    const resources = readdirSync("./html/styles");
-    if(resources.includes(req.params.resourceName)){
+    const styles = readdirSync("./html/styles");
+    const scripts = readdirSync("./html/scripts");
+    if(styles.includes(req.params.resourceName)){
         res.sendFile(`${__dirname}/html/styles/${req.params.resourceName}`);
+    } else if (scripts.includes(req.params.resourceName)) {
+        res.sendFile(`${__dirname}/html/scripts/${req.params.resourceName}`);
     } else {
         return res.redirect(`/error?message=
         Resource ${req.params.resourceName} does not exist.
@@ -321,7 +337,7 @@ dcclient.on("ready", async ()=>{
         console.log("Updating clanmember list.");
         await d2client.dbUserUpdater.updateClanMembers(d2client);
         console.log("Updating statroles");
-        d2client.dbUserUpdater.updateAllUserRoles(dcclient,d2client);
+        await d2client.dbUserUpdater.updateAllUserRoles(dcclient,d2client);
         console.log("Checking clan requests.");
         await fetchPendingClanRequests(dcclient,d2client);
     },5*60*1000);
@@ -385,7 +401,7 @@ function generateXurEmbed(){
     }
 }
 
-if (d2client.activityIdentifierDB.size == 0) { //In case activityIdentifierDB is empty
+if (!d2client.DB.length) {
     instantiateActivityDatabase(d2client);
     updateActivityIdentifierDB(d2client);
 }
