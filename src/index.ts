@@ -340,7 +340,7 @@ dcclient.on("ready", async ()=>{
         await d2client.dbUserUpdater.updateAllUserRoles(dcclient,d2client);
         console.log("Checking clan requests.");
         await fetchPendingClanRequests(dcclient,d2client);
-    },5*60*1000);
+    },5*60*1000); // 5
     //XUR Embed timers while Argos running.
     const createXur = cron.schedule("5 17 * * 5", ()=>{
         generateXurEmbed();

@@ -188,13 +188,6 @@ export class DBUserUpdater {
                 }
             });
             j = tempArr.length;
-            let clanMember = false;
-            let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
-                .catch(e => console.log(4));
-            const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
-            if (resp.results.map(x => x.bungieNetUserInfo.membershipId).includes(dbUser.bungieId)) {
-                clanMember = true;
-            }
             dcclient.getMember(statRoles.guildID,id).then(async member => {
                 let data: { nick?: string, roles: string[] } = {
                     roles: []
@@ -205,6 +198,7 @@ export class DBUserUpdater {
                 const roles = member.roles.sort();
                 data.roles = roles.filter(x => !statRoles.allIDs.includes(x));
                 data.roles = [...data.roles, ...tempArr].sort();
+                data.roles.push(dbUser.inClan);
                 if(!(data.roles.length === roles.length && data.roles.every((role, i) => roles[i] === role))){
                     dcclient.setMember(statRoles.guildID,id,data).catch(e => console.log(`Setting member ${id} failed.`));
                 }
@@ -213,8 +207,6 @@ export class DBUserUpdater {
                         platform_name: "Destiny 2",
                         platform_username: d2name,
                         metadata: {
-                            clanmember: clanMember ? 1 : 0,
-                            visitor: clanMember ? 0 : 1,
                             raids: dbUser.raids.Total,
                             dungeons: dbUser.dungeons.Total,
                             gms: dbUser.grandmasters.Total
