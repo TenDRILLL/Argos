@@ -31,8 +31,8 @@ export default class LFGManager {
         console.log(`Deleting timers for: ${id}`);
         if(this.timers.has(id)){
             const cancel = this.timers.get(id);
-            clearTimeout(cancel!.notifytimer);
-            clearTimeout(cancel!.deletetimer);
+            cancel!.notifytimer.clear();
+            cancel!.deletetimer.clear();
             this.timers.delete(id);
         }
     }
