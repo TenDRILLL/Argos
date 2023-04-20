@@ -6,12 +6,14 @@
     <link rel="stylesheet" href="resource/choosePlatform.css">
 </head>
 <body>
-    <ul><h1>Choose a platform to use</h1><div class="container">`;
+    <ul><h1>Choose a platform to use</h1><div class="container">
         <% platforms.forEach((x)=>{%>
+            <% var acc = crypt(argosRegisterPassword, `${x.membershipType}/seraph/${x.membershipId}`) %>
             <div><a href="/register/<%=acc%>">
                 <img src="<%=icons[x.membershipType]%>">
                 <h2><%=x.displayName%></h2>
             </a></div>
+            <% }) %>
     </div> </ul> 
 </body> 
 </html>

@@ -91,7 +91,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                             "","",
                                             "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
                             res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
-                                .render('choosePlatform.ejs' ,{ profiles: reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}), icons: icons})    
+                                .render('choosePlatform.ejs', { platforms: reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}), icons: icons, argosRegisterPassword: process.env.argosRegisterPassword as string, crypt: crypt})    
                         }
                     }).catch(e => console.log(e));
                 }).catch(e => console.log(e));
