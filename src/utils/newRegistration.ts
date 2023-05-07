@@ -44,7 +44,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 //@ts-ignore
                                 dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
                             });
-                            d2client.dbUserUpdater.updateStatRolesUser(dcclient,d2client,dcuser.id);
+                            d2client.dbUserUpdater.updateUserRoles(dcclient,d2client,dcuser.id);
                             return;
                         } else {
                             if(reply2.profiles.length === 1){
@@ -71,7 +71,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     //@ts-ignore
                                     dcclient.setMember(statRoles.guildID,member.user.id,{roles}).catch(e => console.log(e));
                                 });
-                                d2client.dbUserUpdater.updateStatRolesUser(dcclient,d2client,dcuser.id);
+                                d2client.dbUserUpdater.updateUserRoles(dcclient,d2client,dcuser.id);
                                 return;
                             }
                             d2client.DB.set(dcuser.id,{

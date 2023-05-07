@@ -10,6 +10,7 @@ export function getPanelPageVariables(d2client, ID, d, discordUser) {
         const characterResponse = await d2client.apiRequest("getDestinyCharacters", {
             membershipType: DBData.membershipType,
             destinyMembershipId: DBData.destinyId})
+                .catch(e => rej("Failed to get characters"))
         const resp2 = characterResponse.Response as CharacterQuery;
         let promises: Promise<APIResponse>[] = [];
         resp2.characters.filter(character => !character.deleted).forEach(char => {

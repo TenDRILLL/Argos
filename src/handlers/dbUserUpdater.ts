@@ -73,7 +73,7 @@ export class DBUserUpdater {
                     this.d2client.DB.set(userid, dbUser);
                     res(dbUser);
                 }).catch(e => console.log(2));
-            }).catch(e => console.log(e));
+            }).catch(e => console.log(5));
         });
     }
 
@@ -225,7 +225,7 @@ export class DBUserUpdater {
 
     async updateClanMembers(d2client){
         let clanMembers = await d2client.apiRequest("getGroupMembers", {groupId: "3506545" /*Venerity groupID*/})
-            .catch(e => console.log(5));
+            .catch(e => console.log(14));
         const resp = clanMembers.Response as BungieGroupQuery ?? {results: []};
         const ids = resp.results.map(x => x.bungieNetUserInfo.membershipId);
         if(ids.length > 0){
