@@ -154,7 +154,13 @@ dcclient.on("oauth", (req,res)=>{
             For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     let urlData: {code: string | undefined, state: string | undefined, error: string | undefined, error_description: string | undefined} = {code: undefined, state: undefined, error: undefined, error_description: undefined};
-    req.url.replace("amp;", '').split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
+    req.url = req.url
+        .replace(/&amp;/gim,"&")
+        .replace(/&nbsp;/gim,"")
+        .replace(/&quot;/gim,"\"")
+        .replace(/&lt;/gim,"<")
+        .replace(/&gt;/gim,">");
+    req.url.split("?")[1].split("&").forEach(x => {const param = x.split("=");if(param.length === 2 && param[1] !== "") urlData[param[0]] = param[1];});
     if(urlData.code === undefined || urlData.state === undefined){
         if(urlData.error && urlData.error_description){
             console.log(`${urlData.error.toUpperCase()}: ${urlData.error_description.split("+").join(" ")}.`);
