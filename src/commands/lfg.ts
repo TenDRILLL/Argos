@@ -173,7 +173,7 @@ export default class LFG extends Command {
             } else {
                 lfgData.guardians.splice(lfgData.guardians.indexOf(userID),1);
                 if(lfgData.queue.length > 0){
-                    lfgData.guardians.push(lfgData.queue.pop());
+                    lfgData.guardians.push(lfgData.queue.shift());
                     queue.value = lfgData.queue.map(x => d2client.DB.get(x).destinyName).join(", ");
                 } else {
                     buttons[0].setLabel("Join")
