@@ -1,26 +1,55 @@
-const crypt = (salt, text) => {
-    const textToChars = (text) => text.split("").map((c) => c.charCodeAt(0));
-    const byteHex = (n) => ("0" + Number(n).toString(16)).substr(-2);
-    const applySaltToChar = (code) => textToChars(salt).reduce((a, b) => a ^ b, code);
-    if(!salt || !text) return false;
-    return text
-        .split("")
-        .map(textToChars)
-        .map(applySaltToChar)
-        .map(byteHex)
-        .join("");
+import "dotenv/config";
+import {webcrypto} from "node:crypto";
+const crypt = (data) => {
+    return new Promise(async (res, rej) => {
+        const cryptkey = process.env.cryptkey as string;
+        if(!cryptkey) rej("No cryptkey present in env.");
+        const algorithm = {iv: webcrypto.getRandomValues(new Uint8Array(12)), name: "AES-GCM"};
+        const key = await webcrypto.subtle.importKey(
+            "raw",
+            new Uint8Array(atob(cryptkey).split("").map(x => x.charCodeAt(0))),
+            "AES-GCM",
+            false,
+            [
+                "encrypt",
+                "decrypt"
+            ]
+        ).catch(e => rej(e));
+        const cryptedData = await webcrypto.subtle.encrypt(
+            algorithm,
+            key!,
+            new TextEncoder().encode(JSON.stringify(data))
+        ).catch(e => rej(e));
+        const exportData = new Uint8Array(algorithm.iv.byteLength + cryptedData!.byteLength);
+        exportData.set(algorithm.iv);
+        exportData.set(new Uint8Array(cryptedData!), algorithm.iv.byteLength);
+        res(btoa(String.fromCharCode.apply(null, exportData)));
+    });
 };
 
-const decrypt = (salt, encoded) => {
-    if(!salt || !encoded) return false;
-    const textToChars = (text) => text.split("").map((c) => c.charCodeAt(0));
-    const applySaltToChar = (code) => textToChars(salt).reduce((a, b) => a ^ b, code);
-    return encoded
-        .match(/.{1,2}/g)
-        .map((hex) => parseInt(hex, 16))
-        .map(applySaltToChar)
-        .map((charCode) => String.fromCharCode(charCode))
-        .join("");
+const decrypt = (encodedData) => {
+    return new Promise(async (res, rej) => {
+        const cryptkey = process.env.cryptkey as string;
+        if(!cryptkey) rej("No cryptkey present in env.");
+        const algorithm = {iv: encodedData.subarray(0, 12), name: "AES-GCM"};
+        encodedData = encodedData.subarray(12);
+        const key = await webcrypto.subtle.importKey(
+            "raw",
+            new Uint8Array(atob(cryptkey).split("").map(x => x.charCodeAt(0))),
+            "AES-GCM",
+            false,
+            [
+                "encrypt",
+                "decrypt"
+            ]
+        ).catch(e => rej(e));
+        const data = await webcrypto.subtle.decrypt(
+          algorithm,
+          key!,
+          encodedData
+        ).catch(e => rej(e));
+        res(JSON.parse(new TextDecoder().decode(data!)));
+    });
 };
 
 export {crypt, decrypt};
