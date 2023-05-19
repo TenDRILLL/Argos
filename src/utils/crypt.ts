@@ -18,7 +18,7 @@ const crypt = (data) => {
         const cryptedData = await webcrypto.subtle.encrypt(
             algorithm,
             key!,
-            new TextEncoder().encode(JSON.stringify(data))
+            new TextEncoder().encode(data)
         ).catch(e => rej(e));
         const exportData = new Uint8Array(algorithm.iv.byteLength + cryptedData!.byteLength);
         exportData.set(algorithm.iv);
@@ -48,7 +48,7 @@ const decrypt = (encodedData) => {
           key!,
           encodedData
         ).catch(e => rej(e));
-        res(JSON.parse(new TextDecoder().decode(data!)));
+        res(new TextDecoder().decode(data!));
     });
 };
 
