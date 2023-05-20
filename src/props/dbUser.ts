@@ -8,6 +8,7 @@ export class DBUser {
     raids: ActivityObject;
     dungeons: ActivityObject;
     grandmasters: ActivityObject;
+    guardianRank: number;
     roles: string[];
     timezone: string;
     tokens: {
