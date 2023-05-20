@@ -149,9 +149,10 @@ dcclient.on("oauth", (req,res)=>{
                 \\n
                 For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Splicer`);
         } else if(urlData.state === undefined) {
-            d2client.discordTokens.discordOauthExchange(urlData.code).then(dcuser => {
+            d2client.discordTokens.discordOauthExchange(urlData.code).then(async dcuser => {
                 d2client.DB.set(dcuser.id,dcuser,"discordUser");
-                return res.cookie("conflux", crypt(process.env.argosIdPassword as string, dcuser.id)).redirect("/panel");
+                const conflux = await crypt(process.env.argosIdPassword as string, dcuser.id);
+                return res.cookie("conflux", conflux).redirect("/panel");
             }).catch(e => {
                 console.log(e);
                 return res.redirect(`/error?message=

@@ -17,7 +17,7 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                     const reply = profile.Response as BungieProfile;
                     let membershipType;
                     if(reply.steamDisplayName){membershipType = 3} else if(reply.xboxDisplayName){membershipType = 1} else if(reply.psnDisplayName){membershipType = 2} else if(reply.egsDisplayName){membershipType = 6} else {return;}
-                    d2client.apiRequest("getBungieLinkedProfiles",{membershipType, membershipId: id}).then(resp => {
+                    d2client.apiRequest("getBungieLinkedProfiles",{membershipType, membershipId: id}).then(async resp => {
                         const reply2 = resp.Response as LinkedProfileResponse;
                         const primary = reply2.profiles.find(x => x.isCrossSavePrimary);
                         if(primary){
@@ -34,7 +34,8 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                 },
                                 discordUser: dcuser
                             });
-                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                            const conflux = await crypt(process.env.argosIdPassword as string,dcuser.id);
+                            res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
                             dcclient.getMember(statRoles.guildID,dcuser.id).then(member => {
                                 if(!member) return;
                                 //@ts-ignore
@@ -61,7 +62,8 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                     },
                                     discordUser: dcuser
                                 });
-                                res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                                const conflux = await crypt(process.env.argosIdPassword as string,dcuser.id);
+                                res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
                                 dcclient.getMember(statRoles.guildID,dcuser.id).then(member => {
                                     if(!member) return;
                                     //@ts-ignore
@@ -89,8 +91,9 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
                                             "https://cdn.discordapp.com/emojis/1057027325809672192.webp?size=96&quality=lossless", 
                                             "https://cdn.discordapp.com/emojis/1057041438816350349.webp?size=96&quality=lossless",
                                             "","",
-                                            "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"]
-                            res.cookie("conflux",crypt(process.env.argosIdPassword as string,dcuser.id),{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
+                                            "https://cdn.discordapp.com/emojis/1057027818241916989.webp?size=96&quality=lossless"];
+                            const conflux = await crypt(process.env.argosIdPassword as string,dcuser.id);
+                            res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))})
                                 .render('choosePlatform.ejs', { platforms: reply2.profiles.sort(function (a,b) { return a.displayName.length - b.displayName.length}), icons: icons, argosRegisterPassword: process.env.argosRegisterPassword as string, crypt: crypt})    
                         }
                     }).catch(e => console.log(e));
