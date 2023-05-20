@@ -18,7 +18,7 @@ export class DBUserUpdater {
             if(!this.d2client.DB.has(userid)) rej(`UpdateStats: No user with the ID ${userid} found.`);
             let dbUser = this.d2client.DB.get(userid);
             this.d2client.apiRequest("getDestinyProfile",{membershipType: dbUser.membershipType, destinyMembershipId: dbUser.destinyId}).then(d => {
-                const profresp = d.Reponse as DestinyProfileQuery;
+                const profresp = d.Response as DestinyProfileQuery;
                 this.d2client.apiRequest("getDestinyCharacters",{destinyMembershipId: dbUser.destinyId, membershipType: dbUser.membershipType}).then(d => {
                     const resp = d.Response as CharacterQuery;
                     const stats: Stats = {
@@ -76,7 +76,7 @@ export class DBUserUpdater {
                         dbUser.guardianRank = profresp.profile.data.currentGuardianRank ?? 1;
                         this.d2client.DB.set(userid, dbUser);
                         res(dbUser);
-                    }).catch(e => console.log(2));
+                    }).catch(e => console.log(4));
                 }).catch(e => console.log(5));
             }).catch(e => console.log(0));
         });
