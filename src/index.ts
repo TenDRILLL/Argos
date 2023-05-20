@@ -101,27 +101,6 @@ dcclient.on("site",(req,res)=>{
     //res.send(landingPage());
 });
 
-dcclient.on("db",(req,res)=>{
-    if(req.params.id === undefined) {
-        return res.redirect(`/error?message=
-            Turn back now... Darkness is too strong in here.
-                                        
-            \\n
-            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
-    } else {
-        const dID = decrypt(process.env.argosIdPassword as string,req.params.id);
-        if(d2client.DB.has(dID)){
-            res.json(d2client.DB.get(dID));
-        } else {
-            return res.redirect(`/error?message=
-            Turn back now... Darkness is too strong in here.
-                                        
-            \\n
-            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
-        }
-    }
-});
-
 dcclient.on("authorization", (req, res) => {
     if(req.url.split("?").length < 2){
         return res.redirect(`/error?message=
@@ -293,7 +272,7 @@ dcclient.on("panel",async (req,res)=>{
             });
         });
     } else {
-        res.redirect(`/error?message=
+        res.clearCookie("conflux").redirect(`/error?message=
         Could not find user registration, please make sure you have registered to Argos.
         
         \\n
