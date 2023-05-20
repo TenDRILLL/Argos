@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+    <title>Venerity</title>
+    <link rel="stylesheet" href="resource/choosePlatform.css">
+</head>
+<body>
+    <ul><h1>Choose a platform to use</h1><div class="container">
+        <% platforms.forEach((x)=>{%>
+            <% var acc = crypt(argosRegisterPassword, `${x.membershipType}/seraph/${x.membershipId}`) %>
+            <div><a href="/register/<%=acc%>">
+                <img src="<%=icons[x.membershipType]%>">
+                <h2><%=x.displayName%></h2>
+            </a></div>
+            <% }) %>
+    </div> </ul> 
+</body> 
+</html>
