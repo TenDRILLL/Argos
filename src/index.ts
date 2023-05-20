@@ -204,7 +204,7 @@ dcclient.on("undefined", (req,res)=>{
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
 });
 
-dcclient.on("register",(req, res)=>{
+dcclient.on("register",async (req, res)=>{
     if(req.params.account === undefined || req.cookies["conflux"] === undefined){
         return res.redirect(`/error?message=
         Turn back now... Darkness is too strong in here.
@@ -212,23 +212,23 @@ dcclient.on("register",(req, res)=>{
         \\n
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
-    const account = decrypt(process.env.argosRegisterPassword as string,req.params.account).split("/seraph/");
-    const discordID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
-    if(account.length !== 2) return res.redirect(`/error?message=
+    const account: string | void = await decrypt(process.env.argosRegisterPassword as string,req.params.account).catch(e => console.log(e));
+    const discordID = await decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]).catch(e => console.log(e));
+    if(!account || account.split("/seraph/").length !== 2) return res.redirect(`/error?message=
         Turn back now... Darkness is too strong in here.
                             
         \\n
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     //Account 0 = type
     //Account 1 = id
-    if(!d2client.DB.has(discordID)) return res.redirect(`/error?message=
+    if(!discordID || !d2client.DB.has(discordID)) return res.redirect(`/error?message=
         Turn back now... Darkness is too strong in here.
                             
         \\n
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     let dbUser = d2client.DB.get(discordID);
-    dbUser["destinyId"] = account[1];
-    dbUser["membershipType"] = account[0];
+    dbUser["destinyId"] = account.split("/seraph/")[1];
+    dbUser["membershipType"] = account.split("/seraph/")[0];
     d2client.DB.set(discordID,dbUser);
     res.redirect("/panel");
     dcclient.getMember(statRoles.guildID,discordID).then(member => {
@@ -247,12 +247,12 @@ dcclient.on("panelPreload",(req,res)=>{
     res.render('preload.ejs', { url: "/api/panel" })
 });
 
-dcclient.on("panel",(req,res)=>{
-    let discID = "";
+dcclient.on("panel",async (req,res)=>{
+    let discID: string | void = "";
     if(req.cookies["conflux"]){
-        discID = decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]);
+        discID = await decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]).catch(e => console.log(e));
     }
-    if(d2client.DB.has(discID)){
+    if(discID !== undefined && d2client.DB.has(discID)){
         d2client.dbUserUpdater.updateStats(discID).then((data)=>{
             if(data.destinyId === undefined || data.membershipType === undefined) {
                 return res.redirect(`/error?message=

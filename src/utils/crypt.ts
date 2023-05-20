@@ -1,13 +1,12 @@
 import "dotenv/config";
 import {webcrypto} from "node:crypto";
-const crypt = (data) => {
+const crypt = (cryptkey: string | undefined, data: string): Promise<string> => {
     return new Promise(async (res, rej) => {
-        const cryptkey = process.env.cryptkey as string;
-        if(!cryptkey) rej("No cryptkey present in env.");
+        if(!cryptkey) rej("No cryptkey provided.");
         const algorithm = {iv: webcrypto.getRandomValues(new Uint8Array(12)), name: "AES-GCM"};
         const key = await webcrypto.subtle.importKey(
             "raw",
-            new Uint8Array(atob(cryptkey).split("").map(x => x.charCodeAt(0))),
+            new Uint8Array(atob(cryptkey!).split("").map(x => x.charCodeAt(0))),
             "AES-GCM",
             false,
             [
@@ -27,15 +26,15 @@ const crypt = (data) => {
     });
 };
 
-const decrypt = (encodedData): Promise<string> => {
+const decrypt = (cryptkey: string | undefined, encodedData): Promise<string> => {
     return new Promise(async (res, rej) => {
-        const cryptkey = process.env.cryptkey as string;
-        if(!cryptkey) rej("No cryptkey present in env.");
+        if(!cryptkey) rej("No cryptkey provided.");
+        encodedData = new Uint8Array(atob(encodedData).split("").map(x => x.charCodeAt(0)));
         const algorithm = {iv: encodedData.subarray(0, 12), name: "AES-GCM"};
         encodedData = encodedData.subarray(12);
         const key = await webcrypto.subtle.importKey(
             "raw",
-            new Uint8Array(atob(cryptkey).split("").map(x => x.charCodeAt(0))),
+            new Uint8Array(atob(cryptkey!).split("").map(x => x.charCodeAt(0))),
             "AES-GCM",
             false,
             [
