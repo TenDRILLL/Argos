@@ -27,7 +27,7 @@ const crypt = (data) => {
     });
 };
 
-const decrypt = (encodedData) => {
+const decrypt = (encodedData): Promise<string> => {
     return new Promise(async (res, rej) => {
         const cryptkey = process.env.cryptkey as string;
         if(!cryptkey) rej("No cryptkey present in env.");
