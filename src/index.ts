@@ -10,7 +10,7 @@ import * as cron from "node-cron";
 import { crypt, decrypt } from "./utils/crypt";
 import { newRegistration } from "./utils/newRegistration";
 import { fetchPendingClanRequests } from "./utils/fetchPendingClanRequests";
-import { getXurEmbed } from "./utils/getXurEmbed";
+import { XUR_CHANNEL_ID, getXurEmbed } from "./utils/getXurEmbed";
 import { getPanelPageVariables } from "./html/getters/getPanelPageVariables";
 import { updateActivityIdentifierDB } from "./utils/updateActivityIdentifierDB";
 import { instantiateActivityDatabase } from "./utils/updateActivityIdentifierDB";
@@ -98,7 +98,6 @@ dcclient.on("interaction", interaction => {
 
 dcclient.on("site",(req,res)=>{
     res.render('landingPage.ejs');
-    //res.send(landingPage());
 });
 
 dcclient.on("authorization", (req, res) => {
@@ -121,7 +120,6 @@ dcclient.on("authorization", (req, res) => {
 
 dcclient.on("oauthPreload",(req,res)=>{
     res.render('preload.ejs', { url: `/api/oauth?${req.url.split("?")[1]}` })
-    //res.send(getPreload(`/api/oauth?${req.url.split("?")[1]}`));
 });
 
 dcclient.on("oauth", (req,res)=>{
@@ -245,8 +243,6 @@ dcclient.on("panel",async (req,res)=>{
                 getPanelPageVariables(d2client, discID, data, dcuser).then(resp => {
                     res.render('panel.ejs', { data: resp })
                 })
-                /*getPanelPage(d2client, discID, data, dcuser).then(resp => {
-                    res.send(resp);})*/
                 .catch(e => {
                     console.log(e);
                     res.redirect(`/error?message=
@@ -256,9 +252,6 @@ dcclient.on("panel",async (req,res)=>{
                     For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
                 });
             }).catch(e => {
-                /*getPanelPage(d2client, discID, data, data.discordUser).then(resp => {
-                    res.send(resp);
-                })*/
                 getPanelPageVariables(d2client, discID, data, data.discordUser).then(resp => {
                     res.render('panel.ejs', { data: resp })
                 })
@@ -284,12 +277,10 @@ dcclient.on("panel",async (req,res)=>{
 
 dcclient.on("getError",(req,res)=>{
     res.render('errorPage.ejs', { errorDetails: req.query.message.split("\\n"), button: req.query.button });
-    //res.send(getErrorPage(req.query.message.split("\\n"), req.query.button))
 })
 
 dcclient.on("logout",(req,res)=>{
     res.clearCookie("conflux").render('logout.ejs');
-    //res.clearCookie("conflux").send(logout());
 });
 
 dcclient.on("resource",(req, res)=>{
@@ -381,6 +372,11 @@ function generateXurEmbed(){
         getXurEmbed(d2client, dcclient).then(x => {
             console.log("XUR embed saved.");
             d2client.miscDB.set("xurEmbed",x);
+            if (process.env.NODE_ENV === 'production') {
+                dcclient.newMessage(XUR_CHANNEL_ID ,{
+                    embeds: [x]
+                })
+            }
         });
     } else {
         console.log("XUR embed exists.");

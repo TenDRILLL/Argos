@@ -5,6 +5,8 @@ import { entityQuery } from "../props/entityQuery";
 import { WeaponSlot } from "../enums/weaponSlot";
 import { RawEntityQuery } from "../props/manifest";
 
+export const XUR_CHANNEL_ID = '980143760149188648'
+
 export function getXurEmbed(d2client, dcclient): Promise<Embed> {
     const statHashes = ['2996146975', '392767087', '1943323491', '1735777505', '144602215', '4244567218']
     return new Promise((res, rej) => {
@@ -142,14 +144,10 @@ Total: ${component.stats.reduce((a, b) => a+b)}`
 
 function getWeaponInfo(d2client,weaponID): Promise<entityQuery> {
     return new Promise<entityQuery>(res => {
-        if ((d2client.entityDB.has(weaponID))) {
-            res(d2client.entityDB.get(weaponID));            
-        } else {
-            d2client.apiRequest("getEntity", {hashIdentifier: weaponID}).then(u => {
-                const item = u.Response as entityQuery;
-                d2client.entityDB.set(item.hash.toString(), item);
-                res(item);
-            }).catch(e => console.log(e));
-        }
+        d2client.apiRequest("getEntity", {hashIdentifier: weaponID}).then(u => {
+            const item = u.Response as entityQuery;
+            d2client.entityDB.set(item.hash.toString(), item);
+            res(item);
+        }).catch(e => console.log(e));
     });
 }
