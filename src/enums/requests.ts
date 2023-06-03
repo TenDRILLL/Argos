@@ -4,6 +4,7 @@ const requests = new Map();
 requests.set("getBungieProfile","/User/GetBungieNetUserById/id");
 requests.set("getBungieLinkedProfiles","/Destiny2/membershipType/Profile/membershipId/LinkedProfiles");
 requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMembershipId/Stats/");
+requests.set("getDestinyProfile", "/Destiny2/membershipType/Profile/destinyMembershipId?components=100");
 requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=205");
 requests.set("getDestinyInventory", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/?components=200,205")
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
