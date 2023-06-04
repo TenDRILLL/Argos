@@ -401,6 +401,9 @@ function updateCmds(){
             name: "registrationlink",
             description: "Send registration link."
         }, {
+            name: "updateactivities",
+            description: "Update ActivityIdentifierDB"
+        }, {
             name: "xur",
             description: "Check items offered by xûr."
         }, {
