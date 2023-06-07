@@ -2,6 +2,7 @@ import { statRoles } from "../enums/statRoles";
 import { BungieProfile } from "../props/bungieProfile";
 import { LinkedProfileResponse } from "../props/linkedProfileResponse";
 import { crypt } from "./crypt";
+import { removeAccountRoles } from "./removeAccountRoles";
 
 export function newRegistration(dcclient, d2client, dccode, d2code, res){
     d2client.discordTokens.discordOauthExchange(dccode).then(dcuser => {
@@ -12,6 +13,14 @@ export function newRegistration(dcclient, d2client, dccode, d2code, res){
         data.append("client_secret",d2client.secret);
         d2client.token(data).then(x => {
             let id = x.membership_id;
+            if (d2client.DB.map(e => e.bungieId).includes(id)) {
+                d2client.DB.forEach(user => {
+                    if (user.bungieId === id) {
+                        d2client.DB.delete(id)
+                        removeAccountRoles(user.discordUser.id, dcclient, d2client)
+                    }
+                })
+            }
             if(id){
                 d2client.apiRequest("getBungieProfile",{id}).then(profile => {
                     const reply = profile.Response as BungieProfile;
