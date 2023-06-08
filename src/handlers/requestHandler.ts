@@ -87,7 +87,7 @@ export class requestHandler {
                             res(response);
                         }
                     }).catch(e => {
-                        console.log(e);
+                        console.log(e.response?.statusText);
                     rej(`${e.response.status} ${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
                 });
             }

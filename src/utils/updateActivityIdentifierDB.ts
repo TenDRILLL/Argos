@@ -71,7 +71,7 @@ export function updateActivityIdentifierDB(d2client) {
                 }
             })
         });    
-    }).catch(e => console.log(e));
+    }).catch(e => console.log(20));
 }
 
 export function instantiateActivityDatabase(d2client) {
