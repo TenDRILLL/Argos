@@ -146,7 +146,6 @@ function getWeaponInfo(d2client,weaponID): Promise<entityQuery> {
     return new Promise<entityQuery>(res => {
         d2client.apiRequest("getEntity", {hashIdentifier: weaponID}).then(u => {
             const item = u.Response as entityQuery;
-            d2client.entityDB.set(item.hash.toString(), item);
             res(item);
         }).catch(e => console.log(e));
     });

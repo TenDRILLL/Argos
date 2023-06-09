@@ -383,7 +383,7 @@ function generateXurEmbed(){
     }
 }
 
-if (!d2client.DB.length) {
+if (!d2client.activityIdentifierDB.length) {
     instantiateActivityDatabase(d2client);
     updateActivityIdentifierDB(d2client);
 }
