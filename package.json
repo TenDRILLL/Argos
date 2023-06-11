@@ -18,7 +18,7 @@
     "axios": "^0.27.2",
     "body-parser": "^1.20.1",
     "cookie-parser": "^1.4.6",
-    "discord-http-interactions": "^1.6.1",
+    "discord-http-interactions": "^1.6.4",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.9",
     "enmap": "^5.9.2",
