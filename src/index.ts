@@ -150,7 +150,7 @@ dcclient.on("oauth", (req,res)=>{
             d2client.discordTokens.discordOauthExchange(urlData.code).then(async dcuser => {
                 d2client.DB.set(dcuser.id,dcuser,"discordUser");
                 const conflux = await crypt(process.env.argosIdPassword as string, dcuser.id);
-                return res.cookie("conflux", conflux).redirect("/panel");
+                return res.cookie("conflux", conflux, {expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
             }).catch(e => {
                 console.log(e);
                 return res.redirect(`/error?message=
