@@ -16,7 +16,7 @@
             <ul>
                 <li class="dc">
                     <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/<%=data.discordUser.id%>/<%=data.discordUser.avatar%>.png">
-                    <p><%= data.DBData.discordUser.username %>#<%= data.discordUser.discriminator %></p>
+                    <p><%= `${data.DBData.discordUser.username}${data.DBData.discordUser.discriminator === "0" ? "" : `#${data.DBData.discordUser.discriminator}`}` %></p>
                 </li>
                 <li>
                     <h1 id="heading text">
