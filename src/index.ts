@@ -293,10 +293,13 @@ dcclient.on("resource",(req, res)=>{
     }
     const styles = readdirSync("./html/styles");
     const scripts = readdirSync("./html/scripts");
+    const images = readdirSync("./html/scripts");
     if(styles.includes(req.params.resourceName)){
         res.sendFile(`${__dirname}/html/styles/${req.params.resourceName}`);
     } else if (scripts.includes(req.params.resourceName)) {
         res.sendFile(`${__dirname}/html/scripts/${req.params.resourceName}`);
+    } else if (images.includes(req.param.resourceName)) {
+        res.sendFile(`${__dirname}/html/images/${req.params.resourceName}`);
     } else {
         return res.redirect(`/error?message=
         Resource ${req.params.resourceName} does not exist.
