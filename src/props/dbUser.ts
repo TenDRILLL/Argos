@@ -28,6 +28,7 @@ export class DBUser {
         id: string;
         username: string;
         avatar: string;
+        global_name: string | null;
         avatar_decoration: string;
         discriminator: string;
         public_flags: number;
