@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="/resource/panel.css">
         <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
         <title>Venerity</title>
+        <script src="/resource/unregisterPopup.js"></script>
     </head>
     <body>
         <nav>
@@ -23,12 +24,20 @@
                         Welcome, <%= data.DBData.destinyName %>
                     </h1>
                 </li>
-                <li>
-                    <button onclick="window.location = '/logout'">
-                        <span class="glyphicon glyphicon-log-out" style="margin-right: 3px"></span>
-                        Logout
-                    </button>
-                </li>
+                <div class="buttons">
+                    <li>
+                        <button onclick="window.location = '/logout'">
+                            <span class="glyphicon glyphicon-log-out" style="margin-right: 3px; line-height: 20px !important;"></span>
+                            Logout
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="show('popup')">
+                            <span class="glyphicon glyphicon-remove-sign" style="margin-right: 3px; line-height: 20px !important;"></span>
+                            Unregister
+                        </button>
+                    </li>
+                </div>
             </ul>
         </nav>
         <div id="content">
@@ -166,5 +175,11 @@
             </div>
         </div>
         </div>
+        <div class="popup" id="popup">
+            <b>Are you sure you want to unregister?</b>
+            <p>Unregistering will remove all of your data and will mean that you can't use the <i>Argos, Planetary Core</i> bot anymore.</p>
+            <a href="#" onclick="hide('popup')">Close</a>
+            <a href="/unregister" id="confirmation">Yes, I am sure</a>
+          </div>
     </body>
 </html>

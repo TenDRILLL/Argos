@@ -192,9 +192,17 @@ body {
    align-self: center;
    font-size: 16px;
 }
+.buttons {
+   justify-content: end;
+   display: flex;
+   flex-direction: row;
+}
 button {
+   display: flex;
+   flex-direction: row;
    background-color: #152238;
-   width: 95px;
+   width: fit-content;
+   margin: 0 30px 0 30px;
    font-size: 18px;
    font-family: tahoma;
    border-radius: 7px;
@@ -242,4 +250,50 @@ nav ul li {
 }
 nav ul li p {
    margin: 0;
+}
+
+.popup {
+   display: none;
+   position: fixed;
+   padding: 10px;
+   width: 310px;
+   left: 50%;
+   margin-left: -150px;
+   height: 140px;
+   top: 50%;
+   margin-top: -100px;
+   background: #FFF;
+   border: 3px solid #F04A49;
+   z-index: 20;
+}
+
+.popup p, .popup b {
+   color: #030303;
+   margin: 7px;
+}
+
+#popup:after {
+   position: fixed;
+   content: "";
+   top: 0;
+   left: 0;
+   bottom: 0;
+   right: 0;
+   background: rgba(0,0,0,0.5);
+   z-index: -2;
+}
+
+#popup:before {
+   position: absolute;
+   content: "";
+   top: 0;
+   left: 0;
+   bottom: 0;
+   right: 0;
+   background: #FFF;
+   z-index: -1;
+}
+
+#confirmation {
+   float: right;
 }

@@ -14,6 +14,7 @@ import { XUR_CHANNEL_ID, getXurEmbed } from "./utils/getXurEmbed";
 import { getPanelPageVariables } from "./html/getters/getPanelPageVariables";
 import { updateActivityIdentifierDB } from "./utils/updateActivityIdentifierDB";
 import { instantiateActivityDatabase } from "./utils/updateActivityIdentifierDB";
+import { removeAccountRoles } from "./utils/removeAccountRoles";
 
 let commands;
 const dcclient = new Client({
@@ -54,6 +55,10 @@ const dcclient = new Client({
             name: "panelPreload",
             method: "GET",
             endpoint: "/panel"
+        }, {
+            name: "unregister",
+            method: "GET",
+            endpoint: "/unregister"
         }, {
             name: "logout",
             method: "GET",
@@ -220,6 +225,18 @@ dcclient.on("register",async (req, res)=>{
     });
     d2client.dbUserUpdater.updateUserRoles(dcclient,d2client,discordID);
 });
+
+dcclient.on("unregister", async (req, res)=>{
+    let discID: string | void = "";
+    if(req.cookies["conflux"]){
+        discID = await decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]).catch(e => console.log(e));
+    }
+    if(discID !== undefined && d2client.DB.has(discID)){
+        d2client.DB.delete(discID)
+        removeAccountRoles(discID, dcclient, d2client)
+    }
+    res.clearCookie("conflux").render('logout.ejs');
+})
 
 dcclient.on("panelPreload",(req,res)=>{
     res.render('preload.ejs', { url: "/api/panel" })
@@ -405,7 +422,10 @@ function updateCmds(){
             description: "Send registration link."
         }, {
             name: "updateactivities",
-            description: "Update ActivityIdentifierDB"
+            description: "Update ActivityIdentifierDB."
+        }, {
+            name: "unregister",
+            description: "Remove registration and data."
         }, {
             name: "xur",
             description: "Check items offered by xûr."
