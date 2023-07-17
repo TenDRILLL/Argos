@@ -79,7 +79,7 @@ export default class ClanRequest extends Command {
 
     deleteData(interaction, d2client, id, d, action){
         const apps = d2client.miscDB.get("handledApplications") ?? [];
-        if(d.Response["ErrorCode"] === 1){
+        if(d["ErrorCode"] === 1){
             interaction.reply({
                 content: `Application ${action}.`,
                 ephemeral: true
@@ -88,12 +88,12 @@ export default class ClanRequest extends Command {
                 apps.splice(apps.indexOf(id),1);
                 d2client.miscDB.set("handledApplications");
             }
+            interaction.deleteMessage(interaction.message.channel.id,interaction.message.id);
         } else {
             interaction.reply({
                 content: JSON.stringify(d),
                 ephemeral: true
             });
         }
-        interaction.delete(interaction.message.id);
     }
 }
