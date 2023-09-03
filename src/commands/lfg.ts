@@ -377,7 +377,7 @@ export default class LFG extends Command {
                         activities = ["Gambit","Private Gambit Match"];
                         break;
                     case "Seasonal":
-                        activities = ["Heist Battlegrounds","Ketchcrash","PsiOps"]
+                        activities = ["Savathun's Spire", "Altars of Summoning", "Deep Dive", "Salvage"]
                         break;
                     case "Other":
                         activities = ["Grandmaster Nightfall","Wellspring","Dares of Eternity","Other"]
