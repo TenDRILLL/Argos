@@ -353,7 +353,7 @@ export default class LFG extends Command {
                 let activities;
                 switch(option.options[0].value){
                     case "Raid":
-                        activities = [];
+                        activities = ["Crota's End"];
                         let sunsetRaids = ["Leviathan", "Leviathan, Eater of Worlds", "Leviathan, Spire of Stars", "Scourge of the Past", "Crown of Sorrow"];
                         for (let [key, data] of d2client.activityIdentifierDB) {
                             if(data.type === 0 && !(sunsetRaids.includes(key))){
