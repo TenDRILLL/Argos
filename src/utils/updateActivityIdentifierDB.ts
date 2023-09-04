@@ -88,8 +88,8 @@ export function instantiateActivityDatabase(d2client) {
     while (!result.done) {
         let key = result.value;
         let typeOfActivity;
-        if (i <= 17) typeOfActivity = 0;
-        else if (i > 17 && i <= 39) typeOfActivity = 2;
+        if (i <= 18) typeOfActivity = 0;
+        else if (i > 18 && i <= 40) typeOfActivity = 2;
         else {typeOfActivity = 1}
         const originalKey = key;
         if (MasterTest.test(key) ||PrestigeTest.test(key) || HeroicTest.test(key)) {
