@@ -88,7 +88,7 @@ export default class ClanRequest extends Command {
                 apps.splice(apps.indexOf(id),1);
                 d2client.miscDB.set("handledApplications");
             }
-            interaction.deleteMessage(interaction.message.channel.id,interaction.message.id);
+            interaction.client.deleteMessage(interaction.message.channel.id,interaction.message.id);
         } else {
             interaction.reply({
                 content: JSON.stringify(d),
