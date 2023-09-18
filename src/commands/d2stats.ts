@@ -110,7 +110,16 @@ export default class D2Stats extends Command {
         }
         delete activityObject["Total"];
         let j = 0;
-        const ordered = Object.keys(activityObject).sort((b,a) => order.findIndex(e => e == a) - order.findIndex(e => e == b));
+        let ordered;
+        if (number === 3) {
+            ordered = Object.keys(activityObject)
+                .filter(a => activityObject[a] !== 0)
+                .sort((b,a) => activityObject[a] - activityObject[b]);
+        }
+        else {
+            ordered = Object.keys(activityObject)
+                .sort((b,a) => order.findIndex(e => e == a) - order.findIndex(e => e == b));
+        }
         for (let i = 0; i < ordered.length; i++) {
             const activity = ordered[i];
             if (activity == undefined) {

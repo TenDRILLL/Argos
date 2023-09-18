@@ -50,7 +50,7 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["Harbinger", [1738383283]],
     ["Presage", [2124066889]],
     ["Presage, Master", [4212753278]],
-    ["Shattered Throne", [2032534090, 1893059148]],
+    ["The Shattered Throne", [2032534090, 1893059148]],
     ["Pit of Heresy", [2582501063, 785700673, 785700678, 1375089621, 2559374368, 2559374374, 2559374375]],
     ["Prophecy", [1077850348,4148187374]],
     ["Grasp of Avarice", [4078656646]],

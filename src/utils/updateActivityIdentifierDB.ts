@@ -15,6 +15,7 @@ export function updateActivityIdentifierDB(d2client) {
         const MasterTest = new RegExp(/Master/g);
         const PrestigeTest = new RegExp(/Prestige/g);
         const HeroicTest = new RegExp(/Heroic/g);
+        let dungeonsToActivityOrder : ManifestActivity[] = [];
         d2client.rawRequest(`https://www.bungie.net${enManifest}`).then(e => {
             Object.values(e as unknown as RawManifestQuery).forEach(x => {
                 const activity = x as ManifestActivity;      
@@ -37,10 +38,7 @@ export function updateActivityIdentifierDB(d2client) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(normalizeActivityName(activity.displayProperties.name), saved);
                         if (!d2client.entityDB.get("activityOrder").includes(normalizeActivityName(activity.displayProperties.name))) {
-                            const temp = d2client.entityDB.get("activityOrder");
-                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
-                            temp.push(normalizeActivityName(activity.displayProperties.name));
-                            d2client.entityDB.set("activityOrder", temp);
+                            dungeonsToActivityOrder.push(activity);
                         }
                 }
                 } else if (2043403989/*raid*/ === activity.activityTypeHash) {
@@ -56,19 +54,26 @@ export function updateActivityIdentifierDB(d2client) {
                         }
                     }
                 } 
-                /*else*/ if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster" && activity.displayProperties.name != "Nightfall: Grandmaster") {
+                else if (new RegExp(/Grandmaster/gi).test(activity.displayProperties.name) && activity.displayProperties.description != "Grandmaster") {
                     const saved = d2client.activityIdentifierDB.get(activity.originalDisplayProperties.description) as activityIdentifierObject ?? {IDs: [], type: 0, difficultName: "", difficultIDs: []};
                     saved.type = 2;
                     if (!saved.IDs.includes(activity.hash)) {
                         saved.IDs.push(activity.hash);
                         d2client.activityIdentifierDB.set(activity.displayProperties.description, saved);
-                        /*if (!d2client.entityDB.get("activityOrder").includes(activity.originalDisplayProperties.description)) {
+                        if (!d2client.entityDB.get("activityOrder").includes(activity.originalDisplayProperties.description)) {
                             const temp = d2client.entityDB.get("activityOrder");
                             temp.push(activity.originalDisplayProperties.description);
-                            console.log(`Added ${activity.displayProperties.name} to activityOrder`);
                             d2client.entityDB.set("activityOrder", temp);
-                        }*/
+                        }
                     }
+                }
+            })
+            dungeonsToActivityOrder.sort((a,b) => a.index - b.index).forEach(e => {
+                if (!d2client.entityDB.get("activityOrder").includes(normalizeActivityName(e.displayProperties.name))) {
+                    const temp = d2client.entityDB.get("activityOrder");
+                    console.log(`Added ${normalizeActivityName(e.displayProperties.name)} to activityOrder`);
+                    temp.push(normalizeActivityName(e.displayProperties.name));
+                    d2client.entityDB.set("activityOrder", temp);
                 }
             })
         });    
