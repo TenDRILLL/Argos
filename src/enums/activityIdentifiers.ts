@@ -54,7 +54,8 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["Pit of Heresy", [2582501063, 785700673, 785700678, 1375089621, 2559374368, 2559374374, 2559374375]],
     ["Prophecy", [1077850348,4148187374]],
     ["Grasp of Avarice", [4078656646]],
-    ["Duality", [2823159265]]
+    ["Duality", [2823159265]],
+    ["Warlord's Ruin", [2004855007]]
 ]);
 
 export const directActivityModeType = new Map<string, number>([
