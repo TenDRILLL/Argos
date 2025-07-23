@@ -391,7 +391,7 @@ if (!d2client.DB.length) {
 dcclient.login();
 
 //Use this if you need to change the commands.
-//updateCmds();
+updateCmds();
 
 function updateCmds(){
     dcclient.registerCommands(

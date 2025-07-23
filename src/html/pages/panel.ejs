@@ -13,157 +13,131 @@
     </head>
     <body>
         <nav>
-            <ul>
-                <li class="dc">
+            <div id="logo">Venerity</div>
+            <div class="user">
+                <div class="userIcon">
                     <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/<%=data.discordUser.id%>/<%=data.discordUser.avatar%>.png">
-                    <p><%= data.DBData.discordUser.username %>#<%= data.discordUser.discriminator %></p>
-                </li>
-                <li>
-                    <h1 id="heading text">
-                        Welcome, <%= data.DBData.destinyName %>
-                    </h1>
-                </li>
-                <li>
-                    <button onclick="window.location = '/logout'">
-                        <span class="glyphicon glyphicon-log-out" style="margin-right: 3px"></span>
-                        Logout
-                    </button>
-                </li>
-            </ul>
+                </div>
+                <div class="userName"> <%= `${data.DBData.discordUser.username}${data.DBData.discordUser.discriminator === "0" ? "" : `#${data.DBData.discordUser.discriminator}`}` %> </div>
+                <svg id="caret" class="rotated" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 14.5l5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </div>
         </nav>
-        <div id="content">
-            <div id="characters">
-                <% data.characters.sort((a,b) => b.character.data.light-a.character.data.light).map(character => { %>
-                    <div class="singleCharacter">
-                        <div class="characterBanner" style="background-image: url(https://www.bungie.net<%=character.character.data.emblemBackgroundPath%>);">
-                            <div style="height: 32px; width:32px; margin: 0 8px; align-self: center; position: relative;"></div>
-                            <div style="display: flex; flex-direction: column; flex: 1;">
-                                <div class="nameAndLightContainer">
-                                    <div class="className"><%=data.classHashes.get(character.character.data.classHash)%></div>
-                                    <div class="lightLevel"><%=character.character.data.light%></div>
+        <div id="contentContainer">
+            <aside>
+                <div id="characters">
+                    <% data.characters.sort((a,b) => b.character.data.light-a.character.data.light).map(character => { %>
+                        <div class="character">
+                            <div class="characterInfo">
+                                <div
+                                class="characterEmblem"
+                                style="background-image: url('https://www.bungie.net/common/destiny2_content/icons/ecafe3e611c54e78656b85b77c8ee2f7.jpg')"
+                                />
+                                <div class="characterDetails">
+                                    <div class="characterType"><%=data.classHashes.get(character.character.data.classHash)%></div>
+                                    <div class="characterTitle"><%-data.recordDefinitions[character.character.data.titleRecordHash] !== undefined ? data.recordDefinitions[character.character.data.titleRecordHash]["titleInfo"]["titlesByGender"]["Male"] : ""%></div>
                                 </div>
-                                <span class="titleName">
-                                    <%-data.recordDefinitions[character.character.data.titleRecordHash] !== undefined ? data.recordDefinitions[character.character.data.titleRecordHash]["titleInfo"]["titlesByGender"]["Male"] : ""%>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="characterStats">
-                            <div class="statRow">
-                                <div>
-                                    <img src="https://www.bungie.net/common/destiny2_content/icons/e26e0e93a9daf4fdd21bf64eb9246340.png">
-                                    <div><%=character.character.data.stats["2996146975"]%></div>
-                                </div>
-                                <div>
-                                    <img src="https://www.bungie.net/common/destiny2_content/icons/202ecc1c6febeb6b97dafc856e863140.png">
-                                    <div><%=character.character.data.stats["392767087"]%></div>
-                                </div>
-                                <div>
-                                    <img src="https://www.bungie.net/common/destiny2_content/icons/128eee4ee7fc127851ab32eac6ca91cf.png">
-                                    <div><%=character.character.data.stats["1943323491"]%></div>
-                                </div>
-                                <div>
-                                    <img src="https://www.bungie.net/common/destiny2_content/icons/ca62128071dc254fe75891211b98b237.png">
-                                    <div><%=character.character.data.stats["1735777505"]%></div>
-                                </div>
-                                <div>
-                                    <img src="https://www.bungie.net/common/destiny2_content/icons/59732534ce7060dba681d1ba84c055a6.png">
-                                    <div><%=character.character.data.stats["144602215"]%></div>
-                                </div>
-                                <div>
-                                    <img src="https://www.bungie.net/common/destiny2_content/icons/c7eefc8abbaa586eeab79e962a79d6ad.png">
-                                    <div><%=character.character.data.stats["4244567218"]%></div>
+                                <div class="characterPower">
+                                    <div class="characterPowerImage">✧</div>
+                                    <div class="characterPowerValue"><%=character.character.data.light%></div>
                                 </div>
                             </div>
+                            <div class="characterStats">
+                                <div class="healthStat characterStat">
+                                    <img src="/resource/health.png" />
+                                    <%=character.character.data.stats["392767087"]%>
+                                </div>
+                                <div class="strength characterStat">
+                                    <img src="/resource/strength.png" />
+                                    <%=character.character.data.stats["4244567218"]%>
+                                </div>
+                                <div class="grenadeStat characterStat">
+                                    <img src="/resource/grenade.png" />
+                                    <%=character.character.data.stats["1735777505"]%>
+                                </div>
+                                <div class="superStat characterStat">
+                                    <img src="/resource/super.png" />
+                                    <%=character.character.data.stats["144602215"]%>
+                                </div>
+                                <div class="classStat characterStat">
+                                    <img src="/resource/class.png" />
+                                    <%=character.character.data.stats["1943323491"]%>
+                                </div>
+                                <div class="weaponStat characterStat">
+                                    <img src="/resource/weapon.png" />
+                                    <%=character.character.data.stats["2996146975"]%
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                <% }) %>
-            </div>
-            <div id="completions">
-                <% if (data.DBData.raids["Total"] !== 0) { %>
-                    <div class="completionDiv">
-                        <div class="completionTitle">
-                            <h4><b><u>Raid completions</u></b></h4>
+                    <% }) %>
+                </div>
+            </aside>
+            <main>
+                <div class="raidContainer">
+                    <% if (data.DBData.raids["Total"] !== 0) { %>
+                        <h2>Raid Completions</h2>
+                        <div class="raidTotal">
+                            Total:
+                            <div id="raidTotalValue"><%=data.DBData.raids["Total"]%></div>
                         </div>
-                        <div class="completionTotal">
-                            <b>Total: <%=data.DBData.raids["Total"]%></b>
-                        </div>
-                        <div class="completionGrid">
+                        <div class="raids">
                             <% Object.keys(data.raids).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(raid => { %>
-                                <div>
-                                    <b><%=raid%></b>
-                                    <div class="tooltipContainer">
-                                        <%=data.raids[raid].length === 1 ? data.DBData.raids[raid] : data.DBData.raids[raid]+"*" %>
-                                        <% if (data.raids[raid].length !== 1) { %>
-                                            <div class="tooltiptext">
-                                                <p>Normal: <%- data.raids[raid][0] - data.raids[raid][2]%></p>
-                                                <p><%=data.raids[raid][1]%>: <%=data.raids[raid][2]%></p>
-                                            </div>
-                                        <% } else { %>
-                                            <div></div>
-                                        <% } %>
+                                <div class="clearCard">
+                                    <div
+                                        class="cardEmblem"
+                                        style="
+                                            background-image: url('TODO');
+                                        "
+                                    ></div>
+                                    <div class="cardDetails">
+                                        <div class="cardName"><%=raid%></div>
+                                        <div class="cardClears"><%- data.raids[raid][0]%> clears</div>
                                     </div>
                                 </div>
                             <% }) %>
                         </div>
-                    </div>
-                <% } %>
-                <% if (data.DBData.dungeons["Total"] !== 0) { %>
-                    <div class="completionDiv">
-                        <div class="completionTitle">
-                            <h4><b><u>Dungeon completions</u></b></h4>
+                    <% } %>
+                </div>
+                <div class="dungeonContainer">
+                    <% if (data.DBData.dungeons["Total"] !== 0) { %>
+                        <h2>Dungeon Completions</h2>
+                        <div class="dungeonTotal">
+                            Total:
+                            <div id="dungeonTotalValue"><%=data.DBData.dungeons["Total"]%></div>
                         </div>
-                        <div class="completionTotal">
-                            <b>Total: <%=data.DBData.dungeons["Total"]%></b>
-                        </div>
-                        <div class="completionGrid">
-                            <% Object.keys(data.dungeons).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(dungeon => { %>
-                                <div>
-                                    <b><%=dungeon%></b>
-                                    <div class="tooltipContainer">
-                                        <%=data.dungeons[dungeon].length === 1 ? data.DBData.dungeons[dungeon] : data.DBData.dungeons[dungeon]+"*" %>
-                                        <% if (data.dungeons[dungeon].length !== 1) { %>
-                                            <div class="tooltiptext">
-                                                <p>Normal: <%- data.dungeons[dungeon][0] - data.dungeons[dungeon][2]%></p>
-                                                <p><%=data.dungeons[dungeon][1]%>: <%=data.dungeons[dungeon][2]%></p>
-                                            </div>
-                                        <% } else { %>
-                                            <div></div>
-                                        <% } %>
-                                    </div>
+                        <div id="dungeons">
+                        <% Object.keys(data.dungeons).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(dungeon => { %>
+                            <div class="clearCard">
+                                <div class="cardEmblem" style="background-image: url('TODO')"></div>
+                                <div class="cardDetails">
+                                    <div class="cardName"><%=dungeon%></div>
+                                    <div class="cardClears"><%- data.dungeons[dungeon][0]%> clears</div>
                                 </div>
-                            <% }) %>
+                            </div>
+                        <% }) %>
                         </div>
+                    <% } %>
+                </div>
+                <div class="grandmasterContainer">
+                    <h2>GM Completions</h2>
+                    <div class="gmTotal">
+                        Total:
+                        <div id="gmTotalValue"><%=data.DBData.grandmasters["Total"]%></div>
                     </div>
-                <% } %>
-                <% if (data.DBData.grandmasters["Total"] !== 0) { %>
-                    <div class="completionDiv">
-                        <div class="completionTitle">
-                            <h4><b><u>Grandmaster completions</u></b></h4>
+                    <div id="grandmasters">
+                    <% Object.keys(data.gms).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(gm => { %>
+                        <div class="clearCard">
+                            <div class="cardEmblem" style="background-image: url('https://img.raidreport.dev/salvationsedge.jpg')"></div>
+                            <div class="cardDetails">
+                                <div class="cardName"><%=gm%></div>
+                                <div class="cardClears"><%- data.gms[gm][0]%> clears</div>
+                            </div>
                         </div>
-                        <div class="completionTotal">
-                            <b>Total: <%=data.DBData.grandmasters["Total"]%></b>
-                        </div>
-                        <div class="completionGrid">
-                            <% Object.keys(data.gms).filter(a => a != "Total" && data.DBData[a] !== 0).forEach(gm => { %>
-                                <div>
-                                    <b><%=gm%></b>
-                                    <div class="tooltipContainer">
-                                        <%=data.gms[gm].length === 1 ? data.DBData.grandmasters[gm] : data.DBData.grandmasters[gm]+"*" %>
-                                        <% if (data.gms[gm].length !== 1) { %>
-                                            <div class="tooltiptext">
-                                                <p>Normal: <%- data.gms[gm][0] - data.gms[gm][2]%></p>
-                                                <p><%=data.gms[gm][1]%>: <%=data.gms[gm][2]%></p>
-                                            </div>
-                                        <% } else { %>
-                                            <div></div>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            <% }) %>
-                        </div>
+                    <% }) %>
                     </div>
-                <% } %>
-            </div>
+                </div>
+            </main>
         </div>
         </div>
     </body>
