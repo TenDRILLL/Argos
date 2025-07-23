@@ -14,6 +14,7 @@ import { XUR_CHANNEL_ID, getXurEmbed } from "./utils/getXurEmbed";
 import { getPanelPageVariables } from "./html/getters/getPanelPageVariables";
 import { updateActivityIdentifierDB } from "./utils/updateActivityIdentifierDB";
 import { instantiateActivityDatabase } from "./utils/updateActivityIdentifierDB";
+import { removeAccountRoles } from "./utils/removeAccountRoles";
 
 let commands;
 const dcclient = new Client({
@@ -54,6 +55,10 @@ const dcclient = new Client({
             name: "panelPreload",
             method: "GET",
             endpoint: "/panel"
+        }, {
+            name: "unregister",
+            method: "GET",
+            endpoint: "/unregister"
         }, {
             name: "logout",
             method: "GET",
@@ -150,7 +155,7 @@ dcclient.on("oauth", (req,res)=>{
             d2client.discordTokens.discordOauthExchange(urlData.code).then(async dcuser => {
                 d2client.DB.set(dcuser.id,dcuser,"discordUser");
                 const conflux = await crypt(process.env.argosIdPassword as string, dcuser.id);
-                return res.cookie("conflux", conflux).redirect("/panel");
+                return res.cookie("conflux", conflux, {expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
             }).catch(e => {
                 console.log(e);
                 return res.redirect(`/error?message=
@@ -220,6 +225,18 @@ dcclient.on("register",async (req, res)=>{
     });
     d2client.dbUserUpdater.updateUserRoles(dcclient,d2client,discordID);
 });
+
+dcclient.on("unregister", async (req, res)=>{
+    let discID: string | void = "";
+    if(req.cookies["conflux"]){
+        discID = await decrypt(process.env.argosIdPassword as string,req.cookies["conflux"]).catch(e => console.log(e));
+    }
+    if(discID !== undefined && d2client.DB.has(discID)){
+        d2client.DB.delete(discID)
+        removeAccountRoles(discID, dcclient, d2client)
+    }
+    res.clearCookie("conflux").render('logout.ejs');
+})
 
 dcclient.on("panelPreload",(req,res)=>{
     res.render('preload.ejs', { url: "/api/panel" })
@@ -293,10 +310,13 @@ dcclient.on("resource",(req, res)=>{
     }
     const styles = readdirSync("./html/styles");
     const scripts = readdirSync("./html/scripts");
+    const images = readdirSync("./html/images");
     if(styles.includes(req.params.resourceName)){
         res.sendFile(`${__dirname}/html/styles/${req.params.resourceName}`);
     } else if (scripts.includes(req.params.resourceName)) {
         res.sendFile(`${__dirname}/html/scripts/${req.params.resourceName}`);
+    } else if (images.includes(req.params.resourceName)) {
+        res.sendFile(`${__dirname}/html/images/${req.params.resourceName}`);
     } else {
         return res.redirect(`/error?message=
         Resource ${req.params.resourceName} does not exist.
@@ -383,7 +403,7 @@ function generateXurEmbed(){
     }
 }
 
-if (!d2client.DB.length) {
+if (!d2client.activityIdentifierDB.length) {
     instantiateActivityDatabase(d2client);
     updateActivityIdentifierDB(d2client);
 }
@@ -391,7 +411,7 @@ if (!d2client.DB.length) {
 dcclient.login();
 
 //Use this if you need to change the commands.
-updateCmds();
+//updateCmds();
 
 function updateCmds(){
     dcclient.registerCommands(
@@ -400,6 +420,12 @@ function updateCmds(){
         {
             name: "registrationlink",
             description: "Send registration link."
+        }, {
+            name: "updateactivities",
+            description: "Update ActivityIdentifierDB."
+        }, {
+            name: "unregister",
+            description: "Remove registration and data."
         }, {
             name: "xur",
             description: "Check items offered by xûr."
