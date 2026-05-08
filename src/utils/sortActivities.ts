@@ -1,4 +1,4 @@
-import { ActivityObject } from "../props/dbUser";
+import {ActivityObject} from "../structs/DBUser";
 
 export function sortActivities(activities: ActivityObject): Map<string, string[]> {
     const keys = Object.keys(activities);
