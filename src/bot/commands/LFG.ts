@@ -378,7 +378,7 @@ export default class LFG extends DiscordCommand {
                     activities = ["Gambit", "Private Gambit Match"];
                     break;
                 case "Seasonal":
-                    activities = ["Riven's Lair", "Salvage", "Salvage Legend", "Deep Dive", "Defiant Battlegrounds", "Legend Defiant Battleground", "Savathun's Spire", "Altars of Summoning", "Imbaru Engine"];
+                    activities = ["Seasonal Activity"];
                     break;
                 case "Other":
                     activities = ["Grandmaster Nightfall", "Wellspring", "Dares of Eternity", "Other"];

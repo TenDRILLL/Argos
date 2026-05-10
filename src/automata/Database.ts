@@ -3,7 +3,7 @@ import {createPool, Pool, PoolConnection} from "mariadb";
 let pool: Pool;
 
 async function initDatabase(): Promise<void> {
-    pool = createPool({host: process.env.DB_HOST as string, port: parseInt(process.env.DB_PORT as string), user: process.env.DB_USER as string, password: process.env.DB_PASS as string, database: process.env.DB_NAME});
+    pool = createPool({host: process.env.DB_HOST as string, port: parseInt(process.env.DB_PORT as string), user: process.env.DB_USER as string, password: process.env.DB_PASS as string, database: process.env.DB_NAME, charset: "utf8mb4"});
 
     await dbQuery(`
         CREATE TABLE IF NOT EXISTS discordToken (
@@ -104,8 +104,9 @@ async function initDatabase(): Promise<void> {
         CREATE TABLE IF NOT EXISTS misc (
         key_name        VARCHAR(50)  NOT NULL PRIMARY KEY,
         value           MEDIUMTEXT   NOT NULL
-        );
+        ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     `);
+    await dbQuery(`ALTER TABLE misc CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`).catch(() => {});
 
     console.table({
         discordToken:    {created: true},

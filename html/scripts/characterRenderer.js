@@ -4,7 +4,7 @@ import { loadItemGeometry } from '/resource/tgxmLoader.js';
 
 const CLASS_COLORS = { 0: 0x4466FF, 1: 0x44FF66, 2: 0xAA44FF };
 
-// colorOrConfig: [r,g,b,a] array OR { color, roughness, metalness }
+// colorOrConfig: [r,g,b,a] array OR { color, roughness, metalness } — flat fallback when no shader
 function applyPrimaryColor(group, colorOrConfig) {
     const cfg = Array.isArray(colorOrConfig)
         ? { color: colorOrConfig, roughness: null, metalness: null }
@@ -27,13 +27,203 @@ function applyPrimaryColor(group, colorOrConfig) {
             m.color.setRGB(r, g, b);
             m.metalness = cfg.metalness ?? 0.1;
             m.roughness = cfg.roughness ?? 0.6;
-            if (cfg.emissive) {
-                m.emissive.setRGB(cfg.emissive[0], cfg.emissive[1], cfg.emissive[2]);
-                m.emissiveIntensity = 0.25;
-            }
             obj.material = m;
         }
     });
+}
+
+function calcRoughness(params, remap) {
+    const raw = params[3] ?? 0.6;
+    if (!Array.isArray(remap) || remap.length < 4) return raw;
+    return Math.min(Math.max(raw * remap[1] + remap[0], Math.min(remap[2], remap[3])), Math.max(remap[2], remap[3]));
+}
+
+function liftDark(c) {
+    const luma = 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+    if (luma < 0.005) return [0.04, 0.04, 0.04];
+    if (luma < 0.04) {
+        const s = 0.04 / luma;
+        return [Math.min(c[0]*s, 1), Math.min(c[1]*s, 1), Math.min(c[2]*s, 1)];
+    }
+    return [c[0], c[1], c[2]];
+}
+
+// ---- Dye texture loading ----
+
+function _decodeBC1Block(data, off, out, bx, by, w, force4) {
+    const c0v=data[off]|data[off+1]<<8, c1v=data[off+2]|data[off+3]<<8;
+    const r0=(c0v>>11&31)*255/31|0, g0=(c0v>>5&63)*255/63|0, b0=(c0v&31)*255/31|0;
+    const r1=(c1v>>11&31)*255/31|0, g1=(c1v>>5&63)*255/63|0, b1=(c1v&31)*255/31|0;
+    const pal=[[r0,g0,b0,255],[r1,g1,b1,255],[0,0,0,255],[0,0,0,0]];
+    if (force4||c0v>c1v) {
+        pal[2]=[(2*r0+r1)/3|0,(2*g0+g1)/3|0,(2*b0+b1)/3|0,255];
+        pal[3]=[(r0+2*r1)/3|0,(g0+2*g1)/3|0,(b0+2*b1)/3|0,255];
+    } else { pal[2]=[(r0+r1)>>1,(g0+g1)>>1,(b0+b1)>>1,255]; }
+    for (let py=0;py<4;py++) {
+        const row=data[off+4+py];
+        for (let px=0;px<4;px++) {
+            const x=bx*4+px, y=by*4+py;
+            if (x>=w) continue;
+            const p=pal[(row>>(px*2))&3], i=(y*w+x)*4;
+            out[i]=p[0]; out[i+1]=p[1]; out[i+2]=p[2]; out[i+3]=p[3];
+        }
+    }
+}
+
+function _decodeBC3Block(data, off, out, bx, by, w) {
+    _decodeBC1Block(data, off+8, out, bx, by, w, true);
+    const a0=data[off],a1=data[off+1],ap=[a0,a1];
+    if (a0>a1) { for(let k=1;k<7;k++) ap.push(((7-k)*a0+k*a1)/7|0); }
+    else { for(let k=1;k<5;k++) ap.push(((5-k)*a0+k*a1)/5|0); ap.push(0,255); }
+    const ab=[data[off+2],data[off+3],data[off+4],data[off+5],data[off+6],data[off+7]];
+    for (let i=0;i<16;i++) {
+        const bit=i*3,b2=bit>>3,sh=bit&7;
+        const idx=sh<=5?(ab[b2]>>sh)&7:((ab[b2]>>sh)|(ab[b2+1]<<(8-sh)))&7;
+        const x=bx*4+(i&3),y=by*4+(i>>2);
+        if (x<w) out[(y*w+x)*4+3]=ap[idx];
+    }
+}
+
+function _decodeBC4Block(data, off, out, bx, by, w) {
+    const r0=data[off],r1=data[off+1],rp=[r0,r1];
+    if (r0>r1) { for(let k=1;k<7;k++) rp.push(((7-k)*r0+k*r1)/7|0); }
+    else { for(let k=1;k<5;k++) rp.push(((5-k)*r0+k*r1)/5|0); rp.push(0,255); }
+    const rb=[data[off+2],data[off+3],data[off+4],data[off+5],data[off+6],data[off+7]];
+    for (let i=0;i<16;i++) {
+        const bit=i*3,b2=bit>>3,sh=bit&7;
+        const idx=sh<=5?(rb[b2]>>sh)&7:((rb[b2]>>sh)|(rb[b2+1]<<(8-sh)))&7;
+        const x=bx*4+(i&3),y=by*4+(i>>2);
+        if (x<w) { const p=(y*w+x)*4; out[p]=out[p+1]=out[p+2]=rp[idx]; out[p+3]=255; }
+    }
+}
+
+async function loadDyeTexture(filename) {
+    try {
+        const r = await fetch(`/api/gear/Texture/${filename}`);
+        if (!r.ok) return null;
+        const buf = await r.arrayBuffer();
+        const b = new Uint8Array(buf);
+        if (b[0]!==84||b[1]!==71||b[2]!==88||b[3]!==77) return null;
+
+        const fOff=(b[8]|b[9]<<8|b[10]<<16|b[11]<<24)>>>0;
+        const fCnt=(b[12]|b[13]<<8|b[14]<<16|b[15]<<24)>>>0;
+        let meta=null, pix=null;
+        for (let f=0;f<fCnt;f++) {
+            const base=fOff+0x110*f;
+            let name=''; for (let i=0;i<256&&b[base+i];i++) name+=String.fromCharCode(b[base+i]);
+            const doff=(b[base+256]|b[base+257]<<8|b[base+258]<<16|b[base+259]<<24)>>>0;
+            const dsz =(b[base+264]|b[base+265]<<8|b[base+266]<<16|b[base+267]<<24)>>>0;
+            if (name.endsWith('.js')) meta=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,doff,dsz)));
+            else pix=new Uint8Array(buf,doff,dsz);
+        }
+        if (!meta||!pix) return null;
+
+        const w=meta.width??64, h=meta.height??64;
+        const fmt=String(meta.format??'').toUpperCase();
+        const tmp=new Uint8Array(w*h*4);
+        const bW=Math.ceil(w/4), bH=Math.ceil(h/4);
+
+        if (fmt.includes('BC1')||fmt==='71') {
+            for (let by=0;by<bH;by++) for (let bx=0;bx<bW;bx++)
+                _decodeBC1Block(pix,(by*bW+bx)*8,tmp,bx,by,w,false);
+        } else if (fmt.includes('BC3')||fmt==='77') {
+            for (let by=0;by<bH;by++) for (let bx=0;bx<bW;bx++)
+                _decodeBC3Block(pix,(by*bW+bx)*16,tmp,bx,by,w);
+        } else if (fmt.includes('BC4')||fmt==='80') {
+            for (let by=0;by<bH;by++) for (let bx=0;bx<bW;bx++)
+                _decodeBC4Block(pix,(by*bW+bx)*8,tmp,bx,by,w);
+        } else {
+            const raw=pix.slice(0,w*h*4);
+            if (fmt.includes('BGR')||fmt==='87') {
+                for (let i=0;i<raw.length;i+=4) { tmp[i]=raw[i+2];tmp[i+1]=raw[i+1];tmp[i+2]=raw[i];tmp[i+3]=raw[i+3]??255; }
+            } else { tmp.set(raw); }
+        }
+
+        // Flip Y: BC/image data is top-to-bottom, DataTexture expects bottom-to-top
+        const rgba=new Uint8Array(w*h*4);
+        for (let row=0;row<h;row++) rgba.set(tmp.subarray(row*w*4,(row+1)*w*4),(h-1-row)*w*4);
+
+        const tex=new THREE.DataTexture(rgba,w,h,THREE.RGBAFormat,THREE.UnsignedByteType);
+        tex.needsUpdate=true;
+        console.log(`[dye-tex] loaded ${filename} ${w}×${h} fmt=${fmt}`);
+        return tex;
+    } catch(e) {
+        console.warn('[dye-tex] failed:', e.message);
+        return null;
+    }
+}
+
+function makeDyeMaterial(cfg, dyeTex) {
+    const p = cfg.primary;
+    const s = cfg.secondary ?? cfg.primary;
+    const w = cfg.worn     ?? cfg.primary;
+    const pCol = liftDark(p.color), sCol = liftDark(s.color), wCol = liftDark(w.color);
+
+    const mat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide });
+    // Must be set before onBeforeCompile — defines determine which shader template is selected
+    if (dyeTex) mat.defines.USE_UV = '';
+    mat.onBeforeCompile = (shader) => {
+        shader.uniforms.u_pColor = { value: new THREE.Color(pCol[0], pCol[1], pCol[2]) };
+        shader.uniforms.u_sColor = { value: new THREE.Color(sCol[0], sCol[1], sCol[2]) };
+        shader.uniforms.u_wColor = { value: new THREE.Color(wCol[0], wCol[1], wCol[2]) };
+        shader.uniforms.u_pRough = { value: p.roughness ?? 0.6 };
+        shader.uniforms.u_sRough = { value: s.roughness ?? p.roughness ?? 0.6 };
+        shader.uniforms.u_pMetal = { value: p.metalness ?? 0.1 };
+        shader.uniforms.u_sMetal = { value: s.metalness ?? p.metalness ?? 0.1 };
+
+        if (dyeTex) {
+            shader.uniforms.u_dyeMap = { value: dyeTex };
+            const fp =
+                'uniform vec3 u_pColor, u_sColor, u_wColor;\n' +
+                'uniform float u_pRough, u_sRough, u_pMetal, u_sMetal;\n' +
+                'uniform sampler2D u_dyeMap;\n';
+            shader.fragmentShader = fp + shader.fragmentShader
+                .replace('#include <color_fragment>', `
+#include <color_fragment>
+{
+  vec3 zm = texture2D(u_dyeMap, vUv).rgb;
+  float pm = clamp(zm.r, 0.0, 1.0);
+  float sm = clamp(zm.g, 0.0, 1.0);
+  float wm = clamp(1.0 - pm - sm, 0.0, 1.0);
+  diffuseColor.rgb = u_pColor * pm + u_sColor * sm + u_wColor * wm;
+}`)
+                .replace('#include <roughnessmap_fragment>', `
+#include <roughnessmap_fragment>
+{ float pm=clamp(texture2D(u_dyeMap,vUv).r,0.0,1.0); roughnessFactor=u_pRough*pm+u_sRough*(1.0-pm); }`)
+                .replace('#include <metalnessmap_fragment>', `
+#include <metalnessmap_fragment>
+{ float pm=clamp(texture2D(u_dyeMap,vUv).r,0.0,1.0); metalnessFactor=u_pMetal*pm+u_sMetal*(1.0-pm); }`);
+        } else {
+            // Vertex mask fallback: color0.g=primary, color0.b=secondary (currently all G=1 → all primary)
+            shader.vertexShader =
+                'attribute vec4 dyeMask;\nvarying vec4 vDyeMask;\n' +
+                shader.vertexShader.replace('void main() {', 'void main() {\n  vDyeMask = dyeMask;');
+            const fp =
+                'varying vec4 vDyeMask;\n' +
+                'uniform vec3 u_pColor, u_sColor, u_wColor;\n' +
+                'uniform float u_pRough, u_sRough, u_pMetal, u_sMetal;\n';
+            shader.fragmentShader = fp + shader.fragmentShader
+                .replace('#include <color_fragment>', `
+#include <color_fragment>
+{
+  float pm=clamp(vDyeMask.g,0.0,1.0); float sm=clamp(vDyeMask.b,0.0,1.0);
+  diffuseColor.rgb=u_pColor*pm+u_sColor*sm+u_wColor*clamp(1.0-pm-sm,0.0,1.0);
+}`)
+                .replace('#include <roughnessmap_fragment>', `
+#include <roughnessmap_fragment>
+{ float pm=clamp(vDyeMask.g,0.0,1.0); roughnessFactor=u_pRough*pm+u_sRough*(1.0-pm); }`)
+                .replace('#include <metalnessmap_fragment>', `
+#include <metalnessmap_fragment>
+{ float pm=clamp(vDyeMask.g,0.0,1.0); metalnessFactor=u_pMetal*pm+u_sMetal*(1.0-pm); }`);
+        }
+    };
+    mat.customProgramCacheKey = () => `dye:${dyeTex?'tex':'vtx'}:${pCol}:${sCol}:${wCol}:${p.roughness}:${p.metalness}`;
+    return mat;
+}
+
+function applyDyeColor(group, cfg, dyeTex) {
+    const mat = makeDyeMaterial(cfg, dyeTex);
+    group.traverse(obj => { if (obj.isMesh) obj.material = mat; });
 }
 
 function buildHumanoidRig(classType) {
@@ -105,29 +295,31 @@ const WEAPON_SLOT_ORDER = [
     953998645,  // Power
 ];
 
-let _assetDumped = false;
 async function loadGearItem(itemHash, visualHash) {
     const hash = visualHash ?? itemHash;
     let assetResp = await fetch(`/api/gear/assets/${hash}`);
-    // Cosmetic override failed — fall back to base geometry
-    if (!assetResp.ok && hash !== itemHash) {
-        assetResp = await fetch(`/api/gear/assets/${itemHash}`);
-    }
+    if (!assetResp.ok && hash !== itemHash) assetResp = await fetch(`/api/gear/assets/${itemHash}`);
     if (!assetResp.ok) return null;
     const asset = await assetResp.json();
-    if (!_assetDumped) {
-        _assetDumped = true;
-        console.log('[asset] full structure for', hash, JSON.stringify(asset));
-    }
+
     const geomFiles = asset?.content?.[0]?.geometry ?? [];
     if (!geomFiles.length) return null;
 
-    const g = new THREE.Group();
-    g.rotation.x = -Math.PI / 2;
-    await Promise.allSettled(geomFiles.map(async f => {
-        try { const m = await loadItemGeometry(f); if (m) g.add(m); } catch {}
-    }));
-    return g.children.length ? g : null;
+    const allTex  = asset?.content?.[0]?.textures ?? [];
+    const dyeIdxs = asset?.content?.[0]?.dye_index_set?.textures ?? [];
+    const dyeFile = dyeIdxs.length ? allTex[dyeIdxs[0]] : null;
+
+    const [group, dyeTex] = await Promise.all([
+        (async () => {
+            const g = new THREE.Group();
+            g.rotation.x = -Math.PI / 2;
+            try { const m = await loadItemGeometry(geomFiles[0]); if (m) g.add(m); } catch {}
+            return g.children.length ? g : null;
+        })(),
+        dyeFile ? loadDyeTexture(dyeFile) : Promise.resolve(null),
+    ]);
+
+    return group ? { group, dyeTex } : null;
 }
 
 async function loadCharacterGear(equipment, fallbackColor) {
@@ -135,26 +327,29 @@ async function loadCharacterGear(equipment, fallbackColor) {
 
     const [armorParts, weaponGroups] = await Promise.all([
         Promise.allSettled(armorItems.map(async item => {
-            const g = await loadGearItem(item.itemHash, item.visualHash);
-            if (g) {
-                const mat = await getShaderColor(item.plugHashes ?? []);
-                const color = mat ?? fallbackColor;
-                if (color) applyPrimaryColor(g, color);
+            const result = await loadGearItem(item.itemHash, item.visualHash);
+            if (result) {
+                const { group: g, dyeTex } = result;
+                const dyeSpec = await getShaderColor(item.plugHashes ?? []);
+                if (dyeSpec) applyDyeColor(g, dyeSpec, dyeTex);
+                else if (fallbackColor) applyPrimaryColor(g, fallbackColor);
+                return g;
             }
-            return g;
+            return null;
         })),
         Promise.all(WEAPON_SLOT_ORDER.map(async bucket => {
             const item = equipment.find(i => i.bucketHash === bucket);
             if (!item) return null;
             try {
-                const g = await loadGearItem(item.itemHash, item.visualHash);
-                if (g) {
-                    const shaderMat = await getShaderColor(item.plugHashes ?? []);
-                    const mat = shaderMat ?? await fetchItemGearColor(item.visualHash ?? item.itemHash);
-                    const color = mat ?? fallbackColor;
-                    if (color) applyPrimaryColor(g, color);
+                const result = await loadGearItem(item.itemHash, item.visualHash);
+                if (result) {
+                    const { group: g, dyeTex } = result;
+                    const dyeSpec = await getShaderColor(item.plugHashes ?? []) ?? await fetchItemGearColor(item.visualHash ?? item.itemHash);
+                    if (dyeSpec) applyDyeColor(g, dyeSpec, dyeTex);
+                    else if (fallbackColor) applyPrimaryColor(g, fallbackColor);
+                    return g;
                 }
-                return g;
+                return null;
             } catch { return null; }
         })),
     ]);
@@ -206,6 +401,9 @@ function initScene(canvas) {
         const h = canvas.clientHeight || 500;
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        renderer.outputColorSpace    = THREE.SRGBColorSpace;
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(w, h, false);
         renderer.setClearColor(0x0c0c14, 1);
@@ -326,21 +524,28 @@ async function getShaderColor(plugHashes) {
                 if (!dr.ok) { console.log(`[shader] ${ph} desc HTTP ${dr.status}`); return null; }
                 const desc = await dr.json();
                 console.log(`[shader] ${ph} material_properties:`, JSON.stringify(desc?.default_dyes?.[0]?.material_properties));
-                const mp  = desc?.default_dyes?.[0]?.material_properties ?? {};
-                const tint = mp.primary_albedo_tint;
-                if (!Array.isArray(tint) || tint.length < 3) return null;
-                // primary_material_params = [metallic, roughness, specular_intensity, ?]
-                const matParams = mp.primary_material_params ?? [];
-                const emissive  = mp.primary_emissive_tint_color_and_intensity_bias;
-                // [1,1,1,1] is the neutral/no-emissive default; anything else is a real glow color.
-                // Emissive needs the texture mask to look correct so we apply at low constant intensity.
-                const hasEmissive = Array.isArray(emissive) &&
-                    !(emissive[0] === 1 && emissive[1] === 1 && emissive[2] === 1);
+                const mp    = desc?.default_dyes?.[0]?.material_properties ?? {};
+                const pTint = mp.primary_albedo_tint;
+                if (!Array.isArray(pTint) || pTint.length < 3) return null;
+                const pParams = mp.primary_material_params ?? [];
+                const sTint   = mp.secondary_albedo_tint;
+                const sParams = mp.secondary_material_params ?? [];
+                const wTint   = mp.primary_worn_albedo_tint;
+                console.log(`[shader-zones] ${ph} pri`, pTint.slice(0,3).map(v=>v.toFixed(3)), 'sec', sTint?.slice(0,3).map(v=>v.toFixed(3)));
                 return {
-                    color:     [tint[0], tint[1], tint[2], tint[3] ?? 1.0],
-                    metalness: matParams[0] ?? 0.1,
-                    roughness: matParams[1] ?? 0.6,
-                    emissive:  hasEmissive ? [emissive[0], emissive[1], emissive[2]] : null,
+                    primary: {
+                        color:     [pTint[0], pTint[1], pTint[2], pTint[3] ?? 1.0],
+                        metalness: pParams[0] ?? 0.1,
+                        roughness: calcRoughness(pParams, mp.primary_roughness_remap),
+                    },
+                    secondary: Array.isArray(sTint) && sTint.length >= 3 ? {
+                        color:     [sTint[0], sTint[1], sTint[2], sTint[3] ?? 1.0],
+                        metalness: sParams[0] ?? 0.1,
+                        roughness: calcRoughness(sParams, mp.secondary_roughness_remap),
+                    } : null,
+                    worn: Array.isArray(wTint) && wTint.length >= 3 ? {
+                        color: [wTint[0], wTint[1], wTint[2], wTint[3] ?? 1.0],
+                    } : null,
                 };
             } catch(e) { console.log(`[shader] ${ph} error:`, e); return null; }
         })();
@@ -364,14 +569,27 @@ async function fetchItemGearColor(itemHash) {
             const dr = await fetch(`/api/gear/gear-desc/${gf}`);
             if (!dr.ok) return null;
             const desc = await dr.json();
-            const mp   = desc?.default_dyes?.[0]?.material_properties ?? {};
-            const tint = mp.primary_albedo_tint;
-            if (!Array.isArray(tint) || tint.length < 3) return null;
-            const matParams = mp.primary_material_params ?? [];
+            const mp    = desc?.default_dyes?.[0]?.material_properties ?? {};
+            const pTint = mp.primary_albedo_tint;
+            if (!Array.isArray(pTint) || pTint.length < 3) return null;
+            const pParams = mp.primary_material_params ?? [];
+            const sTint   = mp.secondary_albedo_tint;
+            const sParams = mp.secondary_material_params ?? [];
+            const wTint   = mp.primary_worn_albedo_tint;
             return {
-                color:     [tint[0], tint[1], tint[2], tint[3] ?? 1.0],
-                metalness: matParams[0] ?? 0.1,
-                roughness: matParams[1] ?? 0.6,
+                primary: {
+                    color:     [pTint[0], pTint[1], pTint[2], pTint[3] ?? 1.0],
+                    metalness: pParams[0] ?? 0.1,
+                    roughness: calcRoughness(pParams, mp.primary_roughness_remap),
+                },
+                secondary: Array.isArray(sTint) && sTint.length >= 3 ? {
+                    color:     [sTint[0], sTint[1], sTint[2], sTint[3] ?? 1.0],
+                    metalness: sParams[0] ?? 0.1,
+                    roughness: calcRoughness(sParams, mp.secondary_roughness_remap),
+                } : null,
+                worn: Array.isArray(wTint) && wTint.length >= 3 ? {
+                    color: [wTint[0], wTint[1], wTint[2], wTint[3] ?? 1.0],
+                } : null,
             };
         } catch { return null; }
     })();

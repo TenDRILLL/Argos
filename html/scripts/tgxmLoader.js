@@ -116,6 +116,7 @@ function buildBufferGeometry(verts, indices, posOff, posScl, tcSu, tcSv, tcOu, t
     const positions = new Float32Array(vc * 3);
     const normals   = new Float32Array(vc * 3);
     const uvs       = new Float32Array(vc * 2);
+    const dyeMasks  = new Float32Array(vc * 4);
     let hasNormals = false;
 
     for (let v = 0; v < vc; v++) {
@@ -138,13 +139,19 @@ function buildBufferGeometry(verts, indices, posOff, posScl, tcSu, tcSv, tcOu, t
             hasNormals = true;
         }
 
-        // color0 is AO/material-mask data (R=AO, G=primary dye mask, B=secondary dye mask),
-        // not painted RGB color — do not apply as vertexColors.
+        // color0: R=AO, G=primary dye zone mask, B=secondary dye zone mask, A=worn/emissive.
+        // Default [1,1,0,0] = full AO, fully primary zone, no secondary or worn.
+        const c = vt.color0 ?? [1, 1, 0, 0];
+        dyeMasks[v*4]   = c[0] ?? 1;
+        dyeMasks[v*4+1] = c[1] ?? 1;
+        dyeMasks[v*4+2] = c[2] ?? 0;
+        dyeMasks[v*4+3] = c[3] ?? 0;
     }
 
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geo.setAttribute('uv',       new THREE.BufferAttribute(uvs,       2));
+    geo.setAttribute('dyeMask',  new THREE.BufferAttribute(dyeMasks,  4));
     geo.setIndex(indices);
     if (hasNormals) {
         geo.setAttribute('normal', new THREE.BufferAttribute(normals, 3));

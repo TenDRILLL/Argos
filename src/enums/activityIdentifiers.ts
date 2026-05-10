@@ -20,6 +20,10 @@ const rawIdentifiers = new Map<string, number[]>([
     ["King's Fall, Master",[2964135793]],
     ["Root of Nightmares", [2381413764]],
     ["Crota's End", [4179289725]],
+    ["Salvation's Edge", [2192826039, 1541433876, 940375169]],
+    ["Salvation's Edge, Master", [4129614942]],
+    ["The Desert Perpetual", [1044919065, 3896382790]],
+    ["The Desert Perpetual, Epic", [3817322389, 2586252122]],
 
     ["The Glassway", [4197461112, 3812135451]],
     ["The Lightblade", [968885838, 1964120205]],
@@ -44,6 +48,21 @@ const rawIdentifiers = new Map<string, number[]>([
     ["Tree of Probabilities", [2023667984, 2660931443]],
     ["Strange Terrain", [3883876601]],
     ["A Garden World", [1002842615, 2533203708]],
+    ["Battleground: Behemoth", [8957763]],
+    ["Battleground: Foothold", [3580217919]],
+    ["Battleground: Hailstone", [798920782]],
+    ["Battleground: Oracle", [284866935]],
+    ["Defiant Battleground: Cosmodrome", [3640623961]],
+    ["Defiant Battleground: EDZ", [952545351]],
+    ["Defiant Battleground: Orbital Prison", [2619900708]],
+    ["Heist Battleground: Europa", [247753793]],
+    ["Heist Battleground: Mars", [446038093]],
+    ["Heist Battleground: Moon", [3181063546]],
+    ["HyperNet Current", [2082796332, 2389570605]],
+    ["Liminality", [1700470403]],
+    ["The Sunless Cell", [2438990097]],
+    ["PsiOps Battleground: EDZ", [2944405548]],
+    ["PsiOps Battleground: Moon", [3410113364]],
 
     ["The Whisper", [74501540]],
     ["The Whisper, Heroic", [1099555105]],
@@ -57,7 +76,17 @@ const rawIdentifiers = new Map<string, number[]>([
     ["Prophecy", [1077850348,4148187374]],
     ["Grasp of Avarice", [4078656646]],
     ["Duality", [2823159265]],
-    ["Warlord's Ruin", [2004855007]]
+    ["Warlord's Ruin", [2004855007]],
+    ["Spire of the Watcher", [1262462921]],
+    ["Spire of the Watcher, Master", [2296818662]],
+    ["Ghosts of the Deep", [313828469]],
+    ["Ghosts of the Deep, Master", [2716998124]],
+    ["Vesper's Host", [300092127, 1915770060, 3492566689]],
+    ["Vesper's Host, Master", [4293676253]],
+    ["Sundered Doctrine", [3834447244, 247869137]],
+    ["Sundered Doctrine, Master", [3521648250]],
+    ["Equilibrium", [2727361621]],
+    ["Equilibrium, Contest", [1754635208]],
 ]);
 
 function buildActivityIdentifierDB(): Map<string, ActivityIdentifierObject> {
@@ -67,7 +96,7 @@ function buildActivityIdentifierDB(): Map<string, ActivityIdentifierObject> {
     const heroicTest = /Heroic/;
     let i = 0;
     for (const [originalKey, ids] of rawIdentifiers) {
-        const type = i <= 18 ? 0 : (i <= 40 ? 2 : 1);
+        const type = i <= 22 ? 0 : (i <= 59 ? 2 : 1);
         let key = originalKey;
         if (masterTest.test(key) || prestigeTest.test(key) || heroicTest.test(key)) {
             key = key.substring(0, key.lastIndexOf(","));

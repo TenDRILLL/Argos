@@ -199,7 +199,7 @@ async function generateFields(
 
 async function getWeaponInfo(weaponID: number): Promise<EntityQuery> {
     return new Promise<EntityQuery>(res => {
-        bungieAPI.apiRequest("getEntity", { hashIdentifier: weaponID }).then(u => {
+        bungieAPI.apiRequest("getDestinyEntityDefinition", { entityType: "DestinyInventoryItemDefinition", hashIdentifier: weaponID }).then(u => {
             res(u.Response as EntityQuery);
         }).catch(e => console.log(e));
     });
