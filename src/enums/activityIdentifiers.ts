@@ -1,4 +1,6 @@
-export const activityIdentifiers = new Map<string, number[]>([
+import { ActivityIdentifierObject } from "../structs/ActivityIdentifierObject";
+
+const rawIdentifiers = new Map<string, number[]>([
     ["Leviathan",[2693136600,2693136601,2693136602,2693136603,2693136604,2693136605]],
     ["Leviathan, Prestige", [417231112,508802457,757116822,771164842,1685065161,1800508819,2449714930,3446541099,3857338478,3879860661,3912437239,4206123728]],
     ["Leviathan, Eater of Worlds",[3089205900]],
@@ -18,6 +20,10 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["King's Fall, Master",[2964135793]],
     ["Root of Nightmares", [2381413764]],
     ["Crota's End", [4179289725]],
+    ["Salvation's Edge", [2192826039, 1541433876, 940375169]],
+    ["Salvation's Edge, Master", [4129614942]],
+    ["The Desert Perpetual", [1044919065, 3896382790]],
+    ["The Desert Perpetual, Epic", [3817322389, 2586252122]],
 
     ["The Glassway", [4197461112, 3812135451]],
     ["The Lightblade", [968885838, 1964120205]],
@@ -42,6 +48,21 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["Tree of Probabilities", [2023667984, 2660931443]],
     ["Strange Terrain", [3883876601]],
     ["A Garden World", [1002842615, 2533203708]],
+    ["Battleground: Behemoth", [8957763]],
+    ["Battleground: Foothold", [3580217919]],
+    ["Battleground: Hailstone", [798920782]],
+    ["Battleground: Oracle", [284866935]],
+    ["Defiant Battleground: Cosmodrome", [3640623961]],
+    ["Defiant Battleground: EDZ", [952545351]],
+    ["Defiant Battleground: Orbital Prison", [2619900708]],
+    ["Heist Battleground: Europa", [247753793]],
+    ["Heist Battleground: Mars", [446038093]],
+    ["Heist Battleground: Moon", [3181063546]],
+    ["HyperNet Current", [2082796332, 2389570605]],
+    ["Liminality", [1700470403]],
+    ["The Sunless Cell", [2438990097]],
+    ["PsiOps Battleground: EDZ", [2944405548]],
+    ["PsiOps Battleground: Moon", [3410113364]],
 
     ["The Whisper", [74501540]],
     ["The Whisper, Heroic", [1099555105]],
@@ -55,91 +76,111 @@ export const activityIdentifiers = new Map<string, number[]>([
     ["Prophecy", [1077850348,4148187374]],
     ["Grasp of Avarice", [4078656646]],
     ["Duality", [2823159265]],
-    ["Warlord's Ruin", [2004855007]]
+    ["Warlord's Ruin", [2004855007]],
+    ["Spire of the Watcher", [1262462921]],
+    ["Spire of the Watcher, Master", [2296818662]],
+    ["Ghosts of the Deep", [313828469]],
+    ["Ghosts of the Deep, Master", [2716998124]],
+    ["Vesper's Host", [300092127, 1915770060, 3492566689]],
+    ["Vesper's Host, Master", [4293676253]],
+    ["Sundered Doctrine", [3834447244, 247869137]],
+    ["Sundered Doctrine, Master", [3521648250]],
+    ["Equilibrium", [2727361621]],
+    ["Equilibrium, Contest", [1754635208]],
 ]);
 
-export const directActivityModeType = new Map<string, number>([
-    ["None", 0],
-    ["Story", 2],
-    ["Strike", 3],
-    ["Raid", 4],
-    ["AllPvP", 5],
-    ["Patrol", 6],
-    ["AllPvE", 7],
-    ["Reserved9", 9],
-    ["Control", 10],
-    ["Reserved11", 11],
-    ["Clash", 12],
-    ["Reserved13", 13],
-    ["CrimsonDoubles", 15],
-    ["Nightfall", 16],
-    ["HeroicNightfall", 17],
-    ["AllStrikes", 18],
-    ["IronBanner", 19],
-    ["Reserved20", 20],
-    ["Reserved21", 21],
-    ["Reserved22", 22],
-    ["Reserved24", 24],
-    ["AllMayhem", 25],
-    ["Reserved26", 26],
-    ["Reserved27", 27],
-    ["Reserved28", 28],
-    ["Reserved29", 29],
-    ["Reserved30", 30],
-    ["Supremacy", 31],
-    ["PrivateMatchesAll", 32],
-    ["Survival", 37],
-    ["Countdown", 38],
-    ["TrialsOfTheNine", 39],
-    ["Social", 40],
-    ["TrialsCountdown", 41],
-    ["TrialsSurvival", 42],
-    ["IronBannerControl", 43],
-    ["IronBannerClash", 44],
-    ["IronBannerSupremacy", 45],
-    ["ScoredNightfall", 46],
-    ["ScoredHeroicNightfall", 47],
-    ["Rumble", 48],
-    ["AllDoubles", 49],
-    ["Doubles", 50],
-    ["PrivateMatchesClash", 51],
-    ["PrivateMatchesControl", 52],
-    ["PrivateMatchesSupremacy", 53],
-    ["PrivateMatchesCountdown", 54],
-    ["PrivateMatchesSurvival", 55],
-    ["PrivateMatchesMayhem", 56],
-    ["PrivateMatchesRumble", 57],
-    ["HeroicAdventure", 58],
-    ["Showdown", 59],
-    ["Lockdown", 60],
-    ["Scorched", 61],
-    ["ScorchedTeam", 62],
-    ["Gambit", 63],
-    ["AllPvECompetitive", 64],
-    ["Breakthrough", 65],
-    ["BlackArmoryRun", 66],
-    ["Salvage", 67],
-    ["IronBannerSalvage", 68],
-    ["PvPCompetitive", 69],
-    ["PvPQuickplay", 70],
-    ["ClashQuickplay", 71],
-    ["ClashCompetitive", 72],
-    ["ControlQuickplay", 73],
-    ["ControlCompetitive", 74],
-    ["GambitPrime", 75],
-    ["Reckoning", 76],
-    ["Menagerie", 77],
-    ["VexOffensive", 78],
-    ["NightmareHunt", 79],
-    ["Elimination", 80],
-    ["Momentum", 81],
-    ["Dungeon", 82],
-    ["Sundial", 83],
-    ["TrialsOfOsiris", 84],
-    ["Dares", 85],
-    ["Offensive", 86],
-    ["LostSector", 87],
-    ["Rift", 88],
-    ["ZoneControl", 89],
-    ["IronBannerRift", 90]
-]);
+function buildActivityIdentifierDB(): Map<string, ActivityIdentifierObject> {
+    const db = new Map<string, ActivityIdentifierObject>();
+    const masterTest = /Master/;
+    const prestigeTest = /Prestige/;
+    const heroicTest = /Heroic/;
+    let i = 0;
+    for (const [originalKey, ids] of rawIdentifiers) {
+        const type = i <= 22 ? 0 : (i <= 59 ? 2 : 1);
+        let key = originalKey;
+        if (masterTest.test(key) || prestigeTest.test(key) || heroicTest.test(key)) {
+            key = key.substring(0, key.lastIndexOf(","));
+        }
+        const saved: ActivityIdentifierObject = db.get(key) ?? { IDs: [], type, difficultName: "", difficultIDs: [] };
+        if (masterTest.test(originalKey)) {
+            saved.difficultName = "Master";
+            ids.forEach(id => saved.difficultIDs.push(id));
+        }
+        if (prestigeTest.test(originalKey)) {
+            saved.difficultName = "Prestige";
+            ids.forEach(id => saved.difficultIDs.push(id));
+        }
+        if (heroicTest.test(originalKey)) {
+            saved.difficultName = "Heroic";
+            ids.forEach(id => saved.difficultIDs.push(id));
+        }
+        ids.forEach(id => { if (!saved.IDs.includes(id)) saved.IDs.push(id); });
+        db.set(key, saved);
+        i++;
+    }
+    return db;
+}
+
+export const activityIdentifierDB = buildActivityIdentifierDB();
+
+const MODE_RAID      = 4;
+const MODE_DUNGEON   = 82;
+const MODE_NIGHTFALL = 46;
+const GM_LIGHT_FLOOR = 1580; //Bump if new GMs missing
+const DIFFICULT_TEST = /,\s*(Master|Prestige|Heroic|Contest|Epic)$/;
+
+export interface ManifestNewEntry {
+    name: string;
+    type: 0 | 1 | 2;
+    IDs: number[];
+    difficultName: string;
+    difficultIDs: number[];
+}
+
+export function buildFromManifest(defs: Record<string, any>): { raids: number; dungeons: number; gms: number; newEntries: ManifestNewEntry[] } {
+    // seed from static rawIdentifiers so historical activities (e.g. sunset raids) are never lost
+    const next = buildActivityIdentifierDB();
+    const staticKeys = new Set(next.keys());
+
+    for (const def of Object.values(defs)) {
+        const modes: number[]     = def.activityModeTypes ?? [];
+        const name: string        = def.displayProperties?.name ?? "";
+        const hash: number        = def.hash;
+        const isPlaylist: boolean = def.isPlaylist ?? true;
+        const lightLevel: number  = def.activityLightLevel ?? 0;
+
+        if (!name || isPlaylist) continue;
+
+        let type: number;
+        if      (modes.includes(MODE_RAID))                                      type = 0;
+        else if (modes.includes(MODE_DUNGEON))                                   type = 1;
+        else if (modes.includes(MODE_NIGHTFALL) && lightLevel >= GM_LIGHT_FLOOR) type = 2;
+        else continue;
+
+        const match     = name.match(DIFFICULT_TEST);
+        const baseKey   = match ? name.substring(0, name.lastIndexOf(",")).trim() : name;
+        const difficult = match?.[1] ?? null;
+
+        const entry = next.get(baseKey) ?? { IDs: [], type, difficultName: "", difficultIDs: [] };
+        if (difficult) {
+            entry.difficultName = difficult;
+            if (!entry.difficultIDs.includes(hash)) entry.difficultIDs.push(hash);
+        } else {
+            if (!entry.IDs.includes(hash)) entry.IDs.push(hash);
+        }
+        next.set(baseKey, entry);
+    }
+
+    activityIdentifierDB.clear();
+    for (const [k, v] of next) activityIdentifierDB.set(k, v);
+
+    const newEntries: ManifestNewEntry[] = [];
+    let raids = 0, dungeons = 0, gms = 0;
+    for (const [key, v] of activityIdentifierDB) {
+        if      (v.type === 0) raids++;
+        else if (v.type === 1) dungeons++;
+        else                   gms++;
+        if (!staticKeys.has(key)) newEntries.push({ name: key, type: v.type as 0 | 1 | 2, IDs: v.IDs, difficultName: v.difficultName, difficultIDs: v.difficultIDs });
+    }
+    return { raids, dungeons, gms, newEntries };
+}

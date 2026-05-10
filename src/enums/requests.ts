@@ -1,17 +1,15 @@
 const apiRoot = "https://www.bungie.net/platform";
 
 const requests = new Map();
-requests.set("getBungieProfile","/User/GetBungieNetUserById/id");
-requests.set("getBungieLinkedProfiles","/Destiny2/membershipType/Profile/membershipId/LinkedProfiles");
+requests.set("getBungieProfile","/User/GetBungieNetUserById/id/");
+requests.set("getBungieLinkedProfiles","/Destiny2/membershipType/Profile/membershipId/LinkedProfiles/");
 requests.set("getDestinyCharacters","/Destiny2/membershipType/Account/destinyMembershipId/Stats/");
-requests.set("getDestinyProfile", "/Destiny2/membershipType/Profile/destinyMembershipId?components=100");
-requests.set("getDestinyMetrics","/Destiny2/membershipType/Profile/destinyMembershipId?components=205");
-requests.set("getDestinyInventory", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/?components=200,205")
-requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats");
-requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/UniqueWeapons");
-requests.set("getEntity","/Destiny2/Manifest/DestinyInventoryItemDefinition/hashIdentifier/");
+requests.set("getDestinyProfile", "/Destiny2/membershipType/Profile/destinyMembershipId/?components=100");
+requests.set("getDestinyInventory", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/?components=200,203,205,300,303,304,305")
+requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats/");
+requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/UniqueWeapons/");
 requests.set("getManifests","/Destiny2/Manifest/");
-requests.set("getDestinyEntityDefinition","/Destiny2/Manifest/entityType/hashIdentifier");
+requests.set("getDestinyEntityDefinition","/Destiny2/Manifest/entityType/hashIdentifier/");
 requests.set("getGroupMembers", "/GroupV2/groupId/Members/");
 requests.set("getPendingClanInvites", "/GroupV2/groupId/Members/Pending/");
 requests.set("approveClanMember","/GroupV2/groupId/Members/ApproveList/");

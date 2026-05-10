@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta content="Venerity panel" property="og:title" />
+        <meta content="https://api.venerity.xyz/panel" property="og:url" />
+        <meta content="https://cdn.discordapp.com/attachments/1045010061799460864/1062832377262526535/crotalogo.jpg" property="og:image" />
+        <meta content="#ae27ff" data-react-helmet="true" name="theme-color" />
+        <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
+        <title>Loading...</title>
+        <link rel="stylesheet" type="text/css" href="/resource/preload.css"/>
+    </head>
+    <body>
+        <div class="container">
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+        <div class="circle c3"></div>
+        <div class="circle c4"></div>
+        <div class="shape_group">
+            <div class="shape s1"></div>
+            <div class="shape s2"></div>
+            <div class="shape s3"></div>
+            <div class="shape s4"></div>
+            <div class="shape s5"></div>
+            <div class="shape s6"></div>
+        </div>
+        <div class="line_group g1">
+            <div class="line l1"></div>
+            <div class="line l2"></div>
+            <div class="line l3"></div>
+            <div class="line l4"></div>
+        </div>
+        <div class="line_group g2">
+            <div class="line l1"></div>
+            <div class="line l2"></div>
+            <div class="line l3"></div>
+            <div class="line l4"></div>
+        </div>
+        <div class="line_group g3">
+            <div class="line l1"></div>
+            <div class="line l2"></div>
+            <div class="line l3"></div>
+            <div class="line l4"></div>
+        </div>
+        </div>
+        <script>
+            window.onload = function(url) {
+                const container = document.querySelector(".container");
+                container.classList.add("startup");
+                let classNames = ["startup","warlock", "titan", "hunter","default"];
+                let i = 0;
+                const timeOut = 100;
+                const changeClass = () => {
+                    container.classList.remove(classNames[i]);
+                    i = i < classNames.length - 1 ? i + 1 : 0;
+                    container.classList.add(classNames[i]);
+                };
+                const initialize = () => {
+                    container.classList.remove("startup");
+                    container.classList.add(classNames[i+1]);
+                }
+                window.location= "<%= url %>"
+                setTimeout(() => {initialize(); classNames = classNames.splice(1, classNames.length);}, timeOut)
+                setInterval(changeClass, 3000);
+            }
+        </script>
+    </body>
+</html>
