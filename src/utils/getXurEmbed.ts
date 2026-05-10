@@ -42,6 +42,7 @@ export async function getXurEmbed(client: Client): Promise<EmbedBuilder> {
     const data = info.categories.data.categories[0].itemIndexes
         .concat(info.categories.data.categories[1].itemIndexes)
         .filter(e => e != 0)
+        .filter(index => salesData[index] && socketsData[index] && statsData[index])
         .map(index => ({
             itemHash: salesData[index].itemHash as number,
             sockets: socketsData[index].sockets as SocketComponents[],

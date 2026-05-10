@@ -5,6 +5,7 @@ import {
     ModalSubmitInteraction,
     AutocompleteInteraction,
     ActionRowBuilder,
+    ApplicationCommandOptionType,
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
@@ -63,7 +64,29 @@ function buildLFGModal(customId: string, title: string, defaults?: { size?: stri
 
 export default class LFG extends DiscordCommand {
     constructor() {
-        super("lfg", { name: "lfg", description: "Looking for group." });
+        super("lfg", {
+            name: "lfg",
+            description: "Access LFG commands.",
+            options: [
+                {
+                    name: "create",
+                    description: "Create an LFG.",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        { name: "type", description: "Type of an activity to create an LFG for.", type: ApplicationCommandOptionType.String, autocomplete: true, required: true },
+                        { name: "activity", description: "The activity to create an LFG for.", type: ApplicationCommandOptionType.String, autocomplete: true, required: true }
+                    ]
+                },
+                {
+                    name: "timezone",
+                    description: "Set your timezone for LFG.",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        { name: "set", description: "Set your timezone for LFG.", type: ApplicationCommandOptionType.String, autocomplete: true, required: true }
+                    ]
+                }
+            ]
+        });
     }
 
     async chatInput(interaction: ChatInputCommandInteraction) {
@@ -101,7 +124,7 @@ export default class LFG extends DiscordCommand {
 
             await interaction.showModal(buildLFGModal(`lfg-${activity}`, "LFG Creation"));
         } else if (subcommand === "timezone") {
-            const tz = interaction.options.getString("timezone", true);
+            const tz = interaction.options.getString("set", true);
             await dbQuery("UPDATE users SET timezone = ? WHERE discord_id = ?", [tz, userId]);
             interaction.reply({ content: `Saved timezone: ${tz}`, flags: MessageFlags.Ephemeral });
         }

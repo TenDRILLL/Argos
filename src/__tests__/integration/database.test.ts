@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { setupTestDb, teardownTestDb } from "../helpers/db";
 import { initDatabase, dbQuery, dbTransaction } from "../../automata/Database";
 
-const dbAvailable = !!(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
+const dbAvailable = !!(process.env.ARGOS_RUN_INTEGRATION && process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
 
 const maybeDescribe = dbAvailable ? describe : describe.skip;
 

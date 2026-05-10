@@ -15,7 +15,16 @@ const mockApiRequest = mock(async (endpoint: string) => {
         };
     }
     if (endpoint === "getDestinyInventory") {
-        return { Response: {}, ThrottleSeconds: 0, ErrorCode: 1 };
+        return {
+            Response: {
+                character: { data: { characterId: "char1", classHash: 671679327, light: 1810, emblemBackgroundPath: "/img/test", stats: {}, titleRecordHash: 0 } },
+                characterRenderData: { data: null },
+                equipment: { data: { items: [] } },
+                itemComponents: null
+            },
+            ThrottleSeconds: 0,
+            ErrorCode: 1
+        };
     }
     if (endpoint === "getManifests") {
         return {

@@ -4,7 +4,7 @@ import express from "express";
 import catchallRouter from "../../web/endpoints/catchall";
 
 const app = express();
-app.use("*", catchallRouter);
+app.use(catchallRouter);
 
 describe("catchall router", () => {
     it("GET /unknown redirects to /error", async () => {

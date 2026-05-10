@@ -3,6 +3,7 @@ import {
     ChatInputCommandInteraction,
     AutocompleteInteraction,
     ActionRowBuilder,
+    ApplicationCommandOptionType,
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
@@ -63,12 +64,18 @@ export function buildLeaderboardOptions(): LeaderboardOption[] {
 
 export default class Leaderboard extends DiscordCommand {
     constructor() {
-        super("leaderboard", { name: "leaderboard", description: "View a stat leaderboard." });
+        super("leaderboard", {
+            name: "leaderboard",
+            description: "Display the leaderboard for the requested statistic.",
+            options: [
+                { type: ApplicationCommandOptionType.String, name: "name", description: "Name of the leaderboard.", required: true, autocomplete: true }
+            ]
+        });
     }
 
     async chatInput(interaction: ChatInputCommandInteraction) {
         const authorId = interaction.user.id;
-        const leaderboard = interaction.options.getString("leaderboard", true);
+        const leaderboard = interaction.options.getString("name", true);
         const leaderboards = buildLeaderboardOptions();
 
         if (!leaderboards.map(x => x.value).includes(leaderboard)) {

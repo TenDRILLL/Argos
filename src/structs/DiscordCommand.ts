@@ -26,7 +26,6 @@ export default class DiscordCommand {
     }
 
     exec(interaction: ChatInputCommandInteraction|CommandInteraction|ButtonInteraction|SelectMenuInteraction|AutocompleteInteraction|ModalSubmitInteraction){
-        console.log(`Please override ${this.name} exec.`);
         switch(true){
             case interaction.isChatInputCommand():
                 return this.chatInput(interaction);

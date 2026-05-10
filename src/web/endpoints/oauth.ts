@@ -1,11 +1,11 @@
 import {Router} from "express";
 import {Client} from "discord.js";
 
-import {newRegistration} from "../../automata/RegistrationService";
+import {newRegistration as _newRegistrationDefault} from "../../automata/RegistrationService";
 import {discordOauthExchange} from "../../automata/DiscordTokenManager";
 import {crypt} from "../../utils/crypt";
 
-export default function makeOauthRouter(client: Client): Router {
+export default function makeOauthRouter(client: Client, newRegistration: typeof _newRegistrationDefault = _newRegistrationDefault): Router {
     const router = Router();
     router.get("/", (req, res) => {
         const { code, state, error, error_description } = req.query as {
@@ -14,9 +14,10 @@ export default function makeOauthRouter(client: Client): Router {
             error?: string;
             error_description?: string;
         };
+        console.log(`[oauth] hit — code=${code ? "present" : "missing"} state=${state ?? "none"} error=${error ?? "none"}`);
 
         if(error){
-            console.log(`${error.toUpperCase()}: ${error_description ?? ""}`);
+            console.log(`[oauth] discord error: ${error.toUpperCase()}: ${error_description ?? ""}`);
             return res.redirect(`/error?message=
                 Faulty Discord oAuth Token Exchange. Please try again.
 
@@ -25,6 +26,7 @@ export default function makeOauthRouter(client: Client): Router {
         }
 
         if(code === undefined){
+            console.log(`[oauth] no code in query — aborting`);
             return res.redirect(`/error?message=
                 Turn back now... Darkness is too strong in here.
 
@@ -33,11 +35,14 @@ export default function makeOauthRouter(client: Client): Router {
         }
 
         if(state === undefined){
+            console.log(`[oauth] no state — login flow, exchanging code`);
             discordOauthExchange(code).then(async dcuser => {
+                console.log(`[oauth] exchange ok — discord id=${dcuser.id}, encrypting conflux cookie`);
                 const conflux = await crypt(process.env.ARGOS_ID_PASSWORD as string, dcuser.id);
+                console.log(`[oauth] cookie set, redirecting to /panel`);
                 return res.cookie("conflux", conflux, {expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
             }).catch(e => {
-                console.log(e);
+                console.log(`[oauth] exchange failed:`, e);
                 return res.redirect(`/error?message=
                 Faulty Discord oAuth Token Exchange. Please try again.
 
@@ -46,6 +51,7 @@ export default function makeOauthRouter(client: Client): Router {
                 &button=register`);
             });
         } else {
+            console.log(`[oauth] state present — registration flow`);
             newRegistration(client, code, state, res);
         }
     });

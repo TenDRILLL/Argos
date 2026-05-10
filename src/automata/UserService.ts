@@ -266,7 +266,7 @@ export class UserService {
             .catch(e => { console.log(14); return null; });
         if (!clanResp) return;
         const resp = clanResp.Response as BungieGroupQuery ?? { results: [] };
-        const ids = resp.results.map(x => x.bungieNetUserInfo.membershipId);
+        const ids = resp.results.filter(x => x.bungieNetUserInfo?.membershipId).map(x => x.bungieNetUserInfo.membershipId);
         if (ids.length > 0) {
             const users = await dbQuery("SELECT discord_id, bungie_id FROM users WHERE bungie_id IS NOT NULL");
             for (const user of users) {

@@ -4,10 +4,6 @@ const mockNewRegistration = mock((_client: any, _dc: string, _d2: string, res: a
     res.cookie("conflux", "encrypted_id", {}).redirect("/api/panel");
 });
 
-mock.module("../../automata/RegistrationService", () => ({
-    newRegistration: mockNewRegistration
-}));
-
 const mockDiscordOauthExchange = mock(() => Promise.resolve({ id: "123456789012345678", username: "testuser" }));
 
 mock.module("../../automata/DiscordTokenManager", () => ({
@@ -31,7 +27,7 @@ import makeOauthRouter from "../../web/endpoints/oauth";
 const fakeClient: any = {};
 const app = express();
 app.use(cookieParser());
-app.use("/api/oauth", makeOauthRouter(fakeClient));
+app.use("/api/oauth", makeOauthRouter(fakeClient, mockNewRegistration));
 
 describe("GET /api/oauth", () => {
     beforeAll(() => {

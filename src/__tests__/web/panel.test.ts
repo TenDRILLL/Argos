@@ -81,7 +81,7 @@ describe("GET /api/panel", () => {
     });
 
     it("with invalid decrypt clears cookie and redirects", async () => {
-        mockDecrypt.mockRejectedValueOnce(new Error("decrypt failed"));
+        mockDecrypt.mockImplementationOnce(() => Promise.reject(new Error("decrypt failed")));
         const res = await request(app)
             .get("/api/panel")
             .set("Cookie", "conflux=bad_value");

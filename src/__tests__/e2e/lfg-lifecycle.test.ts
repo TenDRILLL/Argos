@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, mock } from "bun:test";
 
 // LFG lifecycle E2E — requires DB
-const dbAvailable = !!(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
+const dbAvailable = !!(process.env.ARGOS_RUN_INTEGRATION && process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
 const maybeDescribe = dbAvailable ? describe : describe.skip;
 
 // mock safe-timers so we don't actually wait

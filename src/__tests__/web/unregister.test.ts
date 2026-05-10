@@ -41,6 +41,7 @@ describe("GET /unregister", () => {
 
     it("deletes from user_activities with conflux cookie", async () => {
         mockDecrypt.mockResolvedValueOnce("123456789012345678");
+        mockDbQuery.mockResolvedValueOnce([{ discord_id: "123456789012345678" }]);
         mockDbQuery.mockResolvedValue([]);
         await request(app).get("/unregister").set("Cookie", "conflux=valid");
         const deleteActivities = mockDbQuery.mock.calls.find((c: any[]) => c[0].includes("DELETE FROM user_activities"));
@@ -50,6 +51,7 @@ describe("GET /unregister", () => {
     it("deletes from discordToken — regression: missing discordToken cleanup (web)", async () => {
         mockDbQuery.mockClear();
         mockDecrypt.mockResolvedValueOnce("123456789012345678");
+        mockDbQuery.mockResolvedValueOnce([{ discord_id: "123456789012345678" }]);
         mockDbQuery.mockResolvedValue([]);
         await request(app).get("/unregister").set("Cookie", "conflux=valid");
         const deleteDiscordToken = mockDbQuery.mock.calls.find((c: any[]) => c[0].includes("DELETE FROM discordToken"));

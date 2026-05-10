@@ -139,6 +139,7 @@ describe("LFGManager", () => {
                     scheduled: fixtureLFGPost.time, max_size: 6, creator: "creator1", description: ""
                 }])
                 .mockResolvedValueOnce([{ discord_id: "guardian1", queued: false }]);
+            spyOn(mgr as any, "_createTimer").mockImplementation(() => {});
             mgr.init(fakeClient);
             await new Promise(r => setTimeout(r, 20));
             const post = mgr.getLFG(fixtureLFGPost.id);

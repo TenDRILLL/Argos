@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, mock } from "bun:test";
+import { describe, it, expect, beforeAll, afterAll, beforeEach, mock } from "bun:test";
 
 // regression: MariaDB $N placeholder bug — saveTokens must use ? not $1
 // Mock axios before import
@@ -29,7 +29,7 @@ import { setupTestDb, teardownTestDb, clearAllTables } from "../helpers/db";
 import { dbQuery } from "../../automata/Database";
 import { getToken, discordOauthExchange } from "../../automata/DiscordTokenManager";
 
-const dbAvailable = !!(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
+const dbAvailable = !!(process.env.ARGOS_RUN_INTEGRATION && process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
 const maybeDescribe = dbAvailable ? describe : describe.skip;
 
 maybeDescribe("DiscordTokenManager integration", () => {

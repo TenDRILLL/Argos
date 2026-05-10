@@ -77,7 +77,7 @@ describe("newRegistration()", () => {
 
     beforeEach(() => {
         fakeClient = {
-            guilds: { cache: { get: mock(() => ({ members: { fetch: mock(() => Promise.resolve({ roles: { cache: { has: () => false, keys: () => [] }, set: mock(() => Promise.resolve()) } })) } })) }
+            guilds: { cache: { get: mock(() => ({ members: { fetch: mock(() => Promise.resolve({ roles: { cache: { has: () => false, keys: () => [] }, set: mock(() => Promise.resolve()) } })) } })) } }
         };
         fakeRes = makeFakeRes();
         mockDbQuery.mockClear();
@@ -123,12 +123,12 @@ describe("newRegistration()", () => {
         expect(replaceCalls.some((c: any[]) => c[0].includes("user_tokens"))).toBe(true);
     });
 
-    it("sets conflux cookie and redirects to /api/panel", async () => {
+    it("sets conflux cookie and redirects to /panel", async () => {
         mockDbQuery.mockResolvedValue([]);
         newRegistration(fakeClient, "dc_code", "d2_code", fakeRes);
         await new Promise(r => setTimeout(r, 100));
         expect(fakeRes.cookies["conflux"]).toBe("encrypted_discord_id");
-        expect(fakeRes.redirectTarget).toBe("/api/panel");
+        expect(fakeRes.redirectTarget).toBe("/panel");
     });
 
     it("redirects to /error on Discord OAuth failure", async () => {

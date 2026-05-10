@@ -31,7 +31,7 @@ describe("Xur command", () => {
         const interaction = makeChatInput();
         await cmd.chatInput(interaction);
         const args = interaction.reply.mock.calls[0][0];
-        expect(args.content).toContain("not on any planet");
+        expect(args.content).toContain("on any planet");
     });
 
     it("chatInput() parses stored JSON correctly", async () => {

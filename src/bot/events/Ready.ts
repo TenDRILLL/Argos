@@ -4,6 +4,7 @@ import DiscordEvent from "../../structs/DiscordEvent";
 import { userService } from "../../automata/UserService";
 import { generateXurEmbed, deleteXurEmbed } from "../../utils/getXurEmbed";
 import { fetchPendingClanRequests } from "../../utils/fetchPendingClanRequests";
+import { manifestCache } from "../../automata/ManifestCache";
 
 export default class ReadyEvent extends DiscordEvent {
     constructor() {
@@ -12,6 +13,8 @@ export default class ReadyEvent extends DiscordEvent {
 
     exec(client: Client) {
         console.log(`Ready! Logged in as ${client.user?.tag}`);
+
+        manifestCache.refresh().catch(e => console.error("ManifestCache refresh failed:", e));
 
         setInterval(async () => {
             console.log(`Time: ${new Date().toUTCString()}`);
@@ -29,6 +32,7 @@ export default class ReadyEvent extends DiscordEvent {
 
         const deleteXur = cron.schedule("5 17 * * 2", () => {
             deleteXurEmbed(client);
+            manifestCache.refresh().catch(e => console.error("ManifestCache weekly refresh failed:", e));
         }, { timezone: "Etc/UTC" });
 
         createXur.start();

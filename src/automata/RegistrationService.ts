@@ -49,7 +49,7 @@ export function newRegistration(client: Client, dccode: string, d2code: string, 
                                 [dcuser.id, x.access_token, Date.now()+(x.expires_in*1000), x.refresh_token, Date.now()+(x.refresh_expires_in*1000)]
                             );
                             const conflux = await crypt(process.env.ARGOS_ID_PASSWORD as string,dcuser.id);
-                            res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                            res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
                             const guild = client.guilds.cache.get(statRoles.guildID);
                             guild?.members.fetch(dcuser.id).then(member => {
                                 if(!member) return;
@@ -70,7 +70,7 @@ export function newRegistration(client: Client, dccode: string, d2code: string, 
                                     [dcuser.id, x.access_token, Date.now()+(x.expires_in*1000), x.refresh_token, Date.now()+(x.refresh_expires_in*1000)]
                                 );
                                 const conflux = await crypt(process.env.ARGOS_ID_PASSWORD as string,dcuser.id);
-                                res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/api/panel");
+                                res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
                                 const guild = client.guilds.cache.get(statRoles.guildID);
                                 guild?.members.fetch(dcuser.id).then(member => {
                                     if(!member) return;

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, mock } from "bun:test";
 
 // Full OAuth round-trip E2E test with mocked external APIs
-const dbAvailable = !!(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
+const dbAvailable = !!(process.env.ARGOS_RUN_INTEGRATION && process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
 const maybeDescribe = dbAvailable ? describe : describe.skip;
 
 const mockAxiosPost = mock(() => Promise.resolve({

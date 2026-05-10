@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import {Client} from "discord.js";
 
+import gearRouter from "./endpoints/gear";
+import preloadRouter from "./endpoints/preload";
 import siteRouter from "./endpoints/site";
 import authorizationRouter from "./endpoints/authorization";
 import makeOauthRouter from "./endpoints/oauth";
@@ -26,12 +28,14 @@ export function buildApp(client: Client): import("express").Application {
     app.use("/authorization", authorizationRouter);
     app.use("/api/oauth", makeOauthRouter(client));
     app.use("/register", makeRegisterRouter(client));
+    app.use("/api/gear", gearRouter);
+    app.use("/panel", preloadRouter);
     app.use("/api/panel", panelRouter);
     app.use("/unregister", makeUnregisterRouter(client));
     app.use("/logout", logoutRouter);
     app.use("/resource", resourceRouter);
     app.use("/error", errorRouter);
-    app.use("*", catchallRouter);
+    app.use("/{*path}", catchallRouter);
 
     return app;
 }

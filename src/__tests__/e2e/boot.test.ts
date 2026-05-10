@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 // E2E smoke test: boot sequence
 // Requires: DB_HOST, DB_USER, DB_PASS set, mock Discord login
 
-const dbAvailable = !!(process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
+const dbAvailable = !!(process.env.ARGOS_RUN_INTEGRATION && process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASS);
 const maybeDescribe = dbAvailable ? describe : describe.skip;
 
 maybeDescribe("Boot sequence E2E", () => {

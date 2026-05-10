@@ -4,6 +4,7 @@ import {
     ButtonInteraction,
     AutocompleteInteraction,
     ActionRowBuilder,
+    ApplicationCommandOptionType,
     ButtonBuilder,
     ButtonStyle,
     EmbedBuilder,
@@ -14,11 +15,17 @@ import symbol from "../../enums/symbol";
 
 export default class Symbols extends DiscordCommand {
     constructor() {
-        super("symbols", { name: "symbols", description: "Get symbol locations for a raid." });
+        super("symbols", {
+            name: "symbols",
+            description: "Check the locations of symbols in order to gain a Deepsight weapon at the end of the activity.",
+            options: [
+                { type: ApplicationCommandOptionType.String, name: "activity", description: "Please select the activity from the list below.", required: true, autocomplete: true }
+            ]
+        });
     }
 
     async chatInput(interaction: ChatInputCommandInteraction) {
-        const symbolId = interaction.options.getString("symbol", true);
+        const symbolId = interaction.options.getString("activity", true);
         const symbolObject = symbol[symbolId];
         if (!symbolObject) {
             return interaction.reply({ content: "Unknown symbol set.", flags: MessageFlags.Ephemeral });

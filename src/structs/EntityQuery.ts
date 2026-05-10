@@ -1,3 +1,22 @@
+export class DyeReference {
+    channelHash: number;
+    dyeHash: number;
+}
+
+export class GearArtArrangement {
+    classHash: number;
+    artArrangementHash: number;
+}
+
+export class TranslationBlock {
+    weaponPatternHash?: number;
+    defaultDyes: DyeReference[];
+    lockedDyes: DyeReference[];
+    customDyes: DyeReference[];
+    arrangements: GearArtArrangement[];
+    hasGeometry: boolean;
+}
+
 export class EntityQuery {
     displayProperties: DisplayProperties;
     tooltipNotifications: Object[];
@@ -24,7 +43,7 @@ export class EntityQuery {
         ammoType: number;
         displayStrings: string[];
     };
-    translationBlock: Object[];
+    translationBlock: TranslationBlock;
     preview: Object[];
     quality: Object[];
     acquireRewardSiteHash: number;

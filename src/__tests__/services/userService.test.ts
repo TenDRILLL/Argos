@@ -43,8 +43,10 @@ describe("UserService", () => {
 
     beforeEach(() => {
         service = new UserService();
-        mockDbQuery.mockClear();
-        mockApiRequest.mockClear();
+        mockDbQuery.mockReset();
+        mockDbQuery.mockResolvedValue([]);
+        mockApiRequest.mockReset();
+        mockApiRequest.mockResolvedValue({ Response: {}, ErrorCode: 1, ThrottleSeconds: 0 });
         mockGetBungieTag.mockClear();
     });
 
@@ -160,9 +162,9 @@ describe("UserService", () => {
 
         it("processes batches of 10", async () => {
             const fakeMembers = Array.from({ length: 15 }, (_, i) => ({ discord_id: `user_${i}` }));
+            const updateRolesSpy = spyOn(service, "updateUserRoles").mockImplementation(() => Promise.resolve(undefined));
+            const sleepSpy = spyOn(service, "sleep").mockImplementation(() => Promise.resolve("" as any));
             mockDbQuery.mockResolvedValueOnce(fakeMembers);
-            const updateRolesSpy = spyOn(service, "updateUserRoles").mockResolvedValue(undefined);
-            const sleepSpy = spyOn(service, "sleep").mockResolvedValue("" as any);
             await service.updateAllUserRoles({} as any);
             // 15 members → first batch 10, second batch 5 → sleep called once
             expect(sleepSpy).toHaveBeenCalledTimes(1);

@@ -11,17 +11,28 @@
         <link rel="shortcut icon" type="image/webp" href="https://cdn.discordapp.com/emojis/1061526156454666280.webp?size=96&quality=lossless"/>
         <title>Venerity</title>
         <script src="/resource/unregisterPopup.js"></script>
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+            }
+        }
+        </script>
+        <script type="module" src="/resource/characterRenderer.js"></script>
     </head>
     <body>
         <nav>
             <ul>
                 <li class="dc">
+                    <% if (data.discordUser) { %>
                     <img id="dc-avatar" src="https://cdn.discordapp.com/avatars/<%=data.discordUser.id%>/<%=data.discordUser.avatar%>.png">
-                    <p><%= `${data.DBData.discordUser.username}${data.DBData.discordUser.discriminator === "0" ? "" : `#${data.DBData.discordUser.discriminator}`}` %></p>
+                    <p><%= `${data.discordUser.username}${data.discordUser.discriminator === "0" ? "" : `#${data.discordUser.discriminator}`}` %></p>
+                    <% } %>
                 </li>
                 <li>
                     <h1 id="heading text">
-                        Welcome, <%= data.DBData.destinyName %>
+                        Welcome, <%= data.DBData.destiny_name %>
                     </h1>
                 </li>
                 <div class="buttons">
@@ -43,6 +54,7 @@
         <div id="content">
             <div id="characters">
                 <% data.characters.sort((a,b) => b.character.data.light-a.character.data.light).map(character => { %>
+                    <% const renderItem = (data.renderPayload || []).find(r => r.characterId === character.character.data.characterId) || null; %>
                     <div class="singleCharacter">
                         <div class="characterBanner" style="background-image: url(https://www.bungie.net<%=character.character.data.emblemBackgroundPath%>);">
                             <div style="height: 32px; width:32px; margin: 0 8px; align-self: center; position: relative;"></div>
@@ -56,35 +68,19 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="characterStats">
-                            <div class="statRow">
-                                <div class="statRow">
-                                    <div>
-                                        <img src="/resource/health.png">
-                                        <div><%=character.character.data.stats["392767087"]%></div>
-                                    </div>
-                                    <div>
-                                        <img src="/resource/melee.png">
-                                        <div><%=character.character.data.stats["4244567218"]%></div>
-                                    </div>
-                                    <div>
-                                        <img src="/resource/grenade.png">
-                                        <div><%=character.character.data.stats["1735777505"]%></div>
-                                    </div>
-                                    <div>
-                                        <img src="/resource/super.png">
-                                        <div><%=character.character.data.stats["144602215"]%></div>
-                                    </div>
-                                    <div>
-                                        <img src="/resource/class.png">
-                                        <div><%=character.character.data.stats["1943323491"]%></div>
-                                    </div>
-                                    <div>
-                                        <img src="/resource/weapons.png">
-                                        <div><%=character.character.data.stats["2996146975"]%></div>
-                                    </div>
-                                </div>
+                        <% if (renderItem) { %>
+                        <div class="canvasWrapper">
+                            <div class="canvasSpinner"></div>
+                            <canvas id="char-canvas-<%=character.character.data.characterId%>"
+                                    class="characterCanvas"
+                                    data-render='<%- JSON.stringify(renderItem) %>'
+                                    data-stats='<%- JSON.stringify(character.character.data.stats) %>'>
+                            </canvas>
+                            <div class="canvasFallback"
+                                 style="background-image: url(https://www.bungie.net<%=character.character.data.emblemBackgroundPath%>)">
+                            </div>
                         </div>
+                        <% } %>
                     </div>
                 <% }) %>
             </div>
@@ -182,5 +178,6 @@
             <a href="#" onclick="hide('popup')">Close</a>
             <a href="/unregister" id="confirmation">Yes, I am sure</a>
           </div>
+    <script>history.replaceState(null, '', '/panel');</script>
     </body>
 </html>

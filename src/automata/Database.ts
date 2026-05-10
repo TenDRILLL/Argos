@@ -12,10 +12,38 @@ async function initDatabase(): Promise<void> {
         expires_in INT NOT NULL,
         expires_at BIGINT NULL,
         refresh_token VARCHAR(200) NOT NULL,
-        scope VARCHAR(10) NOT NULL,
-        token_type VARCHAR(10) NOT NULL
+        scope VARCHAR(200) NOT NULL,
+        token_type VARCHAR(20) NOT NULL
         );
     `);
+
+    await dbQuery(`ALTER TABLE discordToken MODIFY COLUMN scope VARCHAR(200) NOT NULL`).catch(() => {});
+    await dbQuery(`ALTER TABLE discordToken MODIFY COLUMN token_type VARCHAR(20) NOT NULL`).catch(() => {});
+
+    const schemaCheck = await dbQuery(
+        "SELECT COUNT(*) as cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='users' AND COLUMN_NAME='discord_id'"
+    );
+    const hasNewSchema = parseInt(schemaCheck[0].cnt) > 0;
+    if(!hasNewSchema){
+        console.log("Stale or missing users schema — rebuilding affected tables.");
+        const refs = await dbQuery(
+            "SELECT TABLE_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_SCHEMA=DATABASE() AND REFERENCED_TABLE_NAME='users'"
+        );
+        const conn = await pool.getConnection();
+        try {
+            await conn.query("SET FOREIGN_KEY_CHECKS=0");
+            for(const ref of refs){
+                await conn.query(`DROP TABLE IF EXISTS \`${ref.TABLE_NAME}\``);
+                console.log(`Dropped FK dependent table: ${ref.TABLE_NAME}`);
+            }
+            await conn.query("DROP TABLE IF EXISTS user_activities");
+            await conn.query("DROP TABLE IF EXISTS user_tokens");
+            await conn.query("DROP TABLE IF EXISTS users");
+            await conn.query("SET FOREIGN_KEY_CHECKS=1");
+        } finally {
+            await conn.release();
+        }
+    }
 
     await dbQuery(`
         CREATE TABLE IF NOT EXISTS users (
@@ -91,14 +119,14 @@ async function initDatabase(): Promise<void> {
 }
 
 function dbQuery(query: string, values?: any[]): Promise<any[]>{
-    return new Promise(async res => {
+    return new Promise(async (res, rej) => {
         let connection: PoolConnection;
         try {
             connection = await pool.getConnection();
             const results = values ? await connection.query(query,values) : await connection.query(query);
             res(results);
         } catch (err){
-            throw err;
+            rej(err);
         } finally {
             //@ts-ignore
             if(connection) await connection.release();

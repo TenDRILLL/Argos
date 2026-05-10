@@ -22,7 +22,7 @@ describe("Leaderboard command", () => {
         const interaction = makeChatInput({
             user: { id: userId },
             options: {
-                getString: mock((key: string, required: boolean) => key === "leaderboard" ? "invalid_value" : null),
+                getString: mock((key: string, required: boolean) => key === "name" ? "invalid_value" : null),
                 getSubcommand: mock(() => null),
                 getUser: mock(() => null)
             }
@@ -37,7 +37,7 @@ describe("Leaderboard command", () => {
         const interaction = makeChatInput({
             user: { id: userId },
             options: {
-                getString: mock((key: string) => key === "leaderboard" ? "kd" : null),
+                getString: mock((key: string) => key === "name" ? "kd" : null),
                 getSubcommand: mock(() => null),
                 getUser: mock(() => null)
             }
@@ -54,7 +54,7 @@ describe("Leaderboard command", () => {
         const interaction = makeChatInput({
             user: { id: userId },
             options: {
-                getString: mock((key: string) => key === "leaderboard" ? "r-Last Wish" : null),
+                getString: mock((key: string) => key === "name" ? "r-Last Wish" : null),
                 getSubcommand: mock(() => null),
                 getUser: mock(() => null)
             }
@@ -76,7 +76,7 @@ describe("Leaderboard command", () => {
         const interaction = makeChatInput({
             user: { id: userId },
             options: {
-                getString: mock((key: string) => key === "leaderboard" ? "kd" : null),
+                getString: mock((key: string) => key === "name" ? "kd" : null),
                 getSubcommand: mock(() => null),
                 getUser: mock(() => null)
             }
@@ -96,7 +96,7 @@ describe("Leaderboard command", () => {
         const interaction = makeChatInput({
             user: { id: userId },
             options: {
-                getString: mock((key: string) => key === "leaderboard" ? "kd" : null),
+                getString: mock((key: string) => key === "name" ? "kd" : null),
                 getSubcommand: mock(() => null),
                 getUser: mock(() => null)
             }

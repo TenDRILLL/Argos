@@ -12,9 +12,14 @@ router.get("/:resourceName", (req, res) => {
         For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: OOB`);
     }
     const htmlRoot = path.resolve(__dirname, '../..', 'html');
-    const styles = readdirSync(path.join(htmlRoot, "styles"));
-    const scripts = readdirSync(path.join(htmlRoot, "scripts"));
-    const images = readdirSync(path.join(htmlRoot, "images"));
+    let styles: string[], scripts: string[], images: string[];
+    try {
+        styles = readdirSync(path.join(htmlRoot, "styles"));
+        scripts = readdirSync(path.join(htmlRoot, "scripts"));
+        images = readdirSync(path.join(htmlRoot, "images"));
+    } catch {
+        return res.status(404).send("Resource not found.");
+    }
     if(styles.includes(req.params.resourceName)){
         res.sendFile(path.join(htmlRoot, "styles", req.params.resourceName));
     } else if(scripts.includes(req.params.resourceName)){

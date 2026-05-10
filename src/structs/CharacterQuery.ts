@@ -287,8 +287,20 @@ export class characterInventoryQuery {
         }
         privacy: number;
     };
-    equipment: Object;
+    equipment: {
+        data: { items: EquippedItem[] };
+        privacy: number;
+    };
     uninstancedItemComponents: number[];
+    characterRenderData?: {
+        data: CharacterRenderData;
+        privacy: number;
+    };
+    itemComponents?: {
+        instances?: { data: { [instanceId: string]: ItemInstance }; privacy: number };
+        renderData?: { data: { [instanceId: string]: ItemRenderData }; privacy: number };
+        sockets?: { data: { [instanceId: string]: { sockets: ItemSocket[] } }; privacy: number };
+    };
 }
 
 export class invetoryItem {
@@ -303,4 +315,48 @@ export class invetoryItem {
     state: number;
     dismantlePermission: number;
     isWrapper: boolean;
+}
+
+export class EquippedItem {
+    itemHash: number;
+    itemInstanceId: string;
+    quantity: number;
+    bucketHash: number;
+    transferStatus: number;
+    lockable: boolean;
+    state: number;
+    isWrapper: boolean;
+    overrideStyleItemHash?: number;
+    visualHash?: number;
+    plugHashes?: number[];
+}
+
+export class ItemInstance {
+    damageType: number;
+    damageTypeHash: number;
+    primaryStat: { statHash: number; value: number };
+    itemLevel: number;
+    quality: number;
+    isEquipped: boolean;
+    canEquip: boolean;
+}
+
+export class DyeReference {
+    channelHash: number;
+    dyeHash: number;
+}
+
+export class CharacterRenderData {
+    customDyes: DyeReference[];
+    artRegions: { [key: string]: number };
+}
+
+export class ItemRenderData {
+    artDyeHashes: { [key: string]: number };
+}
+
+export class ItemSocket {
+    plugHash: number;
+    isEnabled: boolean;
+    isVisible: boolean;
 }
