@@ -18,8 +18,8 @@ export class BungieAPI {
     }
 
     async rawRequest(url): Promise<JSON>{
-        return new Promise(res => {
-            axios.get(url).then(d => res(d.data)).catch(e => console.log(e));
+        return new Promise((res, rej) => {
+            axios.get(url).then(d => res(d.data)).catch(e => rej(e));
         });
     }
 

@@ -77,6 +77,13 @@ router.get("/", async (req, res) => {
                     For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
             });
         });
+    }).catch(e => {
+        console.log(`[panel] updateStats failed:`, e);
+        res.redirect(`/error?message=
+            Panel could not be loaded.
+
+            \\n
+            For possible solutions, visit <a href="https://discord.venerity.xyz/">discord.venerity.xyz</a> and ask for help with the error code: Servitor`);
     });
 });
 export default router;

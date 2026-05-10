@@ -12,7 +12,8 @@ export default class ReadyEvent extends DiscordEvent {
     }
 
     exec(client: Client) {
-        console.log(`Ready! Logged in as ${client.user?.tag}`);
+        console.log("Ready.");
+        console.log(`Logged in as ${client.user?.tag}`);
 
         manifestCache.refresh().catch(e => console.error("ManifestCache refresh failed:", e));
 

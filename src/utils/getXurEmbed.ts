@@ -76,17 +76,23 @@ export async function generateXurEmbed(client: Client): Promise<void> {
     }
 }
 
+const PROTECTED_EMOJI_NAMES = new Set([
+    "warlock2", "titan2", "hunter2",
+    "first", "second", "third",
+    "mobility", "resilience", "recovery",
+    "discipline", "intellect", "strength",
+    "Xbox", "PlayStation", "Steam", "EpicGames",
+]);
+
 export async function deleteXurEmbed(client: Client): Promise<void> {
     const rows = await dbQuery("SELECT value FROM misc WHERE key_name = 'xurEmbed'");
     if (!rows.length) return;
     console.log(`Deleting XUR embed and emojis: ${new Date().toISOString()}`);
     await dbQuery("DELETE FROM misc WHERE key_name = 'xurEmbed'");
-    const emojiGuildId = process.env.EMOJI_GUILD_ID ?? "990974785674674187";
-    const emojiGuild = await client.guilds.fetch(emojiGuildId).catch(() => null);
-    if (!emojiGuild) return;
-    const emojis = await emojiGuild.emojis.fetch();
+    const emojis = await client.application!.emojis.fetch();
     for (const [, emoji] of emojis) {
-        await emojiGuild.emojis.delete(emoji.id).catch(() => null);
+        if (PROTECTED_EMOJI_NAMES.has(emoji.name!)) continue;
+        await client.application!.emojis.delete(emoji.id).catch(() => null);
     }
 }
 
@@ -119,24 +125,23 @@ async function generateFields(
     const path = (manifest.Response as any)["jsonWorldComponentContentPaths"]["en"]["DestinyInventoryItemDefinition"];
     const InventoryItemDefinition = await bungieAPI.rawRequest(`https://www.bungie.net${path}`) as unknown as RawEntityQuery;
 
+    const fetchedEmojis = await client.application!.emojis.fetch();
+    const findEmoji = (name: string) => fetchedEmojis.find(e => e.name === name)?.toString() ?? "";
+
     const classTypes: Map<number, string> = new Map([
         [3, ""],
-        [1, "<:hunter2:1067375164012101642>"],
-        [0, "<:titan2:1067375189421203486>"],
-        [2, "<:warlock2:1067375209985880074>"]
+        [1, findEmoji("hunter2")],
+        [0, findEmoji("titan2")],
+        [2, findEmoji("warlock2")]
     ]);
     const statEmojis = [
-        "<:mobility:1068928862538440784>",
-        "<:resilience:1068928804170514594>",
-        "<:recovery:1068928541183455292>",
-        "<:discipline:1068928610699841716>",
-        "<:intellect:1068928723908313131>",
-        "<:strength:1068928763884228728>"
+        findEmoji("mobility"),
+        findEmoji("resilience"),
+        findEmoji("recovery"),
+        findEmoji("discipline"),
+        findEmoji("intellect"),
+        findEmoji("strength")
     ];
-
-    const emojiGuildId = process.env.EMOJI_GUILD_ID ?? "990974785674674187";
-    const emojiGuild = await client.guilds.fetch(emojiGuildId);
-    const fetchedEmojis = await emojiGuild.emojis.fetch();
 
     const exoticPromises = exotics.map(exotic => new Promise<{ name: string; value: string; inline?: boolean }>(async res => {
         const component = components.find(e => e.itemHash === exotic.hash)!;
@@ -175,7 +180,7 @@ async function generateFields(
             const cleanName = icon.name.replace(/[^0-9A-z ]/g, "").split(" ").join("_");
             const emoji = fetchedEmojis.find(e => e.name === cleanName);
             if (!emoji) {
-                const created = await emojiGuild.emojis.create({
+                const created = await client.application!.emojis.create({
                     name: cleanName,
                     attachment: `https://bungie.net${icon.icon}`
                 }).catch(() => null);

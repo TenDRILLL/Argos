@@ -18,6 +18,7 @@ import catchallRouter from "./endpoints/catchall";
 
 export function buildApp(client: Client): import("express").Application {
     const app = express();
+    app.set('trust proxy', 1);
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
     app.use(cookieParser());

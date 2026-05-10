@@ -19,11 +19,13 @@ export async function fetchPendingClanRequests(client: Client): Promise<void> {
     if (!resp) return;
 
     const clanResp = resp.Response as PendingClanmembersQuery;
+    const appEmojis = await client.application!.emojis.fetch();
+    const findEmoji = (name: string) => appEmojis.find(e => e.name === name)?.toString() ?? name;
     const emojis: Record<number, string> = {
-        1: "<:Xbox:1045358581316321280>",
-        2: "<:PlayStation:1057027325809672192>",
-        3: "<:Steam:1045354053087006800>",
-        6: "<:EpicGames:1048534129500770365>"
+        1: findEmoji("Xbox"),
+        2: findEmoji("PlayStation"),
+        3: findEmoji("Steam"),
+        6: findEmoji("EpicGames")
     };
 
     const handledRows = await dbQuery("SELECT value FROM misc WHERE key_name = 'handledApplications'");

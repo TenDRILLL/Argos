@@ -15,7 +15,7 @@ export default class RegistrationLink extends DiscordCommand {
                     new ButtonBuilder()
                         .setLabel("Register")
                         .setStyle(ButtonStyle.Link)
-                        .setURL("https://register.venerity.xyz/")
+                        .setURL(process.env.REGISTER_URL!)
                 )
             ]
         }).catch(e => console.log(e));

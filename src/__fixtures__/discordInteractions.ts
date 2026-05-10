@@ -4,12 +4,26 @@ export function makeChatInput(overrides: Record<string, any> = {}): any {
     return {
         user: { id: "123456789012345678" },
         commandName: "ping",
-        client: { ws: { ping: 42 }, guilds: { cache: { get: mock(() => null) } } },
+        client: {
+            ws: { ping: 42 },
+            guilds: { cache: { get: mock(() => null) } },
+            application: {
+                emojis: {
+                    fetch: mock(() => Promise.resolve({
+                        find: (predicate: (e: any) => boolean) => {
+                            const fakes = ["first","second","third","sword","shield"].map(
+                                (name, i) => ({ name, toString: () => `<:${name}:${i + 1}>` })
+                            );
+                            return fakes.find(predicate) ?? null;
+                        }
+                    }))
+                }
+            }
+        },
         options: {
             getSubcommand: mock(() => null),
             getString: mock(() => null),
-            getUser: mock(() => null),
-            getString: mock(() => null)
+            getUser: mock(() => null)
         },
         isChatInputCommand: () => true,
         isButton: () => false,

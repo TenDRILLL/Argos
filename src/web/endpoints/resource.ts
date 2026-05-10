@@ -20,12 +20,17 @@ router.get("/:resourceName", (req, res) => {
     } catch {
         return res.status(404).send("Resource not found.");
     }
+    const safeServe = (subdir: string) => {
+        const resolved = path.resolve(htmlRoot, subdir, req.params.resourceName);
+        if (!resolved.startsWith(htmlRoot + path.sep)) return res.status(400).send("Invalid resource path.");
+        res.sendFile(resolved);
+    };
     if(styles.includes(req.params.resourceName)){
-        res.sendFile(path.join(htmlRoot, "styles", req.params.resourceName));
+        safeServe("styles");
     } else if(scripts.includes(req.params.resourceName)){
-        res.sendFile(path.join(htmlRoot, "scripts", req.params.resourceName));
+        safeServe("scripts");
     } else if(images.includes(req.params.resourceName)){
-        res.sendFile(path.join(htmlRoot, "images", req.params.resourceName));
+        safeServe("images");
     } else {
         return res.redirect(`/error?message=
         Resource ${req.params.resourceName} does not exist.

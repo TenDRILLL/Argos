@@ -15,34 +15,32 @@
     "test:commands": "bun test src/__tests__/commands",
     "test:web": "bun test src/__tests__/web",
     "test:e2e": "bun test src/__tests__/e2e",
-    "test:coverage": "bun test --coverage",
-    "deploy": "npm run build && node deploy.js"
+    "test:coverage": "bun test --coverage"
   },
   "devDependencies": {
+    "@types/express-rate-limit": "^6.0.2",
     "@types/supertest": "^7.2.0",
     "supertest": "^7.2.2"
   },
   "author": "Ten#0010",
   "license": "ISC",
   "dependencies": {
-    "@keyv/mysql": "^2.1.4",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^18.11.9",
     "axios": "^0.27.2",
+    "better-sqlite3": "^12.9.0",
     "body-parser": "^1.20.1",
     "cookie-parser": "^1.4.6",
-    "discord-http-interactions": "^1.6.4",
     "discord.js": "^14.21.0",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.9",
-    "enmap": "^5.9.2",
     "express": "^5.1.0",
-    "keyv": "^5.4.0",
+    "express-rate-limit": "^8.5.1",
     "mariadb": "^3.4.5",
     "node-cron": "^3.0.2",
     "safe-timers": "^1.1.0",
     "shx": "^0.3.4",
     "spacetime": "^7.4.0",
-    "ssh2-sftp-client": "^9.0.4",
     "typescript": "^5.9.2"
   }
 }

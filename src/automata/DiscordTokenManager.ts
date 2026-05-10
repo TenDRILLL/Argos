@@ -18,14 +18,14 @@ function getToken(id: string): Promise<string>{
         if(dbQ.length < 1) return rej(new Error(`USER_NOT_IN_DB: Requested user ${id} is not logged in the Database.`));
         let tokens = dbQ[0] as DiscordTokens;
 
-        if(Date.now() > tokens.expires_at!){
+        if(Date.now() > Number(tokens.expires_at) - 60_000){
             const data = new URLSearchParams();
             data.append("client_id",process.env.DISCORD_ID as string);
             data.append("client_secret",process.env.DISCORD_SECRET as string);
             data.append("grant_type","refresh_token");
             data.append("refresh_token",tokens.refresh_token);
 
-            axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type": "application/x-www-form-urlencoded"}}).then(d => {
+            axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type": "application/x-www-form-urlencoded"}, timeout: 10_000}).then(d => {
                 console.log(`${id} discord-token-refreshed.`);
                 const tokens: DiscordTokens = d.data;
                 saveTokens(id, tokens);
@@ -45,7 +45,7 @@ function discordOauthExchange(code: string): Promise<DiscordUser>{
         data.append("grant_type","authorization_code");
         data.append("code",code);
         data.append("redirect_uri",process.env.DISCORD_OAUTH as string);
-        axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}}).then(x => {
+        axios.post("https://discord.com/api/oauth2/token",data,{headers: {"Content-Type":"application/x-www-form-urlencoded"}, timeout: 10_000}).then(x => {
             const tokens: DiscordTokens = x.data;
             axios.get("https://discord.com/api/users/@me",{headers: {"authorization": `${tokens.token_type} ${tokens.access_token}`}}).then(y => {
                 const user: DiscordUser = y.data;

@@ -33,6 +33,25 @@ async function fetchLeaderboard(leaderboard: string): Promise<LeaderboardEntry[]
     const key = leaderboard.substring(dashIdx + 1);
     const typeMap: Record<string, number> = { r: 0, d: 1, gm: 2 };
     const actType = typeMap[typeStr] ?? 0;
+
+    if (key === "Total") {
+        const baseKeys = Array.from(activityIdentifierDB.entries())
+            .filter(([, data]) => data.type === actType)
+            .map(([actKey]) => actKey);
+        if (baseKeys.length === 0) return [];
+        const placeholders = baseKeys.map(() => "?").join(",");
+        const rows = await dbQuery(
+            `SELECT u.discord_id, u.destiny_name, SUM(a.clears) AS clears
+             FROM users u
+             JOIN user_activities a ON u.discord_id = a.discord_id
+             WHERE a.activity_type = ? AND a.activity_key IN (${placeholders}) AND u.destiny_name IS NOT NULL
+             GROUP BY u.discord_id, u.destiny_name
+             HAVING SUM(a.clears) > 0`,
+            [actType, ...baseKeys]
+        );
+        return rows.map((r: any) => ({ discordId: r.discord_id, destinyName: r.destiny_name, stat: Number(r.clears) }));
+    }
+
     const rows = await dbQuery(
         "SELECT u.discord_id, u.destiny_name, a.clears FROM users u JOIN user_activities a ON u.discord_id = a.discord_id WHERE a.activity_type = ? AND a.activity_key = ? AND a.clears > 0 AND u.destiny_name IS NOT NULL",
         [actType, key]
@@ -84,6 +103,9 @@ export default class Leaderboard extends DiscordCommand {
 
         await interaction.deferReply();
 
+        const appEmojis = await interaction.client.application!.emojis.fetch();
+        const findEmoji = (name: string) => appEmojis.find(e => e.name === name)?.toString() ?? `${name}:`;
+
         let all = await fetchLeaderboard(leaderboard);
         const isKd = leaderboard === "kd";
 
@@ -109,9 +131,9 @@ export default class Leaderboard extends DiscordCommand {
                 prevVal = value;
             }
             switch (pos) {
-                case 1: pos = "<:first:1061526156454666280>"; break;
-                case 2: pos = "<:second:1061526192248852570>"; break;
-                case 3: pos = "<:third:1061526230018560052>"; break;
+                case 1: pos = findEmoji("first"); break;
+                case 2: pos = findEmoji("second"); break;
+                case 3: pos = findEmoji("third"); break;
                 default: pos = `${pos})`;
             }
             let val = `${pos} ${entry.destinyName} *(${value})*`;

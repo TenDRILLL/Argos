@@ -1,5 +1,5 @@
 import DiscordCommand from "../../structs/DiscordCommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import {ChatInputCommandInteraction, MessageFlags} from "discord.js";
 
 export default class UpdateActivities extends DiscordCommand {
     constructor() {
@@ -7,6 +7,6 @@ export default class UpdateActivities extends DiscordCommand {
     }
 
     chatInput(interaction: ChatInputCommandInteraction) {
-        interaction.reply({ content: "Activity DB refresh from manifest is deferred to Phase 9. Static identifier DB is active." });
+        interaction.reply({ content: "Not in use.", flags: MessageFlags.Ephemeral });
     }
 }

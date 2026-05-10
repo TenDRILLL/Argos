@@ -1,12 +1,16 @@
 import {Router} from "express";
 import {Client} from "discord.js";
+import rateLimit from "express-rate-limit";
 
 import {newRegistration as _newRegistrationDefault} from "../../automata/RegistrationService";
 import {discordOauthExchange} from "../../automata/DiscordTokenManager";
 import {crypt} from "../../utils/crypt";
 
+const oauthLimiter = rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false });
+
 export default function makeOauthRouter(client: Client, newRegistration: typeof _newRegistrationDefault = _newRegistrationDefault): Router {
     const router = Router();
+    router.use(oauthLimiter);
     router.get("/", (req, res) => {
         const { code, state, error, error_description } = req.query as {
             code?: string;
