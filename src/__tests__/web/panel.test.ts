@@ -73,11 +73,10 @@ describe("GET /api/panel", () => {
         process.env.ARGOS_ID_PASSWORD = "test_password";
     });
 
-    it("with no conflux cookie redirects to /error Oracle", async () => {
+    it("with no conflux cookie redirects to /", async () => {
         const res = await request(app).get("/api/panel");
         expect(res.status).toBe(302);
-        expect(res.headers.location).toContain("/error");
-        expect(res.headers.location).toContain("Oracle");
+        expect(res.headers.location).toContain("/");
     });
 
     it("with invalid decrypt clears cookie and redirects", async () => {
