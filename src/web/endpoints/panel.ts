@@ -10,12 +10,15 @@ const router = Router();
 router.get("/", async (req, res) => {
     console.log(`[panel] hit — cookie present=${!!req.cookies["conflux"]}`);
     let discID: string | void = "";
-    if(req.cookies["conflux"]){
-        discID = await decrypt(process.env.ARGOS_ID_PASSWORD as string, req.cookies["conflux"]).catch(e => {
-            console.log(`[panel] cookie decrypt failed:`, e);
-        });
-        console.log(`[panel] decrypted discord id=${discID || "FAILED"}`);
+
+    if(!req.cookies["conflux"]){
+        return res.redirect("/");
     }
+
+    discID = await decrypt(process.env.ARGOS_ID_PASSWORD as string, req.cookies["conflux"]).catch(e => {
+        console.log(`[panel] cookie decrypt failed:`, e);
+    });
+    console.log(`[panel] decrypted discord id=${discID || "FAILED"}`);
     if(!discID){
         console.log(`[panel] no discID — clearing cookie, redirecting Oracle`);
         return res.clearCookie("conflux").redirect(`/error?message=
