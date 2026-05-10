@@ -122,3 +122,65 @@ function buildActivityIdentifierDB(): Map<string, ActivityIdentifierObject> {
 }
 
 export const activityIdentifierDB = buildActivityIdentifierDB();
+
+const MODE_RAID      = 4;
+const MODE_DUNGEON   = 82;
+const MODE_NIGHTFALL = 46;
+const GM_LIGHT_FLOOR = 1580; //Bump if new GMs missing
+const DIFFICULT_TEST = /,\s*(Master|Prestige|Heroic|Contest|Epic)$/;
+
+export interface ManifestNewEntry {
+    name: string;
+    type: 0 | 1 | 2;
+    IDs: number[];
+    difficultName: string;
+    difficultIDs: number[];
+}
+
+export function buildFromManifest(defs: Record<string, any>): { raids: number; dungeons: number; gms: number; newEntries: ManifestNewEntry[] } {
+    // seed from static rawIdentifiers so historical activities (e.g. sunset raids) are never lost
+    const next = buildActivityIdentifierDB();
+    const staticKeys = new Set(next.keys());
+
+    for (const def of Object.values(defs)) {
+        const modes: number[]     = def.activityModeTypes ?? [];
+        const name: string        = def.displayProperties?.name ?? "";
+        const hash: number        = def.hash;
+        const isPlaylist: boolean = def.isPlaylist ?? true;
+        const lightLevel: number  = def.activityLightLevel ?? 0;
+
+        if (!name || isPlaylist) continue;
+
+        let type: number;
+        if      (modes.includes(MODE_RAID))                                      type = 0;
+        else if (modes.includes(MODE_DUNGEON))                                   type = 1;
+        else if (modes.includes(MODE_NIGHTFALL) && lightLevel >= GM_LIGHT_FLOOR) type = 2;
+        else continue;
+
+        const match     = name.match(DIFFICULT_TEST);
+        const baseKey   = match ? name.substring(0, name.lastIndexOf(",")).trim() : name;
+        const difficult = match?.[1] ?? null;
+
+        const entry = next.get(baseKey) ?? { IDs: [], type, difficultName: "", difficultIDs: [] };
+        if (difficult) {
+            entry.difficultName = difficult;
+            if (!entry.difficultIDs.includes(hash)) entry.difficultIDs.push(hash);
+        } else {
+            if (!entry.IDs.includes(hash)) entry.IDs.push(hash);
+        }
+        next.set(baseKey, entry);
+    }
+
+    activityIdentifierDB.clear();
+    for (const [k, v] of next) activityIdentifierDB.set(k, v);
+
+    const newEntries: ManifestNewEntry[] = [];
+    let raids = 0, dungeons = 0, gms = 0;
+    for (const [key, v] of activityIdentifierDB) {
+        if      (v.type === 0) raids++;
+        else if (v.type === 1) dungeons++;
+        else                   gms++;
+        if (!staticKeys.has(key)) newEntries.push({ name: key, type: v.type as 0 | 1 | 2, IDs: v.IDs, difficultName: v.difficultName, difficultIDs: v.difficultIDs });
+    }
+    return { raids, dungeons, gms, newEntries };
+}
