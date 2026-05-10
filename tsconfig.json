@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "watch": true,
+    "rootDir": "src",
     "outDir": "./build",
     "target": "esnext",
     "lib": ["ES5","dom","ES2015"],
     "strictNullChecks": true,
     "moduleResolution": "Node",
+    "ignoreDeprecations": "5.0",
     "allowSyntheticDefaultImports": true,
     "module": "commonjs",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/__tests__/**", "src/**/__fixtures__/**", "src/**/*.test.ts"]
 }

@@ -1,4 +1,4 @@
-export function timezones(){
+export function timezones() {
     return ["Africa/Asmera","Africa/Maputo","Africa/Lagos","Africa/Cairo","Africa/Casablanca",
     "Africa/Ceuta","Africa/Abidjan","Africa/Nairobi","Africa/Johannesburg","Africa/Juba","Africa/Khartoum",
     "Africa/Monrovia","Africa/Ndjamena","Africa/Tripoli","Africa/Tunis","Africa/Windhoek","America/Adak",

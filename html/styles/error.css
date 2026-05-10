@@ -1,0 +1,177 @@
+html {
+    width: 100%;
+    height: 100%;
+    background-color: #040404;
+    color: white;
+    font-family: sans-serif;
+ }
+ 
+ body {
+    overflow: hidden;
+ }
+ 
+ .borderContainer {
+    display: flex;
+    flex: 50%;
+    justify-content: end;
+    padding-right: 35px;
+    background-color: #15151540;
+ }
+ 
+ .border {
+    position: relative;
+    transform: rotate(45deg);
+    top: 30px;
+    width: 70px;
+    height: 70px;
+    margin-left: 20px;
+    text-align: center;
+    margin: 0;
+    border: 1px solid red;
+ }
+ .border:before {
+    content: " ";
+    position: absolute;
+    z-index: -1;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #8B0000;
+  }
+ 
+ .straight {
+    height: 50px;
+    width: 15px;
+    border: 1px solid red;
+    transform: rotate(-45deg);
+    margin-left: 18px;
+    background-color: red;
+ }
+ 
+ .dot {
+    width: 15px;
+    height: 15px;
+    margin-top: -4px;
+    margin-left: 48px;
+    border-radius: 50%;
+    background-color: red;
+ }
+ 
+ .circleShadow {
+    position: relative;
+    width: 55px;
+    height: 55px;
+    margin-top: -55px;
+    margin-left: 8px;
+    border-radius: 50%;
+    z-index: -1;
+    background-color: #8B000040;
+ }
+ 
+ 
+ .container {
+    position: relative;
+    top: 30vh;
+    width: 100vw;
+    height: 200px;
+    left: -10px;
+    border-top: 6px solid red;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+    display: flex;
+ }
+ 
+ .ErrorContainer1 {
+    display: flex;
+    flex-direction: row;
+    width: 80vw;
+    justify-content: left;
+ }
+ 
+ .ErrorContainer2 {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+ }
+ 
+ .ErrorMessage {
+    position: relative;
+    height: 70px;
+    background-color: #8B000080;
+    display: flex;
+    align-items: center;
+ }
+ 
+ .ErrorContents {
+    position: relative;
+    height: 130px;
+    width: 80vw;
+    display: flex;
+    background-color: #070707D0;
+ }
+ 
+ .ErrorContents2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+ }
+ 
+ .extraShadow1 {
+    position: relative;
+    background-color: #07070740;
+    width: 10vw;
+ }
+ 
+ .extraShadow2 {
+    background-color: #12121240;
+    position: relative;
+    width: 40vw;
+ }
+ 
+ .buttonContainer {
+    position: relative;
+    top: 30vh;
+    padding-left: 20vw;
+    width: 80vw;
+    height: 40px;
+    right: 10px;
+    background-color: #060606;
+    display: flex;
+    flex-direction: row;
+    align-self: flex-end;
+    align-items: center;
+    justify-content: start;
+ }
+ 
+ button {
+    margin-left: 20px;
+    width: 40px;
+    height: 25px;
+    display: flex;
+    margin-right: 5px;
+    justify-content: center;
+    text-align: center;
+    background-color: #060606;
+    border: 2px solid #E8E8E8;
+    border-radius: 5px;
+    color: #FFFFFFE0;
+ }
+ 
+ p {
+    margin: 0;
+    margin-left: 30px;
+    padding-top: 5px;
+ }
+ 
+ h4 {
+    margin: 0;
+ }
+ 
+ h1 {
+    letter-spacing: 10px;
+    margin-left: 20px;
+    opacity: 1;
+    font-weight: 600;
+ }
