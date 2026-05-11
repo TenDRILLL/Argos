@@ -21,6 +21,22 @@ router.get("/assets/:itemHash", (req, res) => {
     res.json(asset);
 });
 
+router.post("/assets-batch", (req, res) => {
+    const { hashes } = req.body;
+    if (!Array.isArray(hashes) || hashes.length === 0)
+        return res.status(400).json({ error: "hashes must be a non-empty array" });
+
+    const result: Record<number, any> = {};
+    for (const raw of hashes) {
+        const hash = Number(raw);
+        if (!Number.isFinite(hash) || hash <= 0) continue;
+        const asset = manifestCache.getGearAsset(hash);
+        if (asset) result[hash] = asset;
+    }
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json(result);
+});
+
 router.get("/item-def/:itemHash", async (req, res) => {
     const hash = parseInt(req.params.itemHash, 10);
     if (isNaN(hash)) return res.status(400).json({ error: "Invalid hash" });
@@ -73,6 +89,106 @@ router.get("/icon", async (req, res) => {
     }
 });
 
+router.post("/icons-batch", async (req, res) => {
+    const { paths } = req.body;
+    if (!Array.isArray(paths) || paths.length === 0)
+        return res.status(400).json({ error: "paths must be a non-empty array" });
+
+    const fetched = await Promise.all(
+        (paths as string[]).map(async (iconPath) => {
+            let targetUrl: URL;
+            try { targetUrl = new URL(iconPath, BUNGIE_CDN); } catch { return null; }
+            if (targetUrl.host !== "www.bungie.net") return null;
+            try {
+                const r = await axios.get(targetUrl.toString(), { responseType: "arraybuffer" });
+                const ct: string = r.headers["content-type"] ?? "";
+                if (!ct.startsWith("image/")) return null;
+                return { path: iconPath, ct, data: Buffer.from(r.data as ArrayBuffer) };
+            } catch { return null; }
+        })
+    );
+
+    // Binary pack: [4-byte count] then per entry: [2-byte path len][path][2-byte ct len][ct][4-byte data len][data]
+    const valid = fetched.filter((r): r is { path: string; ct: string; data: Buffer } => r !== null);
+    let size = 4;
+    for (const { path, ct, data } of valid) size += 2 + Buffer.byteLength(path) + 2 + Buffer.byteLength(ct) + 4 + data.length;
+
+    const out = Buffer.allocUnsafe(size);
+    let off = 0;
+    out.writeUInt32LE(valid.length, off); off += 4;
+    for (const { path, ct, data } of valid) {
+        const pb = Buffer.from(path), cb = Buffer.from(ct);
+        out.writeUInt16LE(pb.length, off); off += 2;
+        out.set(pb, off); off += pb.length;
+        out.writeUInt16LE(cb.length, off); off += 2;
+        out.set(cb, off); off += cb.length;
+        out.writeUInt32LE(data.length, off); off += 4;
+        out.set(data, off); off += data.length;
+    }
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.end(out);
+});
+
+router.post("/textures-batch", async (req, res) => {
+    const { files } = req.body;
+    if (!Array.isArray(files) || files.length === 0)
+        return res.status(400).json({ error: "files must be a non-empty array" });
+    if (files.some((f: any) => typeof f !== "string" || !SAFE_HASH_RE.test(f)))
+        return res.status(400).json({ error: "invalid file name" });
+
+    const cdnBase = manifestCache.getCDNBase("Texture" as any);
+    if (!cdnBase) return res.status(503).json({ error: "Manifest cache not ready" });
+
+    const fetched = await Promise.all(
+        (files as string[]).map(async (file) => {
+            try {
+                const r = await axios.get(`${BUNGIE_CDN}${cdnBase}/${file}`, {
+                    responseType: "arraybuffer",
+                    headers: { "X-API-Key": process.env.BUNGIE_API_KEY as string },
+                });
+                return { file, data: Buffer.from(r.data as ArrayBuffer) };
+            } catch { return { file, data: null }; }
+        })
+    );
+
+    const valid = fetched.filter((r): r is { file: string; data: Buffer } => r.data !== null);
+    let size = 4;
+    for (const { file, data } of valid) size += 2 + Buffer.byteLength(file) + 4 + data.length;
+    const out = Buffer.allocUnsafe(size);
+    let off = 0;
+    out.writeUInt32LE(valid.length, off); off += 4;
+    for (const { file, data } of valid) {
+        const nb = Buffer.from(file);
+        out.writeUInt16LE(nb.length, off); off += 2;
+        out.set(nb, off); off += nb.length;
+        out.writeUInt32LE(data.length, off); off += 4;
+        out.set(data, off); off += data.length;
+    }
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.end(out);
+});
+
+router.post("/gear-descs-batch", async (req, res) => {
+    const { files } = req.body;
+    if (!Array.isArray(files) || files.length === 0)
+        return res.status(400).json({ error: "files must be a non-empty array" });
+    if (files.some((f: any) => typeof f !== "string" || !SAFE_HASH_RE.test(f)))
+        return res.status(400).json({ error: "invalid file name" });
+
+    const result: Record<string, any> = {};
+    await Promise.all(
+        (files as string[]).map(async (file) => {
+            const descriptor = await manifestCache.fetchGearDescriptor(file);
+            if (descriptor) result[file] = descriptor;
+        })
+    );
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.json(result);
+});
+
 router.get("/gear-desc/:md5", async (req, res) => {
     const { md5 } = req.params;
     if (!SAFE_HASH_RE.test(md5)) return res.status(400).send("Invalid hash");
@@ -80,6 +196,52 @@ router.get("/gear-desc/:md5", async (req, res) => {
     if (!descriptor) return res.status(404).send("Not found");
     res.setHeader("Cache-Control", "public, max-age=86400");
     res.json(descriptor);
+});
+
+router.post("/geometry-batch", async (req, res) => {
+    const { files } = req.body;
+    if (!Array.isArray(files) || files.length === 0)
+        return res.status(400).json({ error: "files must be a non-empty array" });
+
+    if (files.some((f: any) => typeof f !== "string" || !SAFE_HASH_RE.test(f)))
+        return res.status(400).json({ error: "invalid file name" });
+
+    const cdnBase = manifestCache.getCDNBase("Geometry" as any);
+    if (!cdnBase) return res.status(503).json({ error: "Manifest cache not ready" });
+
+    const fetched = await Promise.all(
+        (files as string[]).map(async (file) => {
+            try {
+                const r = await axios.get(`${BUNGIE_CDN}${cdnBase}/${file}`, {
+                    responseType: "arraybuffer",
+                    headers: { "X-API-Key": process.env.BUNGIE_API_KEY as string },
+                });
+                return { file, data: Buffer.from(r.data as ArrayBuffer) };
+            } catch {
+                return { file, data: null };
+            }
+        })
+    );
+
+    // Binary pack: [4-byte count] then per file: [2-byte name len][name bytes][4-byte data len][data bytes]
+    const valid = fetched.filter((r): r is { file: string; data: Buffer } => r.data !== null);
+    let size = 4;
+    for (const { file, data } of valid) size += 2 + Buffer.byteLength(file) + 4 + data.length;
+
+    const out = Buffer.allocUnsafe(size);
+    let off = 0;
+    out.writeUInt32LE(valid.length, off); off += 4;
+    for (const { file, data } of valid) {
+        const nb = Buffer.from(file);
+        out.writeUInt16LE(nb.length, off); off += 2;
+        out.set(nb, off); off += nb.length;
+        out.writeUInt32LE(data.length, off); off += 4;
+        out.set(data, off); off += data.length;
+    }
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.end(out);
 });
 
 router.get("/:assetType/:hash", async (req, res) => {
@@ -107,6 +269,45 @@ router.get("/:assetType/:hash", async (req, res) => {
         const status = e?.response?.status ?? 502;
         res.status(status).send("Failed to fetch asset");
     }
+});
+
+router.post("/item-defs", async (req, res) => {
+    const { hashes } = req.body;
+    if (!Array.isArray(hashes) || hashes.length === 0)
+        return res.status(400).json({ error: "hashes must be a non-empty array" });
+
+    const result: Record<number, any> = {};
+
+    await Promise.all(hashes.map(async (raw: any) => {
+        const hash = Number(raw);
+        if (!Number.isFinite(hash) || hash <= 0) return;
+
+        let def = manifestCache.getItemDef(hash);
+        if (!def) {
+            try {
+                const resp = await bungieAPI.apiRequest("getDestinyEntityDefinition", {
+                    entityType: "DestinyInventoryItemDefinition",
+                    hashIdentifier: hash
+                });
+                def = (resp as any).Response;
+                if (def) manifestCache.cacheItemDef(hash, def);
+            } catch { /* skip missing hashes */ }
+        }
+
+        if (def) {
+            result[hash] = {
+                icon:                   def.displayProperties?.icon ?? null,
+                name:                   def.displayProperties?.name ?? null,
+                itemSubType:            def.itemSubType ?? null,
+                plugCategoryHash:       def.plug?.plugCategoryHash ?? null,
+                plugCategoryIdentifier: def.plug?.plugCategoryIdentifier ?? null,
+                isDummyPlug:            def.plug?.isDummyPlug ?? false,
+            };
+        }
+    }));
+
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json(result);
 });
 
 router.get("/char-render/:membershipType/:destinyMembershipId/:characterId", async (req, res) => {
