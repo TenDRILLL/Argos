@@ -435,6 +435,7 @@ export default class RNG extends DiscordCommand {
         }
 
         const toEquip: string[] = [];
+        const exoticInstanceIds = new Set<string>();
         const results: string[] = [];
 
         for (const [slotName, slot] of [
@@ -477,18 +478,32 @@ export default class RNG extends DiscordCommand {
                     });
                 }
                 toEquip.push(best.instanceId);
+                if (slot.tierType === TIER_EXOTIC) exoticInstanceIds.add(best.instanceId);
             } catch {
                 results.push(`${slotName}: **${slot.name}** — transfer failed.`);
             }
         }
 
         if (toEquip.length) {
+            const nonExotic = toEquip.filter(id => !exoticInstanceIds.has(id));
+            const exotic    = toEquip.filter(id =>  exoticInstanceIds.has(id));
             try {
-                await bungieAPI.apiRequest("equipItems", {}, headers, "post", {
-                    itemIds: toEquip,
-                    characterId: equipCharId,
-                    membershipType,
-                });
+                // Equip non-exotics first — clears any existing exotic from those slots
+                // so the subsequent exotic equip doesn't hit the one-exotic-per-loadout cap.
+                if (nonExotic.length) {
+                    await bungieAPI.apiRequest("equipItems", {}, headers, "post", {
+                        itemIds: nonExotic,
+                        characterId: equipCharId,
+                        membershipType,
+                    });
+                }
+                if (exotic.length) {
+                    await bungieAPI.apiRequest("equipItems", {}, headers, "post", {
+                        itemIds: exotic,
+                        characterId: equipCharId,
+                        membershipType,
+                    });
+                }
                 results.push(`Equipped ${toEquip.length} weapon(s) on your active Guardian.`);
             } catch {
                 results.push("Equip failed — make sure your Guardian is in orbit or a social space.");
