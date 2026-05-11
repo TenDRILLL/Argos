@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { loadItemGeometry } from '/resource/tgxmLoader.js';
+import { loadItemGeometry, loadItemGeometryFromBuffer } from '/resource/tgxmLoader.js';
 
 const CLASS_COLORS = { 0: 0x4466FF, 1: 0x44FF66, 2: 0xAA44FF };
 
@@ -99,9 +99,10 @@ function _decodeBC4Block(data, off, out, bx, by, w) {
 
 async function loadDyeTexture(filename) {
     try {
-        const r = await fetch(`/api/gear/Texture/${filename}`);
-        if (!r.ok) return null;
-        const buf = await r.arrayBuffer();
+        const buf = _textureCache.has(filename)
+            ? _textureCache.get(filename)
+            : await fetch(`/api/gear/Texture/${filename}`).then(r => r.ok ? r.arrayBuffer() : null);
+        if (!buf) return null;
         const b = new Uint8Array(buf);
         if (b[0]!==84||b[1]!==71||b[2]!==88||b[3]!==77) return null;
 
@@ -295,12 +296,17 @@ const WEAPON_SLOT_ORDER = [
     953998645,  // Power
 ];
 
-async function loadGearItem(itemHash, visualHash) {
+async function loadGearItem(itemHash, visualHash, assetMap, geomMap) {
     const hash = visualHash ?? itemHash;
-    let assetResp = await fetch(`/api/gear/assets/${hash}`);
-    if (!assetResp.ok && hash !== itemHash) assetResp = await fetch(`/api/gear/assets/${itemHash}`);
-    if (!assetResp.ok) return null;
-    const asset = await assetResp.json();
+
+    let asset = assetMap?.[hash] ?? assetMap?.[itemHash] ?? null;
+    if (!asset) {
+        let assetResp = await fetch(`/api/gear/assets/${hash}`);
+        if (!assetResp.ok && hash !== itemHash) assetResp = await fetch(`/api/gear/assets/${itemHash}`);
+        if (!assetResp.ok) return null;
+        asset = await assetResp.json();
+    }
+    if (!asset) return null;
 
     const geomFiles = asset?.content?.[0]?.geometry ?? [];
     if (!geomFiles.length) return null;
@@ -313,7 +319,13 @@ async function loadGearItem(itemHash, visualHash) {
         (async () => {
             const g = new THREE.Group();
             g.rotation.x = -Math.PI / 2;
-            try { const m = await loadItemGeometry(geomFiles[0]); if (m) g.add(m); } catch {}
+            try {
+                const geomBuf = geomMap?.[geomFiles[0]];
+                const m = geomBuf
+                    ? loadItemGeometryFromBuffer(geomBuf)
+                    : await loadItemGeometry(geomFiles[0]);
+                if (m) g.add(m);
+            } catch {}
             return g.children.length ? g : null;
         })(),
         dyeFile ? loadDyeTexture(dyeFile) : Promise.resolve(null),
@@ -323,11 +335,96 @@ async function loadGearItem(itemHash, visualHash) {
 }
 
 async function loadCharacterGear(equipment, fallbackColor) {
-    const armorItems = equipment.filter(item => ARMOR_BUCKETS.has(item.bucketHash));
+    const armorItems  = equipment.filter(item => ARMOR_BUCKETS.has(item.bucketHash));
+    const weaponItems = WEAPON_SLOT_ORDER
+        .map(bucket => equipment.find(i => i.bucketHash === bucket))
+        .filter(Boolean);
+    const allItems = [...armorItems, ...weaponItems];
 
+    // Phase 1: one assets request for all items in this character
+    const allHashes = [...new Set(allItems.flatMap(i => {
+        const h = [i.itemHash];
+        if (i.visualHash && i.visualHash !== i.itemHash) h.push(i.visualHash);
+        return h;
+    }))];
+    const assetMap = allHashes.length
+        ? await fetch('/api/gear/assets-batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ hashes: allHashes }),
+          }).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        : {};
+
+    // Phase 2: extract file sets and plug hashes from assetMap
+    const geomSet = new Set(), dyeSet = new Set();
+    for (const item of allItems) {
+        const asset   = assetMap[item.visualHash ?? item.itemHash] ?? assetMap[item.itemHash];
+        const geom    = asset?.content?.[0]?.geometry?.[0];
+        if (geom) geomSet.add(geom);
+        const allTex  = asset?.content?.[0]?.textures ?? [];
+        const dyeIdxs = asset?.content?.[0]?.dye_index_set?.textures ?? [];
+        if (dyeIdxs.length) { const f = allTex[dyeIdxs[0]]; if (f) dyeSet.add(f); }
+    }
+    const allPlugHashes = [...new Set(allItems.flatMap(i => i.plugHashes ?? []))];
+    const uncachedPlugs = allPlugHashes.filter(h => !_defCache.has(h));
+
+    // Phase 3: geometry + textures + plug defs in parallel
+    const [geomMap, , plugDefBulk] = await Promise.all([
+        geomSet.size ? fetchGeometryBatch([...geomSet]) : Promise.resolve({}),
+        dyeSet.size  ? fetchTexturesBatch([...dyeSet]).then(map => {
+            for (const [f, buf] of Object.entries(map)) _textureCache.set(f, buf);
+        }) : Promise.resolve(),
+        uncachedPlugs.length
+            ? fetch('/api/gear/item-defs', {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ hashes: uncachedPlugs }),
+              }).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+            : Promise.resolve({}),
+    ]);
+    for (const h of uncachedPlugs) {
+        if (!_defCache.has(h)) _defCache.set(h, Promise.resolve(plugDefBulk[h] ?? null));
+    }
+
+    // Phase 4: identify shader plugs; pre-populate weapon assets from assetMap
+    const resolvedPlugDefs = await Promise.all(allPlugHashes.map(h => _defCache.get(h) ?? Promise.resolve(null)));
+    const shaderPlugHashes = [];
+    for (let i = 0; i < allPlugHashes.length; i++) {
+        const h = allPlugHashes[i], def = resolvedPlugDefs[i];
+        if (!def || h === DEFAULT_SHADER) continue;
+        if (def.plugCategoryHash === SHADER_CAT_HASH || def.plugCategoryIdentifier?.includes('cosmetics'))
+            shaderPlugHashes.push(h);
+    }
+    for (const item of weaponItems) {
+        const h = item.visualHash ?? item.itemHash;
+        const asset = assetMap[h] ?? assetMap[item.itemHash];
+        if (asset) { _shaderAssetCache.set(h, asset); _shaderAssetCache.set(item.itemHash, asset); }
+    }
+
+    // Phase 5: batch shader plug assets not already cached
+    const missingShaderHashes = shaderPlugHashes.filter(h => !_shaderAssetCache.has(h));
+    if (missingShaderHashes.length) {
+        const bulk = await fetch('/api/gear/assets-batch', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hashes: missingShaderHashes }),
+        }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+        for (const [h, asset] of Object.entries(bulk)) _shaderAssetCache.set(Number(h), asset);
+    }
+
+    // Phase 6: extract gear-desc files from shader+weapon assets, batch fetch
+    const gearDescFileSet = new Set();
+    for (const asset of _shaderAssetCache.values()) {
+        const gf = asset?.gear?.[0];
+        if (gf && !_gearDescCache.has(gf)) gearDescFileSet.add(gf);
+    }
+    if (gearDescFileSet.size) {
+        const descBulk = await fetchGearDescsBatch([...gearDescFileSet]);
+        for (const [f, desc] of Object.entries(descBulk)) _gearDescCache.set(f, desc);
+    }
+
+    // Phase 7: render all items — all caches warm, no individual requests fire
     const [armorParts, weaponGroups] = await Promise.all([
         Promise.allSettled(armorItems.map(async item => {
-            const result = await loadGearItem(item.itemHash, item.visualHash);
+            const result = await loadGearItem(item.itemHash, item.visualHash, assetMap, geomMap);
             if (result) {
                 const { group: g, dyeTex } = result;
                 const dyeSpec = await getShaderColor(item.plugHashes ?? []);
@@ -341,7 +438,7 @@ async function loadCharacterGear(equipment, fallbackColor) {
             const item = equipment.find(i => i.bucketHash === bucket);
             if (!item) return null;
             try {
-                const result = await loadGearItem(item.itemHash, item.visualHash);
+                const result = await loadGearItem(item.itemHash, item.visualHash, assetMap, geomMap);
                 if (result) {
                     const { group: g, dyeTex } = result;
                     const dyeSpec = await getShaderColor(item.plugHashes ?? []) ?? await fetchItemGearColor(item.visualHash ?? item.itemHash);
@@ -490,7 +587,11 @@ function initScene(canvas) {
 
 // ---- Info box ----
 
-const _defCache = new Map();
+const _defCache        = new Map();
+const _textureCache    = new Map(); // filename → ArrayBuffer
+const _gearDescCache   = new Map(); // md5 → descriptor
+const _shaderAssetCache = new Map(); // hash → asset JSON
+
 function fetchItemDef(hash) {
     if (_defCache.has(hash)) return _defCache.get(hash);
     const p = fetch(`/api/gear/item-def/${hash}`)
@@ -498,6 +599,66 @@ function fetchItemDef(hash) {
         .catch(() => null);
     _defCache.set(hash, p);
     return p;
+}
+
+async function _unpackBinaryBatch(endpoint, body) {
+    const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    }).catch(() => null);
+    if (!resp?.ok) return {};
+    const buf   = await resp.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    const view  = new DataView(buf);
+    const result = {};
+    let off = 0;
+    const count = view.getUint32(off, true); off += 4;
+    for (let i = 0; i < count; i++) {
+        const nameLen = view.getUint16(off, true); off += 2;
+        const name    = new TextDecoder().decode(bytes.subarray(off, off + nameLen)); off += nameLen;
+        const dataLen = view.getUint32(off, true); off += 4;
+        result[name]  = buf.slice(off, off + dataLen); off += dataLen;
+    }
+    return result;
+}
+
+const fetchGeometryBatch = (files) => _unpackBinaryBatch('/api/gear/geometry-batch', { files });
+
+const fetchTexturesBatch  = (files) => _unpackBinaryBatch('/api/gear/textures-batch', { files });
+const fetchGearDescsBatch = (files) => fetch('/api/gear/gear-descs-batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files }),
+}).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+
+const _iconCache = new Map();
+
+async function prefetchIcons(paths) {
+    const uncached = paths.filter(p => p && !_iconCache.has(p));
+    if (!uncached.length) return;
+
+    const pack = await fetch('/api/gear/icons-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paths: uncached }),
+    }).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
+    if (!pack) return;
+
+    const bytes = new Uint8Array(pack);
+    const view  = new DataView(pack);
+    const dec   = new TextDecoder();
+    let off = 0;
+    const count = view.getUint32(off, true); off += 4;
+    for (let i = 0; i < count; i++) {
+        const pLen = view.getUint16(off, true); off += 2;
+        const path = dec.decode(bytes.subarray(off, off + pLen)); off += pLen;
+        const cLen = view.getUint16(off, true); off += 2;
+        const ct   = dec.decode(bytes.subarray(off, off + cLen)); off += cLen;
+        const dLen = view.getUint32(off, true); off += 4;
+        const blob = new Blob([pack.slice(off, off + dLen)], { type: ct }); off += dLen;
+        _iconCache.set(path, URL.createObjectURL(blob));
+    }
 }
 
 const _shaderColorCache = new Map();
@@ -513,16 +674,22 @@ async function getShaderColor(plugHashes) {
         if (_shaderColorCache.has(ph)) return _shaderColorCache.get(ph);
         const mat = await (async () => {
             try {
-                const ar = await fetch(`/api/gear/assets/${ph}`);
-                console.log(`[shader] ${ph} asset HTTP ${ar.status}`);
-                if (!ar.ok) return null;
-                const asset = await ar.json();
+                const asset = _shaderAssetCache.has(ph)
+                    ? _shaderAssetCache.get(ph)
+                    : await fetch(`/api/gear/assets/${ph}`).then(r => {
+                        console.log(`[shader] ${ph} asset HTTP ${r.status}`);
+                        return r.ok ? r.json() : null;
+                    });
+                if (!asset) { console.log(`[shader] ${ph} no asset`); return null; }
                 console.log(`[shader] ${ph} asset keys:`, Object.keys(asset));
                 const gf = asset?.gear?.[0];
                 if (!gf) { console.log(`[shader] ${ph} no gear file`); return null; }
-                const dr = await fetch(`/api/gear/gear-desc/${gf}`);
-                if (!dr.ok) { console.log(`[shader] ${ph} desc HTTP ${dr.status}`); return null; }
-                const desc = await dr.json();
+                const desc = _gearDescCache.has(gf)
+                    ? _gearDescCache.get(gf)
+                    : await fetch(`/api/gear/gear-desc/${gf}`).then(r => {
+                        console.log(`[shader] ${ph} desc HTTP ${r.status}`);
+                        return r.ok ? r.json() : null;
+                    });
                 console.log(`[shader] ${ph} material_properties:`, JSON.stringify(desc?.default_dyes?.[0]?.material_properties));
                 const mp    = desc?.default_dyes?.[0]?.material_properties ?? {};
                 const pTint = mp.primary_albedo_tint;
@@ -561,14 +728,15 @@ async function fetchItemGearColor(itemHash) {
     if (_gearColorCache.has(itemHash)) return _gearColorCache.get(itemHash);
     const result = await (async () => {
         try {
-            const ar = await fetch(`/api/gear/assets/${itemHash}`);
-            if (!ar.ok) return null;
-            const asset = await ar.json();
+            const asset = _shaderAssetCache.has(itemHash)
+                ? _shaderAssetCache.get(itemHash)
+                : await fetch(`/api/gear/assets/${itemHash}`).then(r => r.ok ? r.json() : null);
+            if (!asset) return null;
             const gf = asset?.gear?.[0];
             if (!gf) return null;
-            const dr = await fetch(`/api/gear/gear-desc/${gf}`);
-            if (!dr.ok) return null;
-            const desc = await dr.json();
+            const desc = _gearDescCache.has(gf)
+                ? _gearDescCache.get(gf)
+                : await fetch(`/api/gear/gear-desc/${gf}`).then(r => r.ok ? r.json() : null);
             const mp    = desc?.default_dyes?.[0]?.material_properties ?? {};
             const pTint = mp.primary_albedo_tint;
             if (!Array.isArray(pTint) || pTint.length < 3) return null;
@@ -617,9 +785,10 @@ function gibRow(slot, iconPath, name, emptyClass) {
     const r = document.createElement('div');
     r.className = 'gib-row' + (emptyClass ? ' gib-empty' : '');
     if (slot !== null) {
-        const iconHtml = iconPath
-            ? `<img class="gib-icon" src="/api/gear/icon?path=${encodeURIComponent(iconPath)}" loading="lazy" alt="">`
-            : ``;
+        const src = iconPath
+            ? (_iconCache.get(iconPath) ?? `/api/gear/icon?path=${encodeURIComponent(iconPath)}`)
+            : null;
+        const iconHtml = src ? `<img class="gib-icon" src="${src}" loading="lazy" alt="">` : ``;
         r.innerHTML = `<span class="gib-slot">${slot}</span>${iconHtml}<span class="gib-name">${name}</span>`;
     } else {
         r.innerHTML = `<span class="gib-name">${name}</span>`;
@@ -674,6 +843,25 @@ async function buildInfoBox(canvas, renderData, statsData) {
 
     const relevant = (renderData.equipment ?? []).filter(i => SLOT_NAMES[i.bucketHash]);
 
+    // Bulk-prefetch all item defs in one server round-trip before the render loop
+    const _allHashes = new Set();
+    for (const item of relevant) {
+        _allHashes.add(item.itemHash);
+        if (item.visualHash) _allHashes.add(item.visualHash);
+        for (const ph of (item.plugHashes ?? [])) _allHashes.add(ph);
+    }
+    const _uncached = [..._allHashes].filter(h => !_defCache.has(h));
+    if (_uncached.length) {
+        const _bulk = await fetch('/api/gear/item-defs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hashes: _uncached }),
+        }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+        for (const h of _uncached) {
+            _defCache.set(h, Promise.resolve(_bulk[h] ?? null));
+        }
+    }
+
     const results = await Promise.allSettled(relevant.map(async item => {
         const slot = SLOT_NAMES[item.bucketHash];
         const plugHashes = item.plugHashes ?? [];
@@ -686,6 +874,17 @@ async function buildInfoBox(canvas, renderData, statsData) {
 
         return { slot, item, baseDef, visualDef, plugDefs, plugHashes };
     }));
+
+    // Batch-fetch all icons for this character before building DOM
+    const _iconPaths = new Set();
+    for (const r of results) {
+        if (r.status !== 'fulfilled') continue;
+        const { baseDef, visualDef, plugDefs } = r.value;
+        if (baseDef?.icon)   _iconPaths.add(baseDef.icon);
+        if (visualDef?.icon) _iconPaths.add(visualDef.icon);
+        for (const d of (plugDefs ?? [])) if (d?.icon) _iconPaths.add(d.icon);
+    }
+    await prefetchIcons([..._iconPaths]);
 
     let hasTransmog = false, hasShader = false;
 
