@@ -8,6 +8,10 @@ requests.set("getDestinyProfile", "/Destiny2/membershipType/Profile/destinyMembe
 requests.set("getDestinyInventory", "/Destiny2/membershipType/Profile/destinyMembershipId/Character/characterId/?components=200,203,205,300,303,304,305")
 requests.set("getActivityStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/AggregateActivityStats/");
 requests.set("getWeaponStats","/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/UniqueWeapons/");
+requests.set("getProfileInventory", "/Destiny2/membershipType/Profile/destinyMembershipId/?components=200,201,205,102");
+requests.set("transferItem", "/Destiny2/Actions/Items/TransferItem/");
+requests.set("equipItems", "/Destiny2/Actions/Items/EquipItems/");
+requests.set("getProfileTransitory", "/Destiny2/membershipType/Profile/destinyMembershipId/?components=204,1000");
 requests.set("getManifests","/Destiny2/Manifest/");
 requests.set("getDestinyEntityDefinition","/Destiny2/Manifest/entityType/hashIdentifier/");
 requests.set("getGroupMembers", "/GroupV2/groupId/Members/");
