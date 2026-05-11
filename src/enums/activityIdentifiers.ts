@@ -1,29 +1,32 @@
 import { ActivityIdentifierObject } from "../structs/ActivityIdentifierObject";
 
 const rawIdentifiers = new Map<string, number[]>([
-    ["Leviathan",[2693136600,2693136601,2693136602,2693136603,2693136604,2693136605]],
+    ["Leviathan",[2693136600,2693136601,2693136602,2693136603,2693136604,2693136605,89727599,287649202,1699948563,1875726950,3916343513,4039317196]],
     ["Leviathan, Prestige", [417231112,508802457,757116822,771164842,1685065161,1800508819,2449714930,3446541099,3857338478,3879860661,3912437239,4206123728]],
-    ["Leviathan, Eater of Worlds",[3089205900]],
+    ["Leviathan, Eater of Worlds",[3089205900,2164432138]],
     ["Leviathan, Eater of Worlds, Prestige",[809170886]],
-    ["Leviathan, Spire of Stars", [119944200]],
+    ["Leviathan, Spire of Stars", [119944200,3004605630]],
     ["Leviathan, Spire of Stars, Prestige",[3213556450]],
     ["Scourge of the Past",[548750096,2812525063]],
     ["Crown of Sorrow",[960175301,3333172150]],
-    ["Last Wish",[2122313384,1661734046]],
-    ["Garden of Salvation",[2497200493,2659723068,3458480158,3845997235]],
+    ["Last Wish",[2122313384,1661734046,2214608156,2214608157]],
+    ["Garden of Salvation",[2497200493,2659723068,3458480158,3845997235,1042180643]],
     ["Deep Stone Crypt",[910380154,3976949817]],
-    ["Vault of Glass",[3881495763]],
-    ["Vault of Glass, Master",[1681562271]],
-    ["Vow of the Disciple",[1441982566]],
-    ["Vow of the Disciple, Master",[4217492330]],
-    ["King's Fall",[1374392663]],
-    ["King's Fall, Master",[2964135793]],
+    ["Vault of Glass",[3881495763,1485585878]],
+    ["Vault of Glass, Master",[1681562271,3022541210]],
+    ["Vow of the Disciple",[1441982566,2906950631]],
+    ["Vow of the Disciple, Master",[4217492330,3889634515]],
+    ["King's Fall",[1374392663,1063970578]],
+    ["King's Fall, Master",[2964135793,3257594522]],
     ["Root of Nightmares", [2381413764]],
-    ["Crota's End", [4179289725]],
+    ["Root of Nightmares, Master", [2918919505]],
+    ["Crota's End", [4179289725,107319834,1566480315,156253568]],
+    ["Crota's End, Master", [1507509200]],
     ["Salvation's Edge", [2192826039, 1541433876, 940375169]],
     ["Salvation's Edge, Master", [4129614942]],
     ["The Desert Perpetual", [1044919065, 3896382790]],
     ["The Desert Perpetual, Epic", [3817322389, 2586252122]],
+    ["The Pantheon", [4169648176,4169648177,4169648179,4169648182]],
 
     ["The Glassway", [4197461112, 3812135451]],
     ["The Lightblade", [968885838, 1964120205]],
@@ -73,13 +76,16 @@ const rawIdentifiers = new Map<string, number[]>([
     ["Presage, Master", [4212753278]],
     ["The Shattered Throne", [2032534090, 1893059148]],
     ["Pit of Heresy", [2582501063, 785700673, 785700678, 1375089621, 2559374368, 2559374374, 2559374375]],
-    ["Prophecy", [1077850348,4148187374]],
+    ["Prophecy", [1077850348,4148187374,715153594]],
     ["Grasp of Avarice", [4078656646]],
+    ["Grasp of Avarice, Master", [1112917203,3774021532]],
     ["Duality", [2823159265]],
+    ["Duality, Master", [1668217731,3012587626]],
     ["Warlord's Ruin", [2004855007]],
-    ["Spire of the Watcher", [1262462921]],
-    ["Spire of the Watcher, Master", [2296818662]],
-    ["Ghosts of the Deep", [313828469]],
+    ["Warlord's Ruin, Master", [2534833093]],
+    ["Spire of the Watcher", [1262462921,3339002067,4046934917]],
+    ["Spire of the Watcher, Master", [2296818662,1801496203]],
+    ["Ghosts of the Deep", [313828469,124340010,2961030534]],
     ["Ghosts of the Deep, Master", [2716998124]],
     ["Vesper's Host", [300092127, 1915770060, 3492566689]],
     ["Vesper's Host, Master", [4293676253]],
@@ -96,7 +102,7 @@ function buildActivityIdentifierDB(): Map<string, ActivityIdentifierObject> {
     const heroicTest = /Heroic/;
     let i = 0;
     for (const [originalKey, ids] of rawIdentifiers) {
-        const type = i <= 22 ? 0 : (i <= 59 ? 2 : 1);
+        const type = i <= 25 ? 0 : (i <= 62 ? 2 : 1);
         let key = originalKey;
         if (masterTest.test(key) || prestigeTest.test(key) || heroicTest.test(key)) {
             key = key.substring(0, key.lastIndexOf(","));

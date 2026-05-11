@@ -273,8 +273,7 @@ export default class RNG extends DiscordCommand {
         const ammoEmojiStr: Record<number, string> = {};
         try {
             const appEmojis = await client.application!.emojis.fetch();
-            const emojiArr = [...appEmojis.values()];
-            const e = emojiArr[1] ?? emojiArr[0];
+            const e = appEmojis.find(em => em.name === "first");
             if (e) buttonEmoji = { id: e.id!, name: e.name ?? undefined };
             const exoticEmoji = appEmojis.find(em => em.name === "exotic");
             if (exoticEmoji) exoticEmojiStr = `<:${exoticEmoji.name}:${exoticEmoji.id}>`;

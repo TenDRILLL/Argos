@@ -15,7 +15,8 @@
     "test:commands": "bun test src/__tests__/commands",
     "test:web": "bun test src/__tests__/web",
     "test:e2e": "bun test src/__tests__/e2e",
-    "test:coverage": "bun test --coverage"
+    "test:coverage": "bun test --coverage",
+    "deploy": "npm run build && cd build && node deploy.js"
   },
   "devDependencies": {
     "@types/express-rate-limit": "^6.0.2",
