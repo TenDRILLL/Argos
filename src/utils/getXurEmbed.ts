@@ -82,7 +82,8 @@ const PROTECTED_EMOJI_NAMES = new Set([
     "mobility", "resilience", "recovery",
     "discipline", "intellect", "strength",
     "Xbox", "PlayStation", "Steam", "EpicGames",
-    "exotic", "energy", "primary", "heavy"
+    "exotic", "energy", "primary", "heavy",
+    "lw", "gos", "dsc", "vog", "votd", "kf", "ron", "ce", "se"
 ]);
 
 export async function deleteXurEmbed(client: Client): Promise<void> {

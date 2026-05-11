@@ -23,6 +23,7 @@ requests.set("getVendorInformation", "/Destiny2/membershipType/Profile/destinyMe
 requests.set("getActivityHistory", "/Destiny2/membershipType/Account/destinyMembershipId/Character/characterId/Stats/Activities/")
 requests.set("getPostGameCarnageReport", "/Destiny2/Stats/PostGameCarnageReport/activityId/")
 requests.set("getItem", "/Destiny2/membershipType/Profile/destinyMembershipId/Item/itemInstanceId/?components=300,301,302,303,304,305,306,307,308,309,310")
+requests.set("getProfileRecords", "/Destiny2/membershipType/Profile/destinyMembershipId/?components=900")
 
 export function getRequest(id,data){
     if(requests.has(id)){

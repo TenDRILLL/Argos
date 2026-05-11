@@ -5,6 +5,7 @@ import loadCommands from "./automata/CommandLoader";
 import {setCommands} from "./bot/events/InteractionCreate";
 import {initWeb} from "./web/web";
 import {lfgManager} from "./automata/LFGManager";
+import {patternService} from "./automata/PatternService";
 
 console.log("Starting Argos...");
 initDatabase().then(()=>{
@@ -17,6 +18,7 @@ initDatabase().then(()=>{
     });
 }).then(client =>{
     lfgManager.init(client);
+    patternService.init().catch(e => console.error("PatternService init failed:", e));
     initWeb(parseInt(process.env.WEB_PORT ?? "11542"), client);
 }).catch(e => {
     console.error("Fatal startup error:", e);

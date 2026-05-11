@@ -69,4 +69,20 @@ describe("getRequest()", () => {
         });
         expect(url).toContain("/3/Account/111/Character/222/Stats/Activities/");
     });
+
+    it("getProfileRecords substitutes membershipType and destinyMembershipId", () => {
+        const url = getRequest("getProfileRecords", { membershipType: 3, destinyMembershipId: "abc123" });
+        expect(url).toContain("/3/Profile/abc123/");
+    });
+
+    it("getProfileRecords includes components=900", () => {
+        const url = getRequest("getProfileRecords", { membershipType: 3, destinyMembershipId: "abc123" });
+        expect(url).toContain("components=900");
+    });
+
+    it("getProfileRecords returns a defined URL", () => {
+        const url = getRequest("getProfileRecords", { membershipType: 1, destinyMembershipId: "xyz" });
+        expect(url).toBeDefined();
+        expect(url).toContain("https://www.bungie.net/platform");
+    });
 });
