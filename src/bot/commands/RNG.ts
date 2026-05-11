@@ -1,12 +1,18 @@
 import DiscordCommand from "../../structs/DiscordCommand";
 import {
-    ActionRowBuilder,
     ButtonBuilder,
     ButtonInteraction,
     ButtonStyle,
     ChatInputCommandInteraction,
-    EmbedBuilder,
+    Client,
+    ContainerBuilder,
+    MediaGalleryBuilder,
+    MediaGalleryItemBuilder,
     MessageFlags,
+    SectionBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    TextDisplayBuilder,
 } from "discord.js";
 import { dbQuery } from "../../automata/Database";
 import { bungieAPI } from "../../automata/BungieAPI";
@@ -58,7 +64,7 @@ interface PendingLoadout {
     power:   SlotEntry | null;
 }
 
-const pending = new Map<string, PendingLoadout>();
+export const pending = new Map<string, PendingLoadout>();
 
 function pick<T>(arr: T[]): T | null {
     return arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
@@ -104,9 +110,7 @@ export default class RNG extends DiscordCommand {
         super("rng", { name: "rng", description: "Roll a random weapon loadout from your inventory." });
     }
 
-    async chatInput(interaction: ChatInputCommandInteraction) {
-        const discordId = interaction.user.id;
-
+    private async buildRNG(discordId: string, client: Client<true>): Promise<{ container: ContainerBuilder; loadout: PendingLoadout }> {
         const rows = await dbQuery(
             `SELECT u.destiny_id, u.membership_type,
                     t.access_token, t.access_expiry, t.refresh_token, t.refresh_expiry
@@ -114,27 +118,18 @@ export default class RNG extends DiscordCommand {
              WHERE u.discord_id = ?`,
             [discordId]
         );
-
-        if (!rows.length) {
-            return interaction.reply({ content: "You're not registered.", flags: MessageFlags.Ephemeral });
-        }
-
-        await interaction.deferReply();
+        if (!rows.length) throw new Error("You're not registered.");
 
         let { destiny_id, membership_type, access_token, access_expiry, refresh_token, refresh_expiry } = rows[0];
 
         if (Date.now() > Number(access_expiry) - 300_000) {
-            try {
-                const auth = await bungieAPI.refreshToken(refresh_token, Number(refresh_expiry));
-                access_token = auth.access_token;
-                const now = Date.now();
-                await dbQuery(
-                    "UPDATE user_tokens SET access_token=?, access_expiry=?, refresh_token=?, refresh_expiry=? WHERE discord_id=?",
-                    [auth.access_token, now + auth.expires_in * 1000, auth.refresh_token, now + auth.refresh_expires_in * 1000, discordId]
-                );
-            } catch {
-                return interaction.editReply({ content: "Token refresh failed. Please re-register." });
-            }
+            const auth = await bungieAPI.refreshToken(refresh_token, Number(refresh_expiry));
+            access_token = auth.access_token;
+            const now = Date.now();
+            await dbQuery(
+                "UPDATE user_tokens SET access_token=?, access_expiry=?, refresh_token=?, refresh_expiry=? WHERE discord_id=?",
+                [auth.access_token, now + auth.expires_in * 1000, auth.refresh_token, now + auth.refresh_expires_in * 1000, discordId]
+            );
         }
 
         let profileData: any;
@@ -145,7 +140,7 @@ export default class RNG extends DiscordCommand {
                 { Authorization: `Bearer ${access_token}` }
             );
         } catch {
-            return interaction.editReply({ content: "Failed to fetch inventory from Bungie." });
+            throw new Error("Failed to fetch inventory from Bungie.");
         }
 
         const resp = (profileData as any).Response;
@@ -216,7 +211,7 @@ export default class RNG extends DiscordCommand {
         const power   = weapons.filter(w => w.slot === POWER);
 
         if (!kinetic.length && !energy.length && !power.length) {
-            return interaction.editReply({ content: "No weapons found in your inventory." });
+            throw new Error("No weapons found in your inventory.");
         }
 
         let kPick = pick(kinetic);
@@ -264,43 +259,122 @@ export default class RNG extends DiscordCommand {
             instances: w.instances,
         } : null;
 
-        pending.set(discordId, {
+        const loadout: PendingLoadout = {
             membershipType: membership_type,
             destinyId: destiny_id,
             targetCharId,
             kinetic: toSlotEntry(kPick),
             energy:  toSlotEntry(ePick),
             power:   toSlotEntry(pPick),
-        });
+        };
 
-        const fieldValue = (w: Weapon | null, slotName: string) =>
-            w ? `**${w.name}**\n${TIER_LABELS[w.tierType] ?? "Unknown"} · ${AMMO_LABELS[w.ammoType] ?? "Unknown"}`
-              : `No ${slotName} weapons found.`;
+        let buttonEmoji: { id: string; name: string | undefined } | undefined;
+        let exoticEmojiStr: string | undefined;
+        const ammoEmojiStr: Record<number, string> = {};
+        try {
+            const appEmojis = await client.application!.emojis.fetch();
+            const emojiArr = [...appEmojis.values()];
+            const e = emojiArr[1] ?? emojiArr[0];
+            if (e) buttonEmoji = { id: e.id!, name: e.name ?? undefined };
+            const exoticEmoji = appEmojis.find(em => em.name === "exotic");
+            if (exoticEmoji) exoticEmojiStr = `<:${exoticEmoji.name}:${exoticEmoji.id}>`;
+            // ammo type 1=Primary, 2=Special(energy), 3=Heavy
+            for (const [ammoType, emojiName] of [[1, "primary"], [2, "energy"], [3, "heavy"]] as [number, string][]) {
+                const em = appEmojis.find(x => x.name === emojiName);
+                if (em) ammoEmojiStr[ammoType] = `<:${em.name}:${em.id}>`;
+            }
+        } catch { /* no emoji */ }
 
-        const embed = new EmbedBuilder()
-            .setTitle("RNG Loadout")
-            .setColor(0xae27ff)
-            .setFooter({ text: "Argos, Planetary Core", iconURL: "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp" })
-            .setFields([
-                { name: SLOT_NAMES[KINETIC], value: fieldValue(kPick, "Kinetic"), inline: true },
-                { name: SLOT_NAMES[ENERGY],  value: fieldValue(ePick, "Energy"),  inline: true },
-                { name: SLOT_NAMES[POWER],   value: fieldValue(pPick, "Power"),   inline: true },
-            ]);
+        const textLine = (w: Weapon | null, slotName: string): string => {
+            if (!w) return `-# **${slotName}** · No weapons found`;
+            const ammoLabel = AMMO_LABELS[w.ammoType] ?? "Unknown";
+            const ammoStr = ammoEmojiStr[w.ammoType] ? `${ammoEmojiStr[w.ammoType]} ${ammoLabel}` : ammoLabel;
+            const tierLabel = TIER_LABELS[w.tierType] ?? "Unknown";
+            const tierStr = w.tierType === TIER_EXOTIC && exoticEmojiStr
+                ? `${exoticEmojiStr} ${tierLabel}`
+                : tierLabel;
+            return `**${SLOT_NAMES[w.slot]}** · ${w.name}\n-# ${ammoStr} · ${tierStr}`;
+        };
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setLabel("Equip")
-                .setStyle(ButtonStyle.Success)
-                .setCustomId(`rng-${discordId}`)
-        );
+        const equipBtn = new ButtonBuilder()
+            .setLabel("Equip")
+            .setStyle(ButtonStyle.Success)
+            .setCustomId(`rng-equip-${discordId}`);
+        if (buttonEmoji) equipBtn.setEmoji(buttonEmoji);
 
-        return interaction.editReply({ embeds: [embed], components: [row] });
+        const rerollBtn = new ButtonBuilder()
+            .setLabel("Reroll")
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji({ name: "🔁" })
+            .setCustomId(`rng-reroll-${discordId}`);
+
+        const deleteBtn = new ButtonBuilder()
+            .setLabel("Delete")
+            .setStyle(ButtonStyle.Danger)
+            .setEmoji({ name: "🗑️" })
+            .setCustomId(`delete-${discordId}`);
+
+        const bungieRoot = "https://www.bungie.net";
+        const gallery = new MediaGalleryBuilder();
+        if (kPick?.icon) gallery.addItems(new MediaGalleryItemBuilder().setURL(`${bungieRoot}${kPick.icon}`).setDescription(kPick.name));
+        if (ePick?.icon) gallery.addItems(new MediaGalleryItemBuilder().setURL(`${bungieRoot}${ePick.icon}`).setDescription(ePick.name));
+
+        const container = new ContainerBuilder()
+            .setAccentColor(0xae27ff)
+            .addTextDisplayComponents(new TextDisplayBuilder().setContent("### RNG Loadout"))
+            .addMediaGalleryComponents(gallery)
+            .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true))
+            .addSectionComponents(
+                new SectionBuilder()
+                    .addTextDisplayComponents(new TextDisplayBuilder().setContent(textLine(kPick, "Kinetic")))
+                    .setButtonAccessory(equipBtn)
+            )
+            .addSectionComponents(
+                new SectionBuilder()
+                    .addTextDisplayComponents(new TextDisplayBuilder().setContent(textLine(ePick, "Energy")))
+                    .setButtonAccessory(rerollBtn)
+            )
+            .addSectionComponents(
+                new SectionBuilder()
+                    .addTextDisplayComponents(new TextDisplayBuilder().setContent(textLine(pPick, "Power")))
+                    .setButtonAccessory(deleteBtn)
+            );
+
+        return { container, loadout };
+    }
+
+    async chatInput(interaction: ChatInputCommandInteraction) {
+        await interaction.deferReply();
+        try {
+            const { container, loadout } = await this.buildRNG(interaction.user.id, interaction.client);
+            pending.set(interaction.user.id, loadout);
+            return interaction.editReply({ components: [container], flags: MessageFlags.IsComponentsV2 });
+        } catch (e) {
+            return interaction.editReply({ content: e instanceof Error ? e.message : "Something went wrong." });
+        }
     }
 
     async button(interaction: ButtonInteraction) {
+        const parts = interaction.customId.split("-");
+        const action = parts[1];
+        const ownerId = parts[2];
         const discordId = interaction.user.id;
-        const ownerId = interaction.customId.split("-")[1];
 
+        if (action === "reroll") {
+            if (ownerId !== discordId) {
+                return interaction.reply({ content: "The loadouts are specifically tied to the Guardians of the command user, please use `/rng` to generate your own.", flags: MessageFlags.Ephemeral });
+            }
+            await interaction.deferUpdate();
+            try {
+                const { container, loadout } = await this.buildRNG(discordId, interaction.client);
+                pending.set(discordId, loadout);
+                return interaction.editReply({ components: [container], flags: MessageFlags.IsComponentsV2 });
+            } catch (e) {
+                return interaction.editReply({ content: e instanceof Error ? e.message : "Something went wrong." });
+            }
+        }
+
+        // equip
         if (ownerId !== discordId) {
             return interaction.reply({ content: "The loadouts are specifically tied to the Guardians of the command user, please use `/rng` to generate your own.", flags: MessageFlags.Ephemeral });
         }
