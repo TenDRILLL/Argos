@@ -6,3 +6,4 @@ sftp.json
 launch.json
 .env
 *.md
+/scripts

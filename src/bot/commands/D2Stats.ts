@@ -16,6 +16,7 @@ import { UserStats, ActivityObject } from "../../structs/DBUser";
 import { patternService, PatternProgressMap } from "../../automata/PatternService";
 import { RAID_GROUPS, RAID_NAMES, RaidGroup } from "../../enums/raidWeaponPatterns";
 import { weaponEmojiService } from "../../automata/WeaponEmojiService";
+import { freshClearService } from "../../automata/FreshClearService";
 
 const EMBED_COLOR  = 0xae27ff;
 const FOOTER_TEXT  = "Argos, Planetary Core";
@@ -66,6 +67,12 @@ export default class D2Stats extends DiscordCommand {
                 },
                 {
                     type: ApplicationCommandOptionType.Subcommand,
+                    name: "100full",
+                    description: "Ten's challenge, how many raid & dungeon clears are full (fresh from beginning), capped at 100.",
+                    options: [{ type: ApplicationCommandOptionType.User, name: "user", description: "The Discord user to check.", required: false }]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
                     name: "patterns",
                     description: "Raid weapon pattern progress — total overview or per-raid breakdown.",
                     options: [
@@ -108,6 +115,10 @@ export default class D2Stats extends DiscordCommand {
 
         if (sub === "patterns") {
             return this.patterns(interaction, discordId, authorId);
+        }
+
+        if (sub === "100full") {
+            return this.hundredFull(interaction, discordId, authorId);
         }
 
         const dbUser = await userService.updateStats(discordId);
@@ -262,6 +273,45 @@ export default class D2Stats extends DiscordCommand {
             .setDescription(`**${raidCollected} / ${raidTotal}** patterns  ·  ${pct}%`)
             .setThumbnail(emojiURL)
             .setFields(fields)
+            .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
+
+        this.sendEmbed(interaction, embed, authorId);
+    }
+
+    private async hundredFull(interaction: ChatInputCommandInteraction, discordId: string, authorId: string) {
+        const rows = await dbQuery(
+            "SELECT destiny_id, membership_type, destiny_name FROM users WHERE discord_id = ?",
+            [discordId]
+        );
+        if (!rows[0]?.destiny_id) {
+            return interaction.editReply({ content: "No Destiny account linked for this user." });
+        }
+
+        const { destiny_id, membership_type, destiny_name } = rows[0];
+        const cached = await freshClearService.getCached(discordId);
+
+        if (!cached) {
+            if (freshClearService.isScanning(discordId)) {
+                return interaction.editReply({ content: "Scan already in progress — check back in a few minutes." });
+            }
+            freshClearService.startScan(discordId, membership_type, destiny_id);
+            return interaction.editReply({ content: "Scanning your full raid & dungeon history now. This takes a few minutes — run the command again when done." });
+        }
+
+        const capped  = Math.min(cached.freshCount, 100);
+        const filled  = Math.round(capped / 5);
+        const barStr  = "█".repeat(filled) + "░".repeat(20 - filled);
+        const since   = new Date(cached.lastUpdated).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+        const desc = [`\`${barStr}\`  **${capped}/100**`];
+        if (cached.freshCount > 100) desc.push(`-# ${cached.freshCount} total full clears.`);
+        desc.push(`-# Updated ${since}.`);
+
+        const embed = new EmbedBuilder()
+            .setTitle("Ten's 100 Full Clears Challenge")
+            .setColor(EMBED_COLOR)
+            .setAuthor({ name: destiny_name })
+            .setDescription(desc.join("\n"))
             .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
 
         this.sendEmbed(interaction, embed, authorId);

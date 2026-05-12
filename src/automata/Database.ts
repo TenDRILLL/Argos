@@ -108,14 +108,23 @@ async function initDatabase(): Promise<void> {
     `);
     await dbQuery(`ALTER TABLE misc CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`).catch(() => {});
 
+    await dbQuery(`
+        CREATE TABLE IF NOT EXISTS user_fresh_clears (
+        discord_id   VARCHAR(20) NOT NULL PRIMARY KEY,
+        fresh_count  INT         DEFAULT 0,
+        last_updated BIGINT      NULL
+        );
+    `);
+
     console.table({
-        discordToken:    {created: true},
-        users:           {created: true},
-        user_tokens:     {created: true},
-        user_activities: {created: true},
-        lfg:             {created: true},
-        lfg_members:     {created: true},
-        misc:            {created: true},
+        discordToken:      {created: true},
+        users:             {created: true},
+        user_tokens:       {created: true},
+        user_activities:   {created: true},
+        lfg:               {created: true},
+        lfg_members:       {created: true},
+        misc:              {created: true},
+        user_fresh_clears: {created: true},
     });
 }
 
