@@ -32,11 +32,6 @@ function bar10(progress: number, total: number): string {
     return "█".repeat(Math.min(filled, 10)) + "░".repeat(Math.max(10 - filled, 0));
 }
 
-function statusEmoji(progress: number, total: number): string {
-    if (progress >= total) return "✅";
-    if (progress === 0)    return "⬜";
-    return "🔶";
-}
 
 export default class D2Stats extends DiscordCommand {
     constructor() {
@@ -213,7 +208,8 @@ export default class D2Stats extends DiscordCommand {
             .setTitle("Raid Weapon Patterns")
             .setColor(EMBED_COLOR)
             .setAuthor({ name: destinyName })
-            .setDescription(`**${grandCollected} / ${grandTotal}** patterns collected  ·  ${overallPct}%`)
+            .setDescription(`**${grandCollected} / ${grandTotal}** patterns collected  ·  ${overallPct}%
+-# Use: \`/d2stats patterns raid:\` for specifics.`)
             .setFields(fields)
             .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
 
@@ -229,7 +225,7 @@ export default class D2Stats extends DiscordCommand {
     ) {
         const emojiCache = await interaction.client.application.emojis.fetch().catch(() => null);
         const raidEmoji  = emojiCache?.find((e: any) => e.name === raid.shortName.toLowerCase());
-        const emojiStr   = raidEmoji ? raidEmoji.toString() : "";
+        const emojiURL   = raidEmoji ? (raidEmoji as any).imageURL() : null;
         const raidTotal  = raid.weapons.length * PATTERNS_PER_WEAPON;
         let raidCollected = 0;
 
@@ -239,26 +235,24 @@ export default class D2Stats extends DiscordCommand {
             const cv        = PATTERNS_PER_WEAPON;
             raidCollected  += progress;
 
-            const emoji    = statusEmoji(progress, cv);
             const barStr   = bar5(progress);
             const fraction = `**${progress} / ${cv}**`;
 
             return {
                 name:   `${weapon.name}  ·  *${weapon.type}*`,
-                value:  `${barStr}  ${fraction}  ${emoji}`,
+                value:  `${barStr}  ${fraction}`,
                 inline: true,
             };
         });
 
-        const pct          = raidTotal > 0 ? Math.round((raidCollected / raidTotal) * 100) : 0;
-        const complete     = raidCollected >= raidTotal;
-        const summaryEmoji = complete ? "✅" : "🔶";
+        const pct = raidTotal > 0 ? Math.round((raidCollected / raidTotal) * 100) : 0;
 
         const embed = new EmbedBuilder()
-            .setTitle(`${emojiStr}  ${raid.name}  ·  Patterns`)
+            .setTitle(`${raid.name}  ·  Patterns`)
             .setColor(EMBED_COLOR)
             .setAuthor({ name: destinyName })
-            .setDescription(`${summaryEmoji}  **${raidCollected} / ${raidTotal}** patterns  ·  ${pct}%`)
+            .setDescription(`**${raidCollected} / ${raidTotal}** patterns  ·  ${pct}%`)
+            .setThumbnail(emojiURL)
             .setFields(fields)
             .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
 
