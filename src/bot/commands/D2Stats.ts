@@ -15,6 +15,7 @@ import { activityIdentifierDB } from "../../enums/activityIdentifiers";
 import { UserStats, ActivityObject } from "../../structs/DBUser";
 import { patternService, PatternProgressMap } from "../../automata/PatternService";
 import { RAID_GROUPS, RAID_NAMES, RaidGroup } from "../../enums/raidWeaponPatterns";
+import { weaponEmojiService } from "../../automata/WeaponEmojiService";
 
 const EMBED_COLOR  = 0xae27ff;
 const FOOTER_TEXT  = "Argos, Planetary Core";
@@ -97,8 +98,13 @@ export default class D2Stats extends DiscordCommand {
             return interaction.reply({ content: "The requested user has not registered with me.", flags: MessageFlags.Ephemeral });
         }
 
-        await interaction.deferReply();
         const sub = interaction.options.getSubcommand(false);
+
+        if (sub === "patterns" && weaponEmojiService.isSyncing()) {
+            return interaction.reply({ content: "Weapon emojis are still loading — try again in a minute.", flags: MessageFlags.Ephemeral });
+        }
+
+        await interaction.deferReply();
 
         if (sub === "patterns") {
             return this.patterns(interaction, discordId, authorId);
@@ -235,11 +241,13 @@ export default class D2Stats extends DiscordCommand {
             const cv        = PATTERNS_PER_WEAPON;
             raidCollected  += progress;
 
-            const barStr   = bar5(progress);
-            const fraction = `**${progress} / ${cv}**`;
+            const barStr    = bar5(progress);
+            const fraction  = `**${progress} / ${cv}**`;
+            const wEmoji    = weaponEmojiService.getWeaponEmoji(weapon.name);
+            const prefix    = wEmoji ? `${wEmoji}  ` : "";
 
             return {
-                name:   `${weapon.name}  ·  *${weapon.type}*`,
+                name:   `${prefix} ${weapon.name}`,
                 value:  `${barStr}  ${fraction}`,
                 inline: true,
             };

@@ -6,6 +6,7 @@ import { VendorQuery, SocketComponents } from "../structs/VendorQuery";
 import { CharacterQuery } from "../structs/CharacterQuery";
 import { EntityQuery, RawEntityQuery, DisplayProperties } from "../structs/EntityQuery";
 import { WeaponSlot } from "../enums/WeaponSlot";
+import { RAID_GROUPS, weaponEmojiName } from "../enums/raidWeaponPatterns";
 
 export const XUR_CHANNEL_ID = process.env.XUR_CHANNEL_ID ?? "980143760149188648";
 
@@ -76,14 +77,15 @@ export async function generateXurEmbed(client: Client): Promise<void> {
     }
 }
 
-const PROTECTED_EMOJI_NAMES = new Set([
+export const PROTECTED_EMOJI_NAMES = new Set([
     "warlock2", "titan2", "hunter2",
     "first", "second", "third",
     "mobility", "resilience", "recovery",
     "discipline", "intellect", "strength",
     "Xbox", "PlayStation", "Steam", "EpicGames",
     "exotic", "energy", "primary", "heavy",
-    "lw", "gos", "dsc", "vog", "votd", "kf", "ron", "ce", "se"
+    "lw", "gos", "dsc", "vog", "votd", "kf", "ron", "ce", "se",
+    ...RAID_GROUPS.flatMap(r => r.weapons.map(w => weaponEmojiName(w.name))),
 ]);
 
 export async function deleteXurEmbed(client: Client): Promise<void> {

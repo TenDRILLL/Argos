@@ -122,3 +122,7 @@ export const RAID_GROUPS: RaidGroup[] = [
 ];
 
 export const RAID_NAMES = RAID_GROUPS.map(r => r.name);
+
+export function weaponEmojiName(weaponName: string): string {
+    return weaponName.replace(/[^0-9A-z ]/g, "").split(" ").join("_");
+}
