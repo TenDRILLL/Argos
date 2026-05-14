@@ -19,16 +19,16 @@ import { weaponEmojiService } from "../../automata/WeaponEmojiService";
 import { freshClearService, FreshClearResult } from "../../automata/FreshClearService";
 
 const CURRENT_RAIDS: Array<{ key: string; emoji: string; short: string }> = [
-    { key: "Last Wish",            emoji: "lastwish",          short: "Last Wish"       },
-    { key: "Garden of Salvation",  emoji: "gardenofsalvation", short: "Garden"          },
-    { key: "Deep Stone Crypt",     emoji: "deepstonecrypt",    short: "Deep Stone"      },
+    { key: "Last Wish",            emoji: "lastwish",          short: "LW"       },
+    { key: "Garden of Salvation",  emoji: "gardenofsalvation", short: "GoS"          },
+    { key: "Deep Stone Crypt",     emoji: "deepstonecrypt",    short: "DSC"      },
     { key: "Vault of Glass",       emoji: "vaultofglass",      short: "VoG"             },
     { key: "Vow of the Disciple",  emoji: "vowofthedisciple",  short: "VotD"            },
-    { key: "King's Fall",          emoji: "kingsfall",         short: "King's Fall"     },
+    { key: "King's Fall",          emoji: "kingsfall",         short: "KF"     },
     { key: "Root of Nightmares",   emoji: "rootofnightmares",  short: "RoN"             },
-    { key: "Crota's End",          emoji: "crotasend",         short: "Crota's End"     },
-    { key: "Salvation's Edge",     emoji: "salvationsedge",    short: "Salvation's Edge"},
-    { key: "The Desert Perpetual", emoji: "desertperpetual",   short: "DP"              },
+    { key: "Crota's End",          emoji: "crotasend",         short: "CE"     },
+    { key: "Salvation's Edge",     emoji: "salvationsedge",    short: "SE"},
+    { key: "The Desert Perpetual", emoji: "desertperpetual",   short: "TDP"              },
 ];
 
 export { CURRENT_RAIDS };
