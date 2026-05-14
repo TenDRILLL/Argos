@@ -6,6 +6,7 @@ import { generateXurEmbed, deleteXurEmbed } from "../../utils/getXurEmbed";
 import { fetchPendingClanRequests } from "../../utils/fetchPendingClanRequests";
 import { manifestCache } from "../../automata/ManifestCache";
 import { weaponEmojiService } from "../../automata/WeaponEmojiService";
+import { freshClearService } from "../../automata/FreshClearService";
 
 const ARGOS_STATUSES = [
     "Scanning for Vex signatures",
@@ -54,6 +55,7 @@ export default class ReadyEvent extends DiscordEvent {
 
         manifestCache.refresh().catch(e => console.error("ManifestCache refresh failed:", e));
         weaponEmojiService.syncEmojis(client).catch(e => console.error("WeaponEmojiService sync failed:", e));
+        freshClearService.startInitialScanForAll();
 
         setInterval(async () => {
             console.log(`Time: ${new Date().toUTCString()}`);
@@ -63,6 +65,7 @@ export default class ReadyEvent extends DiscordEvent {
             await userService.updateAllUserRoles(client);
             console.log("Checking clan requests.");
             await fetchPendingClanRequests(client);
+            freshClearService.startIncrementalUpdateAll();
         }, 5 * 60 * 1000);
 
         const createXur = cron.schedule("5 17 * * 5", () => {

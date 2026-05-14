@@ -108,11 +108,15 @@ async function initDatabase(): Promise<void> {
     `);
     await dbQuery(`ALTER TABLE misc CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`).catch(() => {});
 
+    await dbQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS fresh_scanned_at BIGINT NULL`).catch(() => {});
+
     await dbQuery(`
         CREATE TABLE IF NOT EXISTS user_fresh_clears (
-        discord_id   VARCHAR(20) NOT NULL PRIMARY KEY,
-        fresh_count  INT         DEFAULT 0,
-        last_updated BIGINT      NULL
+        discord_id    VARCHAR(20)  NOT NULL,
+        activity_key  VARCHAR(100) NOT NULL,
+        fresh_count   INT          DEFAULT 0,
+        last_updated  BIGINT       NULL,
+        PRIMARY KEY (discord_id, activity_key)
         );
     `);
 
@@ -160,4 +164,8 @@ async function dbTransaction(callback: (tx: (query: string, values?: any[]) => P
     }
 }
 
-export {initDatabase, dbQuery, dbTransaction}
+async function closeDatabase(): Promise<void> {
+    if (pool) await pool.end();
+}
+
+export {initDatabase, dbQuery, dbTransaction, closeDatabase}

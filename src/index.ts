@@ -1,11 +1,16 @@
 import "dotenv/config";
 import initDiscordBot from "./bot/bot";
-import {initDatabase} from "./automata/Database";
+import {initDatabase, closeDatabase} from "./automata/Database";
 import loadCommands from "./automata/CommandLoader";
 import {setCommands} from "./bot/events/InteractionCreate";
 import {initWeb} from "./web/web";
 import {lfgManager} from "./automata/LFGManager";
 import {patternService} from "./automata/PatternService";
+
+process.on("SIGINT", () => {
+    console.log("Shutting down...");
+    closeDatabase().finally(() => process.exit(0));
+});
 
 console.log("Starting Argos...");
 initDatabase().then(()=>{

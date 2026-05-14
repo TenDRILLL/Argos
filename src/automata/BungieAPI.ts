@@ -64,8 +64,7 @@ export class BungieAPI {
                             res(response);
                         }
                     }).catch(e => {
-                        console.log(e.response?.statusText);
-                        rej(`${e.response.status} ${e.code} ${e.response?.data?.Message !== undefined ? e.response.data.Message : ""}`);
+                        rej(`${e.response?.status ?? 0} ${e.code ?? ""} ${e.response?.data?.Message ?? ""}`.trim());
                     });
             }
         });

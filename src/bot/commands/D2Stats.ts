@@ -16,7 +16,34 @@ import { UserStats, ActivityObject } from "../../structs/DBUser";
 import { patternService, PatternProgressMap } from "../../automata/PatternService";
 import { RAID_GROUPS, RAID_NAMES, RaidGroup } from "../../enums/raidWeaponPatterns";
 import { weaponEmojiService } from "../../automata/WeaponEmojiService";
-import { freshClearService } from "../../automata/FreshClearService";
+import { freshClearService, FreshClearResult } from "../../automata/FreshClearService";
+
+const CURRENT_RAIDS: Array<{ key: string; emoji: string; short: string }> = [
+    { key: "Last Wish",            emoji: "lastwish",          short: "Last Wish"       },
+    { key: "Garden of Salvation",  emoji: "gardenofsalvation", short: "Garden"          },
+    { key: "Deep Stone Crypt",     emoji: "deepstonecrypt",    short: "Deep Stone"      },
+    { key: "Vault of Glass",       emoji: "vaultofglass",      short: "VoG"             },
+    { key: "Vow of the Disciple",  emoji: "vowofthedisciple",  short: "VotD"            },
+    { key: "King's Fall",          emoji: "kingsfall",         short: "King's Fall"     },
+    { key: "Root of Nightmares",   emoji: "rootofnightmares",  short: "RoN"             },
+    { key: "Crota's End",          emoji: "crotasend",         short: "Crota's End"     },
+    { key: "Salvation's Edge",     emoji: "salvationsedge",    short: "Salvation's Edge"},
+    { key: "The Desert Perpetual", emoji: "desertperpetual",   short: "DP"              },
+];
+
+export { CURRENT_RAIDS };
+
+export function buildRaidLine(
+    raid:       { key: string; emoji: string; short: string },
+    cached:     FreshClearResult,
+    emojiCache: any
+): string {
+    const count   = Math.min(cached.counts.get(raid.key) ?? 0, 100);
+    const star    = count >= 100 ? " ⭐" : "";
+    const counter = `**${count}/100**${star}`;
+    const emoji   = emojiCache?.find((e: any) => e.name === raid.emoji);
+    return emoji ? `${emoji.toString()}    ${counter}` : `${raid.short}    ${counter}`;
+}
 
 const EMBED_COLOR  = 0xae27ff;
 const FOOTER_TEXT  = "Argos, Planetary Core";
@@ -298,23 +325,30 @@ export default class D2Stats extends DiscordCommand {
             return interaction.editReply({ content: "Scanning your full raid & dungeon history now. This takes a few minutes — run the command again when done." });
         }
 
-        const capped  = Math.min(cached.freshCount, 100);
-        const filled  = Math.round(capped / 5);
-        const barStr  = "█".repeat(filled) + "░".repeat(20 - filled);
-        const since   = new Date(cached.lastUpdated).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        const emojiCache = await interaction.client.application.emojis.fetch().catch(() => null);
+        const lines      = CURRENT_RAIDS.map(raid => this.buildRaidLine(raid, cached, emojiCache));
 
-        const desc = [`\`${barStr}\`  **${capped}/100**`];
-        if (cached.freshCount > 100) desc.push(`-# ${cached.freshCount} total full clears.`);
-        desc.push(`-# Updated ${since}.`);
+        const since = `<t:${Math.floor(cached.lastUpdated / 1000)}:f>`;
+
+        const raidEmoji  = emojiCache?.find((e: any) => e.name === "raid");
+        const titlePrefix = raidEmoji ? `${raidEmoji.toString()}  ` : "";
 
         const embed = new EmbedBuilder()
-            .setTitle("Ten's 100 Full Clears Challenge")
+            .setTitle(`${titlePrefix}100 Full Clears Personal Quest`)
             .setColor(EMBED_COLOR)
             .setAuthor({ name: destiny_name })
-            .setDescription(desc.join("\n"))
+            .setDescription(lines.join("\n") + `\n-# Last Updated ${since}`)
             .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
 
         this.sendEmbed(interaction, embed, authorId);
+    }
+
+    private buildRaidLine(
+        raid:       { key: string; emoji: string; short: string },
+        cached:     FreshClearResult,
+        emojiCache: any
+    ): string {
+        return buildRaidLine(raid, cached, emojiCache);
     }
 
     private summary(interaction: ChatInputCommandInteraction, dbUser: UserStats, authorId: string) {
