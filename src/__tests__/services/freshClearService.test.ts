@@ -107,6 +107,7 @@ function totalFreshSaved(calls: any[][]): number {
 describe("FreshClearService", () => {
     beforeEach(() => {
         mockDbQuery.mockReset();
+        mockDbQuery.mockImplementation(() => Promise.resolve([]));
         mockApiRequest.mockReset();
     });
 
@@ -273,10 +274,20 @@ describe("FreshClearService", () => {
             expect(await countFresh(makeActivity("i", LAST_WISH_HASH, 1, POST_WQ), makePGCRCheckpointResp())).toBe(0);
         });
 
-        it("post-WQ checkpoint (PGCR: wasStarted=false, phase=0) → not counted", async () => {
-            // wasStarted=false is an explicit 'not fresh' signal post-WQ even when phase=0
-            const enc0Checkpoint = { Response: { activityWasStartedFromBeginning: false, startingPhaseIndex: 0 }, ErrorCode: 1, ThrottleSeconds: 0 };
-            expect(await countFresh(makeActivity("i", LAST_WISH_HASH, 1, POST_WQ), enc0Checkpoint)).toBe(0);
+        it("post-WQ wasStarted=false phase=0 → counted (Bungie defaults field to false; phase=0 wins)", async () => {
+            // wasStarted=false + phase=0: Bungie returned a defaulted value — trust startingPhaseIndex=0
+            const enc0WasFalse = { Response: { activityWasStartedFromBeginning: false, startingPhaseIndex: 0 }, ErrorCode: 1, ThrottleSeconds: 0 };
+            expect(await countFresh(makeActivity("i", LAST_WISH_HASH, 1, POST_WQ), enc0WasFalse)).toBe(1);
+        });
+
+        it("post-WQ wasStarted=false phase>0 → not counted (genuine checkpoint)", async () => {
+            const enc2WasFalse = { Response: { activityWasStartedFromBeginning: false, startingPhaseIndex: 2 }, ErrorCode: 1, ThrottleSeconds: 0 };
+            expect(await countFresh(makeActivity("i", LAST_WISH_HASH, 1, POST_WQ), enc2WasFalse)).toBe(0);
+        });
+
+        it("post-WQ wasStarted=null phase=0 → not counted (absent field post-WQ = unreliable PGCR)", async () => {
+            const noField = { Response: { startingPhaseIndex: 0 }, ErrorCode: 1, ThrottleSeconds: 0 };
+            expect(await countFresh(makeActivity("i", LAST_WISH_HASH, 1, POST_WQ), noField)).toBe(0);
         });
 
         it("post-WQ when PGCR unavailable → defaults to fresh", async () => {
@@ -285,7 +296,9 @@ describe("FreshClearService", () => {
                 period: POST_WQ,
                 values: { completed: { basic: { value: 1 } } },
             };
-            expect(await countFresh(activity)).toBe(1);
+            // Simulate PGCR fetch failure by rejecting; fetchPGCR catches and returns null → counted as fresh
+            const pgcrReject = { Response: null, ErrorCode: 5, ThrottleSeconds: 0 };
+            expect(await countFresh(activity, pgcrReject)).toBe(1);
         });
 
         it("pre-WQ fresh (PGCR: startingPhaseIndex=0) → counted", async () => {
@@ -332,6 +345,9 @@ describe("FreshClearService", () => {
                     },
                     ErrorCode: 1, ThrottleSeconds: 0,
                 })
+                .mockResolvedValueOnce(makeEmptyHistoryResp())  // char1 mode=82
+                .mockResolvedValueOnce(makePGCRFreshResp())     // PGCR lw1
+                .mockResolvedValueOnce(makePGCRFreshResp())     // PGCR vog1
                 .mockResolvedValue(makeEmptyHistoryResp());
             mockDbQuery.mockResolvedValue([]);
 
@@ -370,6 +386,8 @@ describe("FreshClearService", () => {
                 .mockResolvedValueOnce(makeHistoryResp(["shared"], undefined, LAST_WISH_HASH, 1)) // char1 mode=4
                 .mockResolvedValueOnce(makeEmptyHistoryResp())                                    // char1 mode=82
                 .mockResolvedValueOnce(makeHistoryResp(["shared"], undefined, LAST_WISH_HASH, 1)) // char2 mode=4 dup
+                .mockResolvedValueOnce(makeEmptyHistoryResp())                                    // char2 mode=82
+                .mockResolvedValueOnce(makePGCRFreshResp())                                       // PGCR "shared"
                 .mockResolvedValue(makeEmptyHistoryResp());
             mockDbQuery.mockResolvedValue([]);
 
@@ -475,6 +493,7 @@ describe("FreshClearService", () => {
                     },
                     ErrorCode: 1, ThrottleSeconds: 0,
                 })
+                .mockResolvedValueOnce(makePGCRFreshResp())  // PGCR "new"
                 .mockResolvedValue(makeEmptyHistoryResp());
 
             svc.startIncrementalUpdateAll();
@@ -495,6 +514,7 @@ describe("FreshClearService", () => {
             mockApiRequest
                 .mockResolvedValueOnce(makeCharResp(["c1"]))
                 .mockResolvedValueOnce(makeHistoryResp(["new_inst"], "2024-01-20T10:00:00Z", LAST_WISH_HASH, 1))
+                .mockResolvedValueOnce(makePGCRFreshResp())  // PGCR "new_inst"
                 .mockResolvedValue(makeEmptyHistoryResp());
 
             svc.startIncrementalUpdateAll();

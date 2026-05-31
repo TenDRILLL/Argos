@@ -18,7 +18,7 @@ const RAID_ANGEL_COUNTS: Record<string, number> = {
 };
 
 function makeCached(counts: Record<string, number>): FreshClearResult {
-    return { counts: new Map(Object.entries(counts)), lastUpdated: 0 };
+    return { counts: new Map(Object.entries(counts)), specials: new Map(), lastUpdated: 0 };
 }
 
 // No emoji cache → falls back to raid.short names. Pure string output, no Discord.js needed.
@@ -29,17 +29,17 @@ describe("hundredFull — buildRaidLine (RaidAngel871 ground truth)", () => {
 
     it("Last Wish — 100/100 ⭐", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "Last Wish")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("Last Wish    **100/100** ⭐");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("LW    **100/100** ⭐");
     });
 
     it("Garden of Salvation — 100/100 ⭐", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "Garden of Salvation")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("Garden    **100/100** ⭐");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("GoS    **100/100** ⭐");
     });
 
     it("Deep Stone Crypt — 100/100 ⭐", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "Deep Stone Crypt")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("Deep Stone    **100/100** ⭐");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("DSC    **100/100** ⭐");
     });
 
     it("Vault of Glass — 100/100 ⭐", () => {
@@ -54,7 +54,7 @@ describe("hundredFull — buildRaidLine (RaidAngel871 ground truth)", () => {
 
     it("King's Fall — 100/100 ⭐", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "King's Fall")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("King's Fall    **100/100** ⭐");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("KF    **100/100** ⭐");
     });
 
     it("Root of Nightmares — 59/100", () => {
@@ -64,23 +64,23 @@ describe("hundredFull — buildRaidLine (RaidAngel871 ground truth)", () => {
 
     it("Crota's End — 32/100", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "Crota's End")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("Crota's End    **32/100**");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("CE    **32/100**");
     });
 
     it("Salvation's Edge — 9/100", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "Salvation's Edge")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("Salvation's Edge    **9/100**");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("SE    **9/100**");
     });
 
     it("The Desert Perpetual — 3/100", () => {
         const raid = CURRENT_RAIDS.find(r => r.key === "The Desert Perpetual")!;
-        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("DP    **3/100**");
+        expect(buildRaidLine(raid, cached, NO_EMOJIS)).toBe("TDP    **3/100**");
     });
 
     it("count > 100 is capped at 100 with ⭐", () => {
         const cached150 = makeCached({ "Last Wish": 150 });
         const raid = CURRENT_RAIDS.find(r => r.key === "Last Wish")!;
-        expect(buildRaidLine(raid, cached150, NO_EMOJIS)).toBe("Last Wish    **100/100** ⭐");
+        expect(buildRaidLine(raid, cached150, NO_EMOJIS)).toBe("LW    **100/100** ⭐");
     });
 
     it("missing key → shows 0/100", () => {

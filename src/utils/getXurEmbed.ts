@@ -84,7 +84,7 @@ export const PROTECTED_EMOJI_NAMES = new Set([
     "discipline", "intellect", "strength",
     "Xbox", "PlayStation", "Steam", "EpicGames",
     "exotic", "energy", "primary", "heavy",
-    "lw", "gos", "dsc", "vog", "votd", "kf", "ron", "ce", "se",
+    "lw", "gos", "dsc", "vog", "votd", "kf", "ron", "ce", "se", "tdp",
     ...RAID_GROUPS.flatMap(r => r.weapons.map(w => weaponEmojiName(w.name))),
 ]);
 

@@ -16,22 +16,44 @@ import { UserStats, ActivityObject } from "../../structs/DBUser";
 import { patternService, PatternProgressMap } from "../../automata/PatternService";
 import { RAID_GROUPS, RAID_NAMES, RaidGroup } from "../../enums/raidWeaponPatterns";
 import { weaponEmojiService } from "../../automata/WeaponEmojiService";
-import { freshClearService, FreshClearResult } from "../../automata/FreshClearService";
+import { freshClearService, FreshClearResult, BestSpecial } from "../../automata/FreshClearService";
 
 const CURRENT_RAIDS: Array<{ key: string; emoji: string; short: string }> = [
-    { key: "Last Wish",            emoji: "lastwish",          short: "LW"       },
-    { key: "Garden of Salvation",  emoji: "gardenofsalvation", short: "GoS"          },
-    { key: "Deep Stone Crypt",     emoji: "deepstonecrypt",    short: "DSC"      },
-    { key: "Vault of Glass",       emoji: "vaultofglass",      short: "VoG"             },
-    { key: "Vow of the Disciple",  emoji: "vowofthedisciple",  short: "VotD"            },
-    { key: "King's Fall",          emoji: "kingsfall",         short: "KF"     },
-    { key: "Root of Nightmares",   emoji: "rootofnightmares",  short: "RoN"             },
-    { key: "Crota's End",          emoji: "crotasend",         short: "CE"     },
-    { key: "Salvation's Edge",     emoji: "salvationsedge",    short: "SE"},
-    { key: "The Desert Perpetual", emoji: "desertperpetual",   short: "TDP"              },
+    { key: "Last Wish",            emoji: "lw",          short: "LW"       },
+    { key: "Garden of Salvation",  emoji: "gos", short: "GoS"          },
+    { key: "Deep Stone Crypt",     emoji: "dsc",    short: "DSC"      },
+    { key: "Vault of Glass",       emoji: "vog",      short: "VoG"             },
+    { key: "Vow of the Disciple",  emoji: "votd",  short: "VotD"            },
+    { key: "King's Fall",          emoji: "kf",         short: "KF"     },
+    { key: "Root of Nightmares",   emoji: "ron",  short: "RoN"             },
+    { key: "Crota's End",          emoji: "ce",         short: "CE"     },
+    { key: "Salvation's Edge",     emoji: "se",    short: "SE"},
+    { key: "The Desert Perpetual", emoji: "tdp",   short: "TDP"              },
 ];
 
 export { CURRENT_RAIDS };
+
+export function buildBadge(special: BestSpecial | undefined): string {
+    if (!special) return "";
+    let flaw = false;
+    let out: string[] = [];
+    if (special.day_one_flawless_low_man > 0) {
+        flaw = true;
+        out.push(`F-D1-${special.day_one_flawless_low_man}`);
+    } else if (special.day_one_flawless) {
+        out.push("F-D1");
+    } else if (special.day_one) {
+        out.push("D1");
+    }
+    if (special.flawless_low_man > 0) {
+        flaw = true;
+        out.push(`F-${special.flawless_low_man}`);
+    } else if (special.low_man > 0) {
+        out.push(`${special.low_man}`);
+    }
+    if (special.flawless && !flaw) out.push("F");
+    return out.join(" ");
+}
 
 export function buildRaidLine(
     raid:       { key: string; emoji: string; short: string },
@@ -41,8 +63,10 @@ export function buildRaidLine(
     const count   = Math.min(cached.counts.get(raid.key) ?? 0, 100);
     const star    = count >= 100 ? " ⭐" : "";
     const counter = `**${count}/100**${star}`;
+    const badge   = ""; /*buildBadge(cached.specials.get(raid.key));*/ //Disabled pending decisions on requirements
+    const suffix  = badge ? `  \`${badge}\`` : "";
     const emoji   = emojiCache?.find((e: any) => e.name === raid.emoji);
-    return emoji ? `${emoji.toString()}    ${counter}` : `${raid.short}    ${counter}`;
+    return emoji ? `${emoji.toString()}    ${counter}${suffix}` : `${raid.short}    ${counter}${suffix}`;
 }
 
 const EMBED_COLOR  = 0xae27ff;

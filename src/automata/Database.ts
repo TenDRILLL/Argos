@@ -120,15 +120,31 @@ async function initDatabase(): Promise<void> {
         );
     `);
 
+    await dbQuery(`
+        CREATE TABLE IF NOT EXISTS user_special_clears (
+        discord_id               VARCHAR(20)  NOT NULL,
+        activity_key             VARCHAR(100) NOT NULL,
+        flawless                 TINYINT(1)   DEFAULT 0,
+        low_man                  TINYINT      DEFAULT 0,
+        day_one                  TINYINT(1)   DEFAULT 0,
+        flawless_low_man         TINYINT      DEFAULT 0,
+        day_one_flawless         TINYINT(1)   DEFAULT 0,
+        day_one_flawless_low_man TINYINT      DEFAULT 0,
+        last_updated             BIGINT       DEFAULT 0,
+        PRIMARY KEY (discord_id, activity_key)
+        );
+    `);
+
     console.table({
-        discordToken:      {created: true},
-        users:             {created: true},
-        user_tokens:       {created: true},
-        user_activities:   {created: true},
-        lfg:               {created: true},
-        lfg_members:       {created: true},
-        misc:              {created: true},
-        user_fresh_clears: {created: true},
+        discordToken:        {created: true},
+        users:               {created: true},
+        user_tokens:         {created: true},
+        user_activities:     {created: true},
+        lfg:                 {created: true},
+        lfg_members:         {created: true},
+        misc:                {created: true},
+        user_fresh_clears:   {created: true},
+        user_special_clears: {created: true},
     });
 }
 
