@@ -57,7 +57,10 @@ export class UserService {
                         });
                     }
                     res(activityIds);
-                }).catch(e => console.log(`Activity stats fetch failed for character ${character.characterId}:`, e));
+                }).catch(e => {
+                    console.log(`Activity stats fetch failed for character ${character.characterId}:`, e);
+                    res({ 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } });
+                });
             }));
         });
 
@@ -141,7 +144,10 @@ export class UserService {
                         });
                     }
                     res(activityIds);
-                }).catch(e => console.log(`Activity stats fetch failed for character ${character.characterId}:`, e));
+                }).catch(e => {
+                    console.log(`Activity stats fetch failed for character ${character.characterId}:`, e);
+                    res({ 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } });
+                });
             }));
         });
         const data = await Promise.all(promises);

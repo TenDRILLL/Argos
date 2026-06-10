@@ -108,21 +108,17 @@ export class BungieAPI {
     }
 
     async getBungieName(id): Promise<string>{
-        return new Promise((res)=>{
-            this.apiRequest("getBungieProfile",{id}).then(data => {
-                const resp = data.Response as BungieProfile;
-                res(resp.displayName);
-            }).catch(e => console.log(e));
-        });
+        return this.apiRequest("getBungieProfile",{id}).then(data => {
+            const resp = data.Response as BungieProfile;
+            return resp.displayName;
+        }).catch(e => { console.log(e); throw e; });
     }
 
     async getBungieTag(id): Promise<string>{
-        return new Promise((res)=>{
-            this.apiRequest("getBungieProfile",{id}).then(data => {
-                const resp = data.Response as BungieProfile;
-                res(resp.uniqueName);
-            }).catch(e => console.log(e));
-        });
+        return this.apiRequest("getBungieProfile",{id}).then(data => {
+            const resp = data.Response as BungieProfile;
+            return resp.uniqueName;
+        }).catch(e => { console.log(e); throw e; });
     }
 }
 
