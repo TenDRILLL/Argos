@@ -97,6 +97,29 @@ describe("PatternService", () => {
             expect(service.hashCount).toBe(2); // confirms it was parsed, not skipped
         });
 
+        it("falls back to objectiveHashes match when description text changes", async () => {
+            // Simulate Bungie update changing description text
+            mockRawRequest.mockResolvedValueOnce({
+                "3743137436": {
+                    displayProperties: {
+                        name: "Rufus's Fury",
+                        description: "Some new description Bungie wrote that no longer matches the old fragment.",
+                    },
+                    objectiveHashes: [999],  // exactly 1 → pattern record fallback
+                },
+                "11111": {
+                    displayProperties: {
+                        name: "Rufus's Fury",
+                        description: "Collect from raid.",
+                    },
+                    // no objectiveHashes → should be ignored
+                },
+            });
+            const svc2 = new PatternService();
+            await svc2.init();
+            expect(svc2.hashCount).toBe(1);
+        });
+
         it("concurrent init() calls only trigger one fetch", async () => {
             await Promise.all([service.init(), service.init(), service.init()]);
             expect(mockApiRequest).toHaveBeenCalledTimes(1);
@@ -172,8 +195,7 @@ describe("PatternService", () => {
             expect(rf.completionValue).toBe(5);
         });
 
-        it("returns progress: 0 default when objective missing", async () => {
-            // provide response with no objectives array for a known hash
+        it("treats redeemed record (state=1, no objectives) as 5/5", async () => {
             mockApiRequest.mockReset();
             mockApiRequest
                 .mockResolvedValueOnce({
@@ -189,7 +211,8 @@ describe("PatternService", () => {
                         profileRecords: {
                             data: {
                                 records: {
-                                    "3743137436": { objectives: [] }  // empty objectives
+                                    // Completed pattern: Bungie omits objectives after unlock, state=1 (RecordRedeemed)
+                                    "3743137436": { state: 1, objectives: null }
                                 }
                             }
                         }
@@ -199,7 +222,38 @@ describe("PatternService", () => {
 
             const svc2 = new PatternService();
             const result = await svc2.getProgress(membershipType, destinyId);
-            // no objectives → entry not added to map
+            expect(result.has("Rufus's Fury")).toBe(true);
+            const rf = result.get("Rufus's Fury")!;
+            expect(rf.progress).toBe(5);
+            expect(rf.completionValue).toBe(5);
+        });
+
+        it("skips record with empty objectives and no redeemed state", async () => {
+            mockApiRequest.mockReset();
+            mockApiRequest
+                .mockResolvedValueOnce({
+                    Response: {
+                        jsonWorldComponentContentPaths: {
+                            en: { DestinyRecordDefinition: "/path/to/records.json" }
+                        }
+                    },
+                    ErrorCode: 1, ThrottleSeconds: 0,
+                })
+                .mockResolvedValueOnce({
+                    Response: {
+                        profileRecords: {
+                            data: {
+                                records: {
+                                    "3743137436": { state: 0, objectives: [] }
+                                }
+                            }
+                        }
+                    },
+                    ErrorCode: 1, ThrottleSeconds: 0,
+                });
+
+            const svc2 = new PatternService();
+            const result = await svc2.getProgress(membershipType, destinyId);
             expect(result.has("Rufus's Fury")).toBe(false);
         });
 

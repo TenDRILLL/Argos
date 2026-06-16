@@ -9,6 +9,7 @@ export interface WeaponPatternProgress {
 export type PatternProgressMap = Map<string, WeaponPatternProgress>;
 
 const PATTERN_DESC_FRAGMENT = "Completing Deepsight Resonance extractions on this weapon";
+export const PATTERNS_PER_WEAPON = 5;
 
 export class PatternService {
     private recordHashes: Map<string, number> = new Map();
@@ -47,10 +48,18 @@ export class PatternService {
             const name: string = def?.displayProperties?.name ?? "";
             const desc: string = def?.displayProperties?.description ?? "";
             if (!weaponNames.has(name)) continue;
-            if (!desc.includes(PATTERN_DESC_FRAGMENT)) continue;
+
+            const hasPatternDesc = desc.includes(PATTERN_DESC_FRAGMENT);
+            // Fallback: pattern records have exactly 1 objective hash; description text may change between D2 updates
+            const hasOneObjective = (def?.objectiveHashes?.length ?? 0) === 1;
+            if (!hasPatternDesc && !hasOneObjective) continue;
+
             const raw = parseInt(hashStr, 10);
             const hash = raw < 0 ? raw + 4294967296 : raw;
-            this.recordHashes.set(name, hash);
+            // Description-matched record wins; objective-only fallback doesn't overwrite it
+            if (!this.recordHashes.has(name) || hasPatternDesc) {
+                this.recordHashes.set(name, hash);
+            }
         }
     }
 
@@ -62,17 +71,28 @@ export class PatternService {
             destinyMembershipId: destinyId,
         });
 
-        const records: Record<string, any> = (response.Response as any)?.profileRecords?.data?.records ?? {};
+        const resp = response.Response as any;
+        const profileRecords: Record<string, any> = resp?.profileRecords?.data?.records ?? {};
+        const charData: Record<string, any> = resp?.characterRecords?.data ?? {};
+        const firstCharId = Object.keys(charData)[0];
+        const charRecords: Record<string, any> = firstCharId ? (charData[firstCharId]?.records ?? {}) : {};
+
         const result: PatternProgressMap = new Map();
 
         for (const [weaponName, recordHash] of this.recordHashes) {
-            const record = records[String(recordHash)];
+            const record = profileRecords[String(recordHash)] ?? charRecords[String(recordHash)];
             if (!record) continue;
             const obj = record.objectives?.[0];
-            if (!obj) continue;
+            if (!obj) {
+                // DestinyRecordState bit 1 = RecordRedeemed: pattern fully extracted, objectives omitted
+                if ((record.state ?? 0) & 1) {
+                    result.set(weaponName, { progress: PATTERNS_PER_WEAPON, completionValue: PATTERNS_PER_WEAPON });
+                }
+                continue;
+            }
             result.set(weaponName, {
                 progress: obj.progress ?? 0,
-                completionValue: obj.completionValue ?? 5,
+                completionValue: obj.completionValue ?? PATTERNS_PER_WEAPON,
             });
         }
 

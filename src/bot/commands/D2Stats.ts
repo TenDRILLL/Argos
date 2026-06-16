@@ -13,7 +13,7 @@ import { dbQuery } from "../../automata/Database";
 import { userService } from "../../automata/UserService";
 import { activityIdentifierDB } from "../../enums/activityIdentifiers";
 import { UserStats, ActivityObject } from "../../structs/DBUser";
-import { patternService, PatternProgressMap } from "../../automata/PatternService";
+import { patternService, PatternProgressMap, PATTERNS_PER_WEAPON } from "../../automata/PatternService";
 import { RAID_GROUPS, RAID_NAMES, RaidGroup } from "../../enums/raidWeaponPatterns";
 import { weaponEmojiService } from "../../automata/WeaponEmojiService";
 import { freshClearService, FreshClearResult, BestSpecial } from "../../automata/FreshClearService";
@@ -72,7 +72,6 @@ export function buildRaidLine(
 const EMBED_COLOR  = 0xae27ff;
 const FOOTER_TEXT  = "Argos, Planetary Core";
 const FOOTER_ICON  = "https://cdn.discordapp.com/avatars/1045324859586125905/0adce6b64cba7496675aa7b1c725ab23.webp";
-const PATTERNS_PER_WEAPON = 5;
 
 function bar5(progress: number): string {
     const filled = Math.min(Math.max(progress, 0), PATTERNS_PER_WEAPON);

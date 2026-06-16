@@ -30,9 +30,10 @@ export class UserService {
             light: resp.mergedAllCharacters.merged.allTime.highestLightLevel.basic.value
         };
 
-        const promises: Promise<Object>[] = [];
+        let activityFetchFailures = 0;
+        const promises: Promise<Object | null>[] = [];
         resp.characters.forEach(character => {
-            promises.push(new Promise((res) => {
+            promises.push(
                 bungieAPI.apiRequest("getActivityStats", { destinyMembershipId: dbUser.destiny_id, membershipType: dbUser.membership_type, characterId: character.characterId }).then(d => {
                     const actResp = d.Response as ActivityQuery;
                     let activityIds = { 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } };
@@ -56,15 +57,22 @@ export class UserService {
                             }
                         });
                     }
-                    res(activityIds);
-                }).catch(e => {
-                    console.log(`Activity stats fetch failed for character ${character.characterId}:`, e);
-                    res({ 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } });
-                });
-            }));
+                    return activityIds;
+                }).catch(() => {
+                    activityFetchFailures++;
+                    return null;
+                })
+            );
         });
 
-        const data = await Promise.all(promises);
+        const rawData = await Promise.all(promises);
+        if (activityFetchFailures > 0) {
+            console.log(`Activity stats: ${activityFetchFailures}/${resp.characters.length} characters failed for ${discordId}`);
+        }
+        if (activityFetchFailures === resp.characters.length) {
+            throw new Error(`Activity stats unavailable for ${discordId} — all character fetches failed`);
+        }
+        const data = rawData.filter((x): x is Object => x !== null);
         const TotalClears = { 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } };
         data.forEach(char => {
             Object.keys(char).forEach(type => {
@@ -117,9 +125,10 @@ export class UserService {
             kd: resp.mergedAllCharacters.results.allPvP?.allTime?.killsDeathsRatio?.basic.value ?? 0,
             light: resp.mergedAllCharacters.merged.allTime.highestLightLevel.basic.value
         };
-        const promises: Promise<Object>[] = [];
+        let activityFetchFailures = 0;
+        const promises: Promise<Object | null>[] = [];
         resp.characters.forEach(character => {
-            promises.push(new Promise((res) => {
+            promises.push(
                 bungieAPI.apiRequest("getActivityStats", { destinyMembershipId: partialUser.destinyId, membershipType: partialUser.membershipType, characterId: character.characterId }).then(d => {
                     const actResp = d.Response as ActivityQuery;
                     let activityIds = { 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } };
@@ -143,14 +152,18 @@ export class UserService {
                             }
                         });
                     }
-                    res(activityIds);
-                }).catch(e => {
-                    console.log(`Activity stats fetch failed for character ${character.characterId}:`, e);
-                    res({ 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } });
-                });
-            }));
+                    return activityIds;
+                }).catch(() => {
+                    activityFetchFailures++;
+                    return null;
+                })
+            );
         });
-        const data = await Promise.all(promises);
+        const rawData = await Promise.all(promises);
+        if (activityFetchFailures > 0) {
+            console.log(`Activity stats: ${activityFetchFailures}/${resp.characters.length} characters failed for partial user ${partialUser.destinyId}`);
+        }
+        const data = rawData.filter((x): x is Object => x !== null);
         const TotalClears = { 0: { "Total": 0 }, 1: { "Total": 0 }, 2: { "Total": 0 } };
         data.forEach(char => {
             Object.keys(char).forEach(type => {
