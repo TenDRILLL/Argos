@@ -8,7 +8,7 @@
 <body>
     <ul><h1>Choose a platform to use</h1><div class="container">
         <% platforms.forEach((x, i)=>{%>
-            <div><a href="/register/<%=links[i]%>">
+            <div><a href="/register/<%=encodeURIComponent(links[i])%>">
                 <img src="<%=icons[x.membershipType]%>">
                 <h2><%=x.displayName%></h2>
             </a></div>
