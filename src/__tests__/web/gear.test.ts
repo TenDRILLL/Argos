@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test";
+import { describe, it, expect, mock, beforeEach, afterAll } from "bun:test";
 
 const mockGetGearAsset     = mock(() => null);
 const mockGetItemDef       = mock(() => null);
@@ -45,6 +45,10 @@ import request from "supertest";
 import express from "express";
 import cookieParser from "cookie-parser";
 import gearRouter from "../../web/endpoints/gear";
+
+afterAll(() => {
+    mock.restore();
+});
 
 const app = express();
 app.use(cookieParser());

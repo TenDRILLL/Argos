@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeAll } from "bun:test";
+import { describe, it, expect, mock, beforeAll, afterAll } from "bun:test";
 
 const mockNewRegistration = mock((_client: any, _dc: string, _d2: string, res: any) => {
     res.cookie("conflux", "encrypted_id", {}).redirect("/api/panel");
@@ -23,6 +23,10 @@ import request from "supertest";
 import express from "express";
 import cookieParser from "cookie-parser";
 import makeOauthRouter from "../../web/endpoints/oauth";
+
+afterAll(() => {
+    mock.restore();
+});
 
 const fakeClient: any = {};
 const app = express();

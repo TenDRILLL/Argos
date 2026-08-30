@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeAll } from "bun:test";
+import { describe, it, expect, mock, beforeAll, afterAll } from "bun:test";
 
 const mockDbQuery = mock(() => Promise.resolve([]));
 
@@ -27,6 +27,10 @@ import request from "supertest";
 import express from "express";
 import cookieParser from "cookie-parser";
 import makeRegisterRouter from "../../web/endpoints/register";
+
+afterAll(() => {
+    mock.restore();
+});
 
 const fakeClient: any = { guilds: { cache: { get: () => null } } };
 const app = express();

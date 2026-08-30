@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeAll } from "bun:test";
+import { describe, it, expect, mock, beforeAll, afterAll } from "bun:test";
 
 const mockDbQuery = mock(() => Promise.resolve([]));
 
@@ -61,6 +61,10 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import panelRouter from "../../web/endpoints/panel";
 import path from "path";
+
+afterAll(() => {
+    mock.restore();
+});
 
 const app = express();
 app.use(cookieParser());

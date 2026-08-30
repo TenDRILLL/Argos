@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test";
+import { describe, it, expect, mock, beforeEach, afterAll } from "bun:test";
 
 const mockDbQuery = mock(() => Promise.resolve([]));
 
@@ -59,6 +59,10 @@ mock.module("../../automata/UserService", () => ({
 }));
 
 import { newRegistration } from "../../automata/RegistrationService";
+
+afterAll(() => {
+    mock.restore();
+});
 
 function makeFakeRes() {
     const res: any = {

@@ -8,7 +8,7 @@
     "copyhtml": "shx mkdir -p ./build/html && shx cp -r ./html/pages ./html/scripts ./html/styles ./html/images ./build/html",
     "buildrun": "npm run build && npm run run",
     "run": "cd build && node index.js",
-    "test": "bun test",
+    "test": "bun test --isolate",
     "test:unit": "bun test src/__tests__/unit",
     "test:integration": "bun test src/__tests__/integration",
     "test:services": "bun test src/__tests__/services",
