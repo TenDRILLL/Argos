@@ -16,8 +16,6 @@ import { UserStats, ActivityObject } from "../../structs/DBUser";
 import { patternService, PatternProgressMap, PATTERNS_PER_WEAPON } from "../../automata/PatternService";
 import { RAID_GROUPS, RAID_NAMES, RaidGroup } from "../../enums/raidWeaponPatterns";
 import { weaponEmojiService } from "../../automata/WeaponEmojiService";
-import { freshClearService, FreshClearResult, BestSpecial } from "../../automata/FreshClearService";
-
 const CURRENT_RAIDS: Array<{ key: string; emoji: string; short: string }> = [
     { key: "Last Wish",            emoji: "lw",          short: "LW"       },
     { key: "Garden of Salvation",  emoji: "gos", short: "GoS"          },
@@ -32,42 +30,6 @@ const CURRENT_RAIDS: Array<{ key: string; emoji: string; short: string }> = [
 ];
 
 export { CURRENT_RAIDS };
-
-export function buildBadge(special: BestSpecial | undefined): string {
-    if (!special) return "";
-    let flaw = false;
-    let out: string[] = [];
-    if (special.day_one_flawless_low_man > 0) {
-        flaw = true;
-        out.push(`F-D1-${special.day_one_flawless_low_man}`);
-    } else if (special.day_one_flawless) {
-        out.push("F-D1");
-    } else if (special.day_one) {
-        out.push("D1");
-    }
-    if (special.flawless_low_man > 0) {
-        flaw = true;
-        out.push(`F-${special.flawless_low_man}`);
-    } else if (special.low_man > 0) {
-        out.push(`${special.low_man}`);
-    }
-    if (special.flawless && !flaw) out.push("F");
-    return out.join(" ");
-}
-
-export function buildRaidLine(
-    raid:       { key: string; emoji: string; short: string },
-    cached:     FreshClearResult,
-    emojiCache: any
-): string {
-    const count   = Math.min(cached.counts.get(raid.key) ?? 0, 100);
-    const star    = count >= 100 ? " ⭐" : "";
-    const counter = `**${count}/100**${star}`;
-    const badge   = ""; /*buildBadge(cached.specials.get(raid.key));*/ //Disabled pending decisions on requirements
-    const suffix  = badge ? `  \`${badge}\`` : "";
-    const emoji   = emojiCache?.find((e: any) => e.name === raid.emoji);
-    return emoji ? `${emoji.toString()}    ${counter}${suffix}` : `${raid.short}    ${counter}${suffix}`;
-}
 
 const EMBED_COLOR  = 0xae27ff;
 const FOOTER_TEXT  = "Argos, Planetary Core";
@@ -117,12 +79,6 @@ export default class D2Stats extends DiscordCommand {
                 },
                 {
                     type: ApplicationCommandOptionType.Subcommand,
-                    name: "100full",
-                    description: "Ten's challenge, how many raid & dungeon clears are full (fresh from beginning), capped at 100.",
-                    options: [{ type: ApplicationCommandOptionType.User, name: "user", description: "The Discord user to check.", required: false }]
-                },
-                {
-                    type: ApplicationCommandOptionType.Subcommand,
                     name: "patterns",
                     description: "Raid weapon pattern progress — total overview or per-raid breakdown.",
                     options: [
@@ -165,10 +121,6 @@ export default class D2Stats extends DiscordCommand {
 
         if (sub === "patterns") {
             return this.patterns(interaction, discordId, authorId);
-        }
-
-        if (sub === "100full") {
-            return this.hundredFull(interaction, discordId, authorId);
         }
 
         const dbUser = await userService.updateStats(discordId);
@@ -326,52 +278,6 @@ export default class D2Stats extends DiscordCommand {
             .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
 
         this.sendEmbed(interaction, embed, authorId);
-    }
-
-    private async hundredFull(interaction: ChatInputCommandInteraction, discordId: string, authorId: string) {
-        const rows = await dbQuery(
-            "SELECT destiny_id, membership_type, destiny_name FROM users WHERE discord_id = ?",
-            [discordId]
-        );
-        if (!rows[0]?.destiny_id) {
-            return interaction.editReply({ content: "No Destiny account linked for this user." });
-        }
-
-        const { destiny_id, membership_type, destiny_name } = rows[0];
-        const cached = await freshClearService.getCached(discordId);
-
-        if (!cached) {
-            if (freshClearService.isScanning(discordId)) {
-                return interaction.editReply({ content: "Scan already in progress — check back in a few minutes." });
-            }
-            freshClearService.startScan(discordId, membership_type, destiny_id);
-            return interaction.editReply({ content: "Scanning your full raid & dungeon history now. This takes a few minutes — run the command again when done." });
-        }
-
-        const emojiCache = await interaction.client.application.emojis.fetch().catch(() => null);
-        const lines      = CURRENT_RAIDS.map(raid => this.buildRaidLine(raid, cached, emojiCache));
-
-        const since = `<t:${Math.floor(cached.lastUpdated / 1000)}:f>`;
-
-        const raidEmoji  = emojiCache?.find((e: any) => e.name === "raid");
-        const titlePrefix = raidEmoji ? `${raidEmoji.toString()}  ` : "";
-
-        const embed = new EmbedBuilder()
-            .setTitle(`${titlePrefix}100 Full Clears Personal Quest`)
-            .setColor(EMBED_COLOR)
-            .setAuthor({ name: destiny_name })
-            .setDescription(lines.join("\n") + `\n-# Last Updated ${since}`)
-            .setFooter({ text: FOOTER_TEXT, iconURL: FOOTER_ICON });
-
-        this.sendEmbed(interaction, embed, authorId);
-    }
-
-    private buildRaidLine(
-        raid:       { key: string; emoji: string; short: string },
-        cached:     FreshClearResult,
-        emojiCache: any
-    ): string {
-        return buildRaidLine(raid, cached, emojiCache);
     }
 
     private summary(interaction: ChatInputCommandInteraction, dbUser: UserStats, authorId: string) {

@@ -233,12 +233,13 @@ export class UserService {
             await dbQuery("UPDATE users SET destiny_name=? WHERE discord_id=?", [d2name, id]);
         }
 
-        const currentRoles = Array.from(member.roles.cache.keys());
-        let newRoles = currentRoles.filter(x => !statRoles.allIDs.includes(x));
-        newRoles = [...newRoles, ...tempArr].sort();
-        newRoles.push(dbUser.in_clan);
+        const currentRoleSet = new Set(Array.from(member.roles.cache.keys()));
+        let newRoles = [...currentRoleSet].filter(x => !statRoles.allIDs.includes(x));
+        newRoles = [...newRoles, ...tempArr, dbUser.in_clan].sort();
 
-        if (!(newRoles.length === currentRoles.length && newRoles.every((role, i) => currentRoles[i] === role))) {
+        const newRoleSet = new Set(newRoles);
+        const rolesChanged = currentRoleSet.size !== newRoleSet.size || [...newRoleSet].some(r => !currentRoleSet.has(r));
+        if (rolesChanged) {
             await member.roles.set(newRoles).catch(() => console.log(`Setting member ${id} roles failed.`));
         }
 

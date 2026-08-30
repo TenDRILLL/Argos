@@ -22,6 +22,6 @@ export default class InteractionCreateEvent extends DiscordEvent {
                 interaction.reply({content: "Not implemented yet.", flags: MessageFlags.Ephemeral}).catch((e: any) => console.log(e));
             return;
         }
-        command.exec(interaction);
+        Promise.resolve(command.exec(interaction)).catch((e: any) => console.error(`[LFG exec error] ${e?.message ?? e}`, e?.stack ?? ""));
     }
 }

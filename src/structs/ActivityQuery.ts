@@ -109,8 +109,6 @@ export class ActivityValues {
 
 export class PostGameCarnageReport {
     period: string;
-    startingPhaseIndex: number;
-    activityWasStartedFromBeginning: boolean;
     activityDetails: ActivityDetails;
     entries: PostGameCarnageReportEntry[];
     teams: {

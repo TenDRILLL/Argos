@@ -107,33 +107,7 @@ async function initDatabase(): Promise<void> {
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     `);
     await dbQuery(`ALTER TABLE misc CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`).catch(() => {});
-
-    await dbQuery(`ALTER TABLE users ADD COLUMN IF NOT EXISTS fresh_scanned_at BIGINT NULL`).catch(() => {});
-
-    await dbQuery(`
-        CREATE TABLE IF NOT EXISTS user_fresh_clears (
-        discord_id    VARCHAR(20)  NOT NULL,
-        activity_key  VARCHAR(100) NOT NULL,
-        fresh_count   INT          DEFAULT 0,
-        last_updated  BIGINT       NULL,
-        PRIMARY KEY (discord_id, activity_key)
-        );
-    `);
-
-    await dbQuery(`
-        CREATE TABLE IF NOT EXISTS user_special_clears (
-        discord_id               VARCHAR(20)  NOT NULL,
-        activity_key             VARCHAR(100) NOT NULL,
-        flawless                 TINYINT(1)   DEFAULT 0,
-        low_man                  TINYINT      DEFAULT 0,
-        day_one                  TINYINT(1)   DEFAULT 0,
-        flawless_low_man         TINYINT      DEFAULT 0,
-        day_one_flawless         TINYINT(1)   DEFAULT 0,
-        day_one_flawless_low_man TINYINT      DEFAULT 0,
-        last_updated             BIGINT       DEFAULT 0,
-        PRIMARY KEY (discord_id, activity_key)
-        );
-    `);
+    await dbQuery(`ALTER TABLE lfg ADD COLUMN IF NOT EXISTS message_ref VARCHAR(60) NULL`).catch(() => {});
 
     console.table({
         discordToken:        {created: true},
@@ -143,8 +117,6 @@ async function initDatabase(): Promise<void> {
         lfg:                 {created: true},
         lfg_members:         {created: true},
         misc:                {created: true},
-        user_fresh_clears:   {created: true},
-        user_special_clears: {created: true},
     });
 }
 

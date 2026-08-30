@@ -5,6 +5,7 @@ import { userService } from "./UserService";
 
 export interface LFGPost {
     id: string;
+    messageRef?: string;
     activity: string;
     timeString: string;
     time: number;
@@ -50,9 +51,10 @@ export class LFGManager {
     }
 
     deleteLFG(id: string): void {
+        const messageRef = this.posts.get(id)?.messageRef;
         this.posts.delete(id);
         this.deleteTimer(id);
-        this._persistDelete(id).catch(e => console.error("LFG delete error:", e));
+        this._persistDelete(id, messageRef).catch(e => console.error("LFG delete error:", e));
     }
 
     deleteTimer(id: string): void {
@@ -90,6 +92,7 @@ export class LFGManager {
             const queue = members.filter((m: any) => m.queued).map((m: any) => m.discord_id);
             const post: LFGPost = {
                 id: row.id,
+                messageRef: row.message_ref ?? undefined,
                 activity: row.activity,
                 timeString: "",
                 time: Number(row.scheduled),
@@ -106,7 +109,7 @@ export class LFGManager {
 
     private _createTimer(post: LFGPost): void {
         if (!this.client) return;
-        const [channelId, messageId] = post.id.split("&");
+        const [channelId, messageId] = (post.messageRef || post.id).split("&");
         this.client.channels.fetch(channelId).then((ch: any) => {
             if (!ch) return Promise.reject(new Error("channel not found"));
             return ch.messages.fetch(messageId);
@@ -129,7 +132,7 @@ export class LFGManager {
 
     private async _sendNotification(post: LFGPost): Promise<void> {
         if (!this.client) return;
-        const [channelId, messageId] = post.id.split("&");
+        const [channelId, messageId] = (post.messageRef || post.id).split("&");
         const ch: any = await this.client.channels.fetch(channelId);
         if (!ch) { this.deleteLFG(post.id); return; }
         const msg: any = await ch.messages.fetch(messageId).catch(() => null);
@@ -153,8 +156,8 @@ export class LFGManager {
     private async _persistSave(post: LFGPost): Promise<void> {
         await dbTransaction(async (tx) => {
             await tx(
-                "INSERT INTO lfg (id, activity, scheduled, max_size, creator, description) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE scheduled = VALUES(scheduled), max_size = VALUES(max_size), description = VALUES(description)",
-                [post.id, post.activity, post.time, post.maxSize, post.creator, post.desc]
+                "INSERT INTO lfg (id, activity, scheduled, max_size, creator, description, message_ref) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE scheduled = VALUES(scheduled), max_size = VALUES(max_size), description = VALUES(description), message_ref = VALUES(message_ref)",
+                [post.id, post.activity, post.time, post.maxSize, post.creator, post.desc, post.messageRef ?? null]
             );
             await tx("DELETE FROM lfg_members WHERE lfg_id = ?", [post.id]);
             for (const guardian of post.guardians) {
@@ -166,11 +169,11 @@ export class LFGManager {
         });
     }
 
-    private async _persistDelete(id: string): Promise<void> {
+    private async _persistDelete(id: string, messageRef?: string): Promise<void> {
         await dbQuery("DELETE FROM lfg WHERE id = ?", [id]);
         await dbQuery("DELETE FROM lfg_members WHERE lfg_id = ?", [id]);
         if (!this.client) return;
-        const [channelId, messageId] = id.split("&");
+        const [channelId, messageId] = (messageRef || id).split("&");
         this.client.channels.fetch(channelId).then((ch: any) => {
             if (!ch) return;
             ch.messages.fetch(messageId).then((msg: any) => msg.delete()).catch(() => {});
@@ -188,7 +191,7 @@ export class LFGManager {
             { name: "**Queue:**", value: post.queue.length === 0 ? "None." : queueNames.join(", "), inline: true }
         ]);
         if (!this.client) return;
-        const [channelId, messageId] = post.id.split("&");
+        const [channelId, messageId] = (post.messageRef || post.id).split("&");
         this.client.channels.fetch(channelId).then((ch: any) => {
             if (!ch) return;
             ch.messages.fetch(messageId).then((msg: any) => {

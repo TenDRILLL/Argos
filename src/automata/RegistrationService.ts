@@ -51,13 +51,14 @@ export function newRegistration(client: Client, dccode: string, d2code: string, 
                             const conflux = await crypt(process.env.ARGOS_ID_PASSWORD as string,dcuser.id);
                             res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
                             const guild = client.guilds.cache.get(statRoles.guildID);
-                            guild?.members.fetch(dcuser.id).then(member => {
+                            guild?.members.fetch(dcuser.id).then(async member => {
                                 if(!member) return;
-                                if(member.roles.cache.has(statRoles.registeredID)) return;
-                                const roles = [...Array.from(member.roles.cache.keys()), statRoles.registeredID];
-                                member.roles.set(roles).catch(e => console.log(e));
+                                if(!member.roles.cache.has(statRoles.registeredID)) {
+                                    const roles = [...Array.from(member.roles.cache.keys()), statRoles.registeredID];
+                                    await member.roles.set(roles).catch(e => console.log(e));
+                                }
+                                await userService.updateUserRoles(client, dcuser.id);
                             });
-                            userService.updateUserRoles(client, dcuser.id);
                             return;
                         } else {
                             if(reply2.profiles.length === 1){
@@ -72,13 +73,14 @@ export function newRegistration(client: Client, dccode: string, d2code: string, 
                                 const conflux = await crypt(process.env.ARGOS_ID_PASSWORD as string,dcuser.id);
                                 res.cookie("conflux",conflux,{expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))}).redirect("/panel");
                                 const guild = client.guilds.cache.get(statRoles.guildID);
-                                guild?.members.fetch(dcuser.id).then(member => {
+                                guild?.members.fetch(dcuser.id).then(async member => {
                                     if(!member) return;
-                                    if(member.roles.cache.has(statRoles.registeredID)) return;
-                                    const roles = [...Array.from(member.roles.cache.keys()), statRoles.registeredID];
-                                    member.roles.set(roles).catch(e => console.log(e));
+                                    if(!member.roles.cache.has(statRoles.registeredID)) {
+                                        const roles = [...Array.from(member.roles.cache.keys()), statRoles.registeredID];
+                                        await member.roles.set(roles).catch(e => console.log(e));
+                                    }
+                                    await userService.updateUserRoles(client, dcuser.id);
                                 });
-                                userService.updateUserRoles(client, dcuser.id);
                                 return;
                             }
                             await dbQuery(

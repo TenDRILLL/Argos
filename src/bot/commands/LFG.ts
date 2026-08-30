@@ -13,8 +13,7 @@ import {
     TextInputBuilder,
     TextInputStyle,
     MessageFlags,
-    ComponentType,
-    Message
+    ComponentType
 } from "discord.js";
 import spacetime from "spacetime";
 import { dbQuery } from "../../automata/Database";
@@ -253,7 +252,7 @@ export default class LFG extends DiscordCommand {
             await interaction.deferUpdate();
             const lfgid = interaction.customId.split("-")[2];
             lfgManager.deleteLFG(lfgid);
-            interaction.message.delete().catch(e => console.log(e));
+            interaction.deleteReply().catch(e => console.log(e));
         } else if (cmd === "edit") {
             const lfgid = interaction.customId.split("-")[2];
             const oldLFG = lfgManager.getLFG(lfgid);
@@ -318,9 +317,10 @@ export default class LFG extends DiscordCommand {
             return;
         }
 
-        const response = await interaction.reply({ embeds: [embed], fetchReply: true }) as Message;
-        const id = `${response.channelId}&${response.id}`;
-        await interaction.editReply({
+        const id = `${interaction.channelId}&${interaction.id}`;
+        const callbackRes = await interaction.reply({
+            embeds: [embed],
+            withResponse: true,
             components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
                     new ButtonBuilder()
@@ -338,9 +338,11 @@ export default class LFG extends DiscordCommand {
                 )
             ]
         });
+        const replyMsg = callbackRes.resource?.message;
 
         lfgManager.saveLFG({
             id,
+            messageRef: replyMsg ? `${replyMsg.channelId}&${replyMsg.id}` : undefined,
             activity: interaction.customId.split("-")[1],
             timeString,
             time,
